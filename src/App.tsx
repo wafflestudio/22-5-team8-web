@@ -1,11 +1,17 @@
 import './index.css';
 
+import { Route, Routes } from 'react-router-dom';
+
+import { Index } from './pages/Index';
+import { Movies } from './pages/Movies';
+
 export const App = () => {
   return (
     <div>
-      <h1 className="text-4xl font-bold text-center text-red-500">
-        Watcha Pedia Clone Project
-      </h1>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/movies" element={<Movies />} />
+      </Routes>
     </div>
   );
 };
