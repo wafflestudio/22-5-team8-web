@@ -1,4 +1,14 @@
+import React, { useEffect, useState } from 'react';
+
+type LoginResponse = {
+  login_id: string;
+  login_password: string;
+};
+
 export const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <div className="flex-1 bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
@@ -10,11 +20,19 @@ export const Login = () => {
         <input
           type="email"
           placeholder="이메일"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+          }}
           className="w-full p-3 border rounded-md mb-4"
         />
         <input
           type="password"
           placeholder="비밀번호"
+          value={password}
+          onChange={(e) => {
+            setPassword(e.target.value);
+          }}
           className="w-full p-3 border rounded-md mb-6"
         />
         <button className="w-full bg-pink-500 text-white p-3 rounded-md font-semibold">
@@ -63,6 +81,35 @@ export const Login = () => {
       </div>
     </div>
   );
+};
+
+export const LoginItem = () => {
+  const [login, setLogin] = useState<LoginResponse>();
+
+  const fetchLogin = async () => {
+    const baseUrl = 'http://3.36.75.22';
+    const response = await fetch(`${baseUrl}/api/users/signin`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch login data');
+    }
+    const data = (await response.json()) as LoginResponse;
+    return data;
+  };
+
+  useEffect(() => {
+    let ignore = false;
+    fetchLogin()
+      .then((data) => {
+        if (!ignore) setLogin(data);
+      })
+      .catch((error: unknown) => {
+        console.error('Error fetching login data', error);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, []);
+  return <div>{login !== undefined ? login.login_id : 'Loading...'}</div>;
 };
 
 function CircleIcon({
