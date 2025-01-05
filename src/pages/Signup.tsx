@@ -1,40 +1,35 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-type LoginResponse = {
-  access_token: string;
-  refresh_token: string;
-};
-
-export const Login = () => {
+export const Signup = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async () => {
+  const handleSignup = async () => {
     setError(null);
     const baseUrl = 'http://3.39.11.124';
-    const loginData = {
+    const signupData = {
+      name,
       email,
       password,
     };
 
     try {
-      const response = await fetch(`${baseUrl}/api/users/signin`, {
+      const response = await fetch(`${baseUrl}/api/users/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(loginData),
+        body: JSON.stringify(signupData),
       });
 
       if (!response.ok) {
-        throw new Error('Login failed. Please check your credentials.');
+        throw new Error('Signup failed. Please check your credentials.');
       }
 
-      const data = (await response.json()) as LoginResponse;
-      console.debug('Login successful:', data);
-      alert('로그인 성공!');
+      alert('회원가입 성공!');
     } catch (err) {
       setError((err as Error).message);
     }
@@ -46,8 +41,17 @@ export const Login = () => {
         <h1 className="text-3xl font-bold text-center mb-8 text-pink-600">
           WATCHA<span className="text-gray-800">PEDIA</span>
         </h1>
-        <h2 className="text-xl font-semibold text-center mb-6">로그인</h2>
+        <h2 className="text-xl font-semibold text-center mb-6">회원가입</h2>
 
+        <input
+          type="name"
+          placeholder="이름"
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+          }}
+          className="w-full p-3 border rounded-md mb-4"
+        />
         <input
           type="email"
           placeholder="이메일"
@@ -68,33 +72,28 @@ export const Login = () => {
         />
         <button
           onClick={() => {
-            handleLogin()
+            handleSignup()
               .then(() => {
-                console.debug('Login successful');
+                console.debug('Signup successful');
               })
               .catch((err: unknown) => {
-                console.error('Error during login:', err);
+                console.error('Error during signup:', err);
               });
           }}
           className="w-full bg-pink-500 text-white p-3 rounded-md font-semibold"
         >
-          로그인
+          회원가입
         </button>
 
         {error !== null && (
           <div className="mt-4 text-red-500 text-center">{error}</div>
         )}
 
-        <div className="text-center mt-4">
-          <a href="#" className="text-pink-500 text-sm">
-            비밀번호를 잊어버리셨나요?
-          </a>
-        </div>
         <div className="text-center mt-2">
-          <span className="text-sm">계정이 없으신가요? </span>
-          <Link to="/signup">
+          <span className="text-sm">이미 가입하셨나요? </span>
+          <Link to="/login">
             <a href="#" className="text-pink-500 text-sm font-semibold">
-              회원가입
+              로그인
             </a>
           </Link>
         </div>
