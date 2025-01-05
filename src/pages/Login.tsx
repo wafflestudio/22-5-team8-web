@@ -13,10 +13,10 @@ export const Login = () => {
 
   const handleLogin = async () => {
     setError(null);
-    const baseUrl = 'https://d1xtmfti6ypide.cloudfront.net/';
+    const baseUrl = 'http://3.39.11.124';
     const loginData = {
-      email,
-      password,
+      login_id: email,
+      login_password: password,
     };
 
     try {

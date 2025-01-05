@@ -9,11 +9,11 @@ export const Signup = () => {
 
   const handleSignup = async () => {
     setError(null);
-    const baseUrl = 'https://d1xtmfti6ypide.cloudfront.net/';
+    const baseUrl = 'http://3.39.11.124';
     const signupData = {
-      name,
-      email,
-      password,
+      username: name,
+      login_id: email,
+      login_password: password,
     };
 
     try {
