@@ -21,7 +21,7 @@ export const Footerbar = () => {
               <div className="text-xs">검색</div>
             </div>
           </Link>
-          <Link to="/sign_in">
+          <Link to="/login">
             <div className="flex flex-col items-center">
               <img src={login} className="w-6 h-6 mb-1" />
               <div className="text-xs">로그인</div>
