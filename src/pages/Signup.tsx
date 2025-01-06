@@ -3,15 +3,38 @@ import { Link } from 'react-router-dom';
 
 export const Signup = () => {
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [isNameValid, setIsNameValid] = useState(true);
+  const [id, setId] = useState('');
+  const [isIdValid, setIsIdValid] = useState(true);
   const [password, setPassword] = useState('');
+  const [isPasswordValid, setIsPasswordValid] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const nameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
+  const idRegex = /^[a-zA-Z0-9_.]{6,20}$/;
+  const passwordRegex =
+    /^(?:(?=.*[A-Za-z])(?=.*\d)|(?=.*[A-Za-z])(?=.*[^\w\s])|(?=.*\d)(?=.*[^\w\s])).{8,20}$/;
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+    setIsNameValid(nameRegex.test(e.target.value));
+  };
+
+  const handleIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setId(e.target.value);
+    setIsIdValid(idRegex.test(e.target.value));
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    setIsPasswordValid(passwordRegex.test(e.target.value));
+  };
 
   const handleSignup = async () => {
     setError(null);
     const signupData = {
       username: name,
-      login_id: email,
+      login_id: id,
       login_password: password,
     };
 
@@ -25,6 +48,9 @@ export const Signup = () => {
       });
 
       if (!response.ok) {
+        if (response.status === 409) {
+          throw new Error('이미 존재하는 이름 또는 아이디입니다.');
+        }
         throw new Error('Signup failed. Please check your credentials.');
       }
 
@@ -43,32 +69,46 @@ export const Signup = () => {
         <h2 className="text-xl font-semibold text-center mb-6">회원가입</h2>
 
         <input
-          type="name"
+          type="text"
           placeholder="이름"
           value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-          }}
-          className="w-full p-3 border rounded-md mb-4"
+          onChange={handleNameChange}
+          className={`w-full p-3 border ${
+            isNameValid ? 'border-gray-300' : 'border-red-500'
+          } rounded-md`}
         />
+        {!isNameValid && (
+          <div className="text-red-500 text-sm">정확하지 않은 이름입니다.</div>
+        )}
         <input
-          type="email"
-          placeholder="이메일"
-          value={email}
-          onChange={(e) => {
-            setEmail(e.target.value);
-          }}
-          className="w-full p-3 border rounded-md mb-4"
+          type="id"
+          placeholder="아이디"
+          value={id}
+          onChange={handleIdChange}
+          className={`w-full p-3 border ${
+            isIdValid ? 'border-gray-300' : 'border-red-500'
+          } rounded-md mt-4`}
         />
+        {!isIdValid && (
+          <div className="text-red-500 text-sm">
+            정확하지 않은 아이디입니다.
+          </div>
+        )}
         <input
           type="password"
           placeholder="비밀번호"
           value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-          }}
-          className="w-full p-3 border rounded-md mb-6"
+          onChange={handlePasswordChange}
+          className={`w-full p-3 border ${
+            isPasswordValid ? 'border-gray-300' : 'border-red-500'
+          } rounded-md mt-4`}
         />
+        {!isPasswordValid && (
+          <div className="text-red-500 text-sm">
+            비밀번호는 영문, 숫자, 특수문자 중 2개 이상을 조합하여 최소 8자리,
+            최대 20자리여야 합니다.
+          </div>
+        )}
         <button
           onClick={() => {
             handleSignup()
@@ -79,7 +119,7 @@ export const Signup = () => {
                 console.error('Error during signup:', err);
               });
           }}
-          className="w-full bg-pink-500 text-white p-3 rounded-md font-semibold"
+          className="w-full bg-pink-500 text-white p-3 rounded-md font-semibold mt-6 mb-6"
         >
           회원가입
         </button>
@@ -119,10 +159,6 @@ export const Signup = () => {
           <CircleIcon bgColor="bg-green-500">
             <LineIcon />
           </CircleIcon>
-        </div>
-
-        <div className="bg-gray-100 p-4 mt-6 rounded-md text-center text-sm text-gray-600">
-          TIP. 왓챠 계정이 있으신가요? 왓챠와 왓챠피디아는 같은 계정을 사용해요.
         </div>
       </div>
     </div>
