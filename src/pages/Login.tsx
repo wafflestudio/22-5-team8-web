@@ -13,14 +13,13 @@ export const Login = () => {
 
   const handleLogin = async () => {
     setError(null);
-    const baseUrl = 'http://3.39.11.124';
     const loginData = {
       login_id: email,
       login_password: password,
     };
 
     try {
-      const response = await fetch(`${baseUrl}/api/users/signin`, {
+      const response = await fetch(`/api/users/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -9,7 +9,6 @@ export const Signup = () => {
 
   const handleSignup = async () => {
     setError(null);
-    const baseUrl = 'http://3.39.11.124';
     const signupData = {
       username: name,
       login_id: email,
@@ -17,7 +16,7 @@ export const Signup = () => {
     };
 
     try {
-      const response = await fetch(`${baseUrl}/api/users/signup`, {
+      const response = await fetch(`/api/users/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
