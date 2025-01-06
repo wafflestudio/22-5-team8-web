@@ -7,14 +7,29 @@ type LoginResponse = {
 };
 
 export const Login = () => {
-  const [email, setEmail] = useState('');
+  const [id, setId] = useState('');
+  const [isIdValid, setIsIdValid] = useState(true);
   const [password, setPassword] = useState('');
+  const [isPasswordValid, setIsPasswordValid] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const idRegex = /^[a-zA-Z0-9_.]{6,20}$/;
+  const passwordRegex = /^.{8,20}$/;
+
+  const handleIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setId(e.target.value);
+    setIsIdValid(idRegex.test(e.target.value));
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    setIsPasswordValid(passwordRegex.test(e.target.value));
+  };
 
   const handleLogin = async () => {
     setError(null);
     const loginData = {
-      login_id: email,
+      login_id: id,
       login_password: password,
     };
 
@@ -48,23 +63,33 @@ export const Login = () => {
         <h2 className="text-xl font-semibold text-center mb-6">로그인</h2>
 
         <input
-          type="email"
-          placeholder="이메일"
-          value={email}
-          onChange={(e) => {
-            setEmail(e.target.value);
-          }}
-          className="w-full p-3 border rounded-md mb-4"
+          type="id"
+          placeholder="아이디"
+          value={id}
+          onChange={handleIdChange}
+          className={`w-full p-3 border ${
+            isIdValid ? 'border-gray-300' : 'border-red-500'
+          } rounded-md`}
         />
+        {!isIdValid && (
+          <div className="text-red-500 text-sm">
+            정확하지 않은 아이디입니다.
+          </div>
+        )}
         <input
           type="password"
           placeholder="비밀번호"
           value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-          }}
-          className="w-full p-3 border rounded-md mb-6"
+          onChange={handlePasswordChange}
+          className={`w-full p-3 border ${
+            isPasswordValid ? 'border-gray-300' : 'border-red-500'
+          } rounded-md mt-4`}
         />
+        {!isPasswordValid && (
+          <div className="text-red-500 text-sm">
+            비밀번호는 8자 이상 20자 이하여야 합니다.
+          </div>
+        )}
         <button
           onClick={() => {
             handleLogin()
@@ -75,7 +100,7 @@ export const Login = () => {
                 console.error('Error during login:', err);
               });
           }}
-          className="w-full bg-pink-500 text-white p-3 rounded-md font-semibold"
+          className="w-full bg-pink-500 text-white p-3 rounded-md font-semibold mt-6"
         >
           로그인
         </button>
