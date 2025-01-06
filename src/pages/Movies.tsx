@@ -11,7 +11,10 @@ export const Movies = () => {
       </div>
       <div className="flex-1 flex flex-col items-center justify-center">
         <h1>Movies page</h1>
-        <Link className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded" to='/movies/1'>
+        <Link
+          className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded"
+          to="/movies/1"
+        >
           Go to MoviePage
         </Link>
       </div>

@@ -64,8 +64,9 @@ const StarRating = () => {
       <div className="flex">
         {Array.from({ length: 5 }).map((_, index) => {
           const value = index + 1;
-          const isHalf = (hover === 0 ? rating === value - 0.5 : hover === value - 0.5);
-          const isFull = (hover === 0 ? rating >= value : hover >= value);
+          const isHalf =
+            hover === 0 ? rating === value - 0.5 : hover === value - 0.5;
+          const isFull = hover === 0 ? rating >= value : hover >= value;
 
           return (
             <div

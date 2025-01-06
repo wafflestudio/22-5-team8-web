@@ -20,7 +20,7 @@ export const Header = () => {
       alert('링크 복사에 실패했습니다.');
     }
   };
-  
+
   return (
     <div className="bg-white mt-2">
       <div className="p-4">
@@ -31,9 +31,7 @@ export const Header = () => {
           >
             <img src={back} alt="뒤로가기" className="w-6 h-6" />
           </button>
-          <div className="font-bold">
-            영화 제목
-          </div>
+          <div className="font-bold">영화 제목</div>
           <button
             onClick={() => void handleShare()}
             className={`flex items-center space-x-2 px-4 py-2 rounded ${isMobile ? '' : 'hover:bg-gray-100'}`}
