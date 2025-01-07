@@ -56,7 +56,7 @@ export const MoviePage = () => {
         <Header title={testData.title} />
       </div>
       <div className="flex-1 flex flex-col items-center justify-start py-16">
-        <div className="relative w-full aspect-[3/4] mb-3">
+        <div className="relative w-full h-[550px] mb-3">
           <img
             src={testData.backdrop_url}
             alt={testData.title}
@@ -93,11 +93,11 @@ export const MoviePage = () => {
         <div className="w-11/12 my-3 text-gray-700 text-sm whitespace-pre-line">
           {testData.synopsis}
         </div>
-        <div className="w-9/12 my-5 items-center justify-center">
+        <div className="flex w-9/12 my-5 justify-center">
           <img src={testData.poster_url} alt={testData.title} />
         </div>
         <hr className="w-11/12 my-3 bg-gray-300" />
-        <div className="w-full max-w-screen-md overflow-hidden">
+        <div className="w-11/12 overflow-hidden">
           <CastList participants={castData} />
         </div>
       </div>

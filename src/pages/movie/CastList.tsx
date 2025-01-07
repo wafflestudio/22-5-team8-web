@@ -22,10 +22,7 @@ const CastList = ({ participants = [] }: CastListProps) => {
       <div className="overflow-x-auto snap-x snap-mandatory">
         <div className="flex space-x-4 px-4">
           {chunkedCast.map((group, idx) => (
-            <div
-              key={idx}
-              className="snap-center shrink-0 w-[calc(100vw-2rem)]"
-            >
+            <div key={idx} className="snap-center shrink-0 w-full flex-none">
               <div className="grid grid-rows-3">
                 {group.map((member) => (
                   <div
