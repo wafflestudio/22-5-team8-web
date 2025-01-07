@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24">
+    <path fill="#7E7E7E" fill-rule="evenodd" d="M23.77 11.634C22.775 10.131 18.616 4.5 12 4.5S1.224 10.13.23 11.634a.655.655 0 0 0 0 .732C1.225 13.869 5.384 19.5 12 19.5s10.776-5.63 11.77-7.134a.655.655 0 0 0 0-.732M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12" clip-rule="evenodd"></path>
+    <circle cx="12" cy="12" r="3" fill="#7E7E7E"></circle>
+</svg>
