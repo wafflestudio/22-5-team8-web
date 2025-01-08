@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import back from '../../assets/back.svg';
 import share from '../../assets/share.svg';
 
-export const Header = () => {
+export const Header = ({ title }: { title: string }) => {
   const navigate = useNavigate();
 
   const handleBack = () => {
@@ -22,8 +22,8 @@ export const Header = () => {
   };
 
   return (
-    <div className="bg-white mt-2">
-      <div className="p-4">
+    <div className="bg-white">
+      <div className="py-3 px-1">
         <div className="flex items-center justify-between">
           <button
             onClick={handleBack}
@@ -31,7 +31,7 @@ export const Header = () => {
           >
             <img src={back} alt="뒤로가기" className="w-6 h-6" />
           </button>
-          <div className="font-bold">영화 제목</div>
+          <div className="text-lg font-semibold">{title}</div>
           <button
             onClick={() => void handleShare()}
             className={`flex items-center space-x-2 px-4 py-2 rounded ${isMobile ? '' : 'hover:bg-gray-100'}`}

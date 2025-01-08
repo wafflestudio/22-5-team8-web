@@ -60,7 +60,7 @@ const StarRating = () => {
   };
 
   return (
-    <div className="flex flex-col items-center space-y-4">
+    <div className="flex flex-col items-center space-y-3">
       <div className="flex">
         {Array.from({ length: 5 }).map((_, index) => {
           const value = index + 1;
@@ -84,13 +84,13 @@ const StarRating = () => {
               onMouseLeave={handleMouseLeave}
             >
               <span
-                className={`text-4xl cursor-pointer ${isFull ? 'text-pink-500' : 'text-gray-300'}`}
+                className={`text-5xl cursor-pointer ${isFull ? 'text-hotPink' : 'text-gray-300'}`}
               >
                 &#9733;
               </span>
               {isHalf && (
                 <span
-                  className="absolute left-0 top-0 text-4xl cursor-pointer text-pink-500 overflow-hidden"
+                  className="absolute left-0 top-0 text-5xl cursor-pointer text-hotPink overflow-hidden"
                   style={{ width: '50%' }}
                 >
                   &#9733;
@@ -100,7 +100,7 @@ const StarRating = () => {
           );
         })}
       </div>
-      <p className="text-lg font-medium">{getFeedback(rating)}</p>
+      <p className="text-sm font-medium">{getFeedback(rating)}</p>
     </div>
   );
 };
