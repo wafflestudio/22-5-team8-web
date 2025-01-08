@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+import { useAuth } from '../components/AuthContext';
 
 type LoginResponse = {
   access_token: string;
@@ -12,6 +14,8 @@ export const Login = () => {
   const [password, setPassword] = useState('');
   const [isPasswordValid, setIsPasswordValid] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const idRegex = /^[a-zA-Z0-9_.]{6,20}$/;
   const passwordRegex = /^.{8,20}$/;
@@ -47,8 +51,17 @@ export const Login = () => {
       }
 
       const data = (await response.json()) as LoginResponse;
+      login({
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+      });
+
       console.debug('Login successful:', data);
-      alert('로그인 성공!');
+      try {
+        await navigate('/');
+      } catch (err) {
+        console.error('Navigation error:', err);
+      }
     } catch (err) {
       setError((err as Error).message);
     }
