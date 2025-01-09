@@ -29,7 +29,7 @@ export const App = () => {
           <Route path="/news" element={<News />} />
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/movies/:movieId/comments" element={<CommentList />} />
-          <Route path="people/:peopleId" element={<PeoplePage />} />
+          <Route path="/people/:peopleId" element={<PeoplePage />} />
           <Route path="/comments/:commentId" element={<ReplyPage />} />
         </Routes>
       </AuthProvider>
