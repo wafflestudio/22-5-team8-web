@@ -8,7 +8,7 @@ export const Headbar = () => {
   };
 
   return (
-    <div className="bg-white">
+    <div className="bg-white relative">
       <div className="p-4">
         <div className="flex items-center">
           <Link to="/" className={getLinkStyle('/')}>
