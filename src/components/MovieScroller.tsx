@@ -1,11 +1,11 @@
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { BriefMovieInfo } from '../components/BriefMovieInfo';
-import type {Movie} from '../utils/Types';
+import type { Movie } from '../utils/Types';
 
 type MovieScrollerProps = {
   chart_type?: string;
-}
+};
 
 export const MovieScroller = ({ chart_type }: MovieScrollerProps) => {
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -14,13 +14,16 @@ export const MovieScroller = ({ chart_type }: MovieScrollerProps) => {
   useEffect(() => {
     void (async () => {
       setError(null);
-      const fetchUrl = chart_type !== undefined && chart_type !== '' ? `/api/movies?chart_type=${chart_type}` : '/api/movies';
+      const fetchUrl =
+        chart_type !== undefined && chart_type !== ''
+          ? `/api/movies?chart_type=${chart_type}`
+          : '/api/movies';
       try {
         const response = await fetch(fetchUrl, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-          }
+          },
         });
 
         if (!response.ok) {

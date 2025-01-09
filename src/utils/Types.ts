@@ -3,7 +3,7 @@ export type Participant = {
   name: string;
   role: string;
   profile_url: string;
-}
+};
 
 export type Movie = {
   id: number;
@@ -20,4 +20,4 @@ export type Movie = {
   poster_url: string;
   backdrop_url: string;
   participants: Participant[];
-}
+};
