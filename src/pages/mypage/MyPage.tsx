@@ -1,9 +1,12 @@
 import { FaCog } from 'react-icons/fa'; // Cogwheel icon from react-icons
 import { Link } from 'react-router-dom';
 
+import { useAuth } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
 
 export const MyPage = () => {
+  const { user } = useAuth();
+
   return (
     <div className="flex flex-col h-screen">
       {/* Scrollable Content */}
@@ -15,8 +18,13 @@ export const MyPage = () => {
             <div className="w-20 h-20 rounded-full bg-gray-300"></div>
             {/* Profile Info */}
             <div className="text-left">
-              <h1 className="text-xl font-bold">박인혁</h1>
-              <p className="text-sm text-gray-600">alexander211@naver.com</p>
+              {user !== null && (
+                <h1 className="text-xl font-bold">{user.username}</h1>
+              )}
+
+              {user !== null && (
+                <p className="text-sm text-gray-600">{user.login_id}</p>
+              )}
               <p className="text-sm text-gray-400 mt-2">
                 팔로워 <span className="text-black font-bold">0</span> | 팔로잉{' '}
                 <span className="text-black font-bold">1</span>
