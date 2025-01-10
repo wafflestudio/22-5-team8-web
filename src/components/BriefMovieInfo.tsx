@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 import type { Movie } from '../utils/Types';
 
 type BriefMovieInfoProps = {
@@ -7,7 +9,7 @@ type BriefMovieInfoProps = {
 
 export const BriefMovieInfo = ({ movie, index }: BriefMovieInfoProps) => {
   return (
-    <div className="flex-none w-[100px] snap-start">
+    <Link className="flex-none w-[100px] snap-start" to={`/movies/${movie.id}`}>
       <div className="flex flex-col gap-1">
         <div className="relative">
           <div className="absolute top-1 left-1 bg-black/70 px-2 rounded">
@@ -26,6 +28,6 @@ export const BriefMovieInfo = ({ movie, index }: BriefMovieInfoProps) => {
             : movie.average_rating.toFixed(1)}
         </h1>
       </div>
-    </div>
+    </Link>
   );
 };
