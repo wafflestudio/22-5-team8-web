@@ -1,4 +1,5 @@
 import { FaCog } from 'react-icons/fa'; // Cogwheel icon from react-icons
+import { Link } from 'react-router-dom';
 
 import { Footerbar } from '../../components/Footerbar';
 
@@ -21,14 +22,11 @@ export const MyPage = () => {
           </div>
         </div>
         {/* Cogwheel Icon */}
-        <button
-          className="absolute top-6 right-6 text-gray-600 hover:text-gray-800"
-          onClick={() => {
-            alert('Settings clicked!');
-          }}
-        >
-          <FaCog className="w-6 h-6" />
-        </button>
+        <Link to="/mypage/settings">
+          <button className="absolute top-6 right-6 text-gray-600 hover:text-gray-800">
+            <FaCog className="w-6 h-6" />
+          </button>
+        </Link>
       </div>
 
       {/* Stats Section */}
