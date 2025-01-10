@@ -7,7 +7,7 @@ import { Index } from './pages/Index';
 import { Login } from './pages/Login';
 import { MoviePage } from './pages/movie/MoviePage';
 import { Movies } from './pages/Movies';
-import { MyPage } from './pages/MyPage';
+import { MyPage } from './pages/mypage/MyPage';
 import { News } from './pages/News';
 import { Rating } from './pages/Rating';
 import { Signup } from './pages/Signup';
