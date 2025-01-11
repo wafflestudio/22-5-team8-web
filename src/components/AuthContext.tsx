@@ -8,8 +8,8 @@ import {
 } from 'react';
 
 interface User {
-  login_id: string;
   username: string;
+  login_id: string;
 }
 
 interface AuthContextType {
