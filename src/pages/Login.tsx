@@ -51,14 +51,11 @@ export const Login = () => {
       }
 
       const data = (await response.json()) as LoginResponse;
-      login({
-        accessToken: data.access_token,
-        refreshToken: data.refresh_token,
-      });
+      login(data.access_token, data.refresh_token);
 
       console.debug('Login successful:', data);
       try {
-        await navigate('/');
+        await navigate('/mypage');
       } catch (err) {
         console.error('Navigation error:', err);
       }

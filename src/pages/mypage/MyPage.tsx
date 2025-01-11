@@ -1,54 +1,58 @@
 import { FaCog } from 'react-icons/fa'; // Cogwheel icon from react-icons
+import { Link } from 'react-router-dom';
 
+import { useAuth } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
 
 export const MyPage = () => {
+  const { user } = useAuth();
+
   return (
     <div className="flex flex-col h-screen">
-      {/* Top Profile Section */}
-      <div className="bg-white p-6 shadow-md relative">
-        <div className="flex flex-col items-center">
-          {/* Profile Image */}
-          <div className="w-20 h-20 rounded-full bg-gray-300 mb-4"></div>
-          {/* Profile Info */}
-          <div className="text-center">
-            <h1 className="text-xl font-bold">박인혁</h1>
-            <p className="text-gray-600">alexander211@naver.com</p>
-            <p className="text-sm text-gray-400 mt-2">
-              팔로워 <span className="text-black font-bold">0</span> • 팔로잉{' '}
-              <span className="text-black font-bold">1</span>
-            </p>
-          </div>
-        </div>
-        {/* Cogwheel Icon */}
-        <button
-          className="absolute top-6 right-6 text-gray-600 hover:text-gray-800"
-          onClick={() => {
-            alert('Settings clicked!');
-          }}
-        >
-          <FaCog className="w-6 h-6" />
-        </button>
-      </div>
-
-      {/* Stats Section */}
-      <div className="grid grid-cols-3 text-center py-4 bg-white">
-        <div>
-          <p className="font-bold">0</p>
-          <p className="text-gray-500">평가</p>
-        </div>
-        <div>
-          <p className="font-bold">0</p>
-          <p className="text-gray-500">코멘트</p>
-        </div>
-        <div>
-          <p className="font-bold">0</p>
-          <p className="text-gray-500">컬렉션</p>
-        </div>
-      </div>
-
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto bg-gray-100">
+        {/* Top Profile Section */}
+        <div className="bg-white p-6 relative">
+          <div className="flex flex-col items-start space-y-4">
+            {/* Profile Image */}
+            <div className="w-20 h-20 rounded-full bg-gray-300"></div>
+            {/* Profile Info */}
+            <div className="text-left">
+              {user !== null && (
+                <h1 className="text-xl font-bold">{user.username}</h1>
+              )}
+
+              {user !== null && (
+                <p className="text-sm text-gray-600">{user.login_id}</p>
+              )}
+              <p className="text-sm text-gray-400 mt-2">
+                팔로워 <span className="text-black font-bold">0</span> | 팔로잉{' '}
+                <span className="text-black font-bold">1</span>
+              </p>
+            </div>
+          </div>
+          {/* Cogwheel Icon */}
+          <Link to="/mypage/settings">
+            <button className="absolute top-3 right-3 text-gray-600 hover:text-gray-800">
+              <FaCog className="w-6 h-6" />
+            </button>
+          </Link>
+        </div>
+        {/* Stats Section */}
+        <div className="grid grid-cols-3 text-center py-4 bg-white">
+          <div>
+            <p className="font-bold">0</p>
+            <p className="text-gray-500">평가</p>
+          </div>
+          <div>
+            <p className="font-bold">0</p>
+            <p className="text-gray-500">코멘트</p>
+          </div>
+          <div>
+            <p className="font-bold">0</p>
+            <p className="text-gray-500">컬렉션</p>
+          </div>
+        </div>
         {/* Saved Items Section */}
         <div className="bg-gray-100 p-4">
           <h2 className="text-lg font-semibold mb-2">보관함</h2>

@@ -1,56 +1,174 @@
-import { createContext, type ReactNode, useContext, useState } from 'react';
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 
-// Define the structure of the AuthContext
-interface AuthContextType {
-  isLoggedIn: boolean;
-  accessToken: string | null;
-  refreshToken: string | null;
-  login: (tokens: { accessToken: string; refreshToken: string }) => void;
-  logout: () => void;
-  updateAccessToken: (token: string) => void;
+interface User {
+  login_id: string;
+  username: string;
 }
 
-// Create the AuthContext with default values
+interface AuthContextType {
+  isLoggedIn: boolean;
+  user: User | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  login: (accessToken: string, refreshToken: string) => void;
+  fetchUser: () => Promise<void>;
+  logout: () => void;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
 
-  // Handle login and store tokens
-  const login = (tokens: { accessToken: string; refreshToken: string }) => {
-    setIsLoggedIn(true);
-    setAccessToken(tokens.accessToken);
-    setRefreshToken(tokens.refreshToken);
-    localStorage.setItem('accessToken', tokens.accessToken);
-    localStorage.setItem('refreshToken', tokens.refreshToken);
-  };
-
-  // Handle logout
-  const logout = () => {
+  // Logout function
+  const logout = useCallback(() => {
     setIsLoggedIn(false);
+    setUser(null);
     setAccessToken(null);
     setRefreshToken(null);
+    localStorage.removeItem('user');
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+  }, []);
+
+  // Login function
+  const login = (loginAccessToken: string, loginRefreshToken: string) => {
+    setIsLoggedIn(true);
+    setAccessToken(accessToken);
+    setRefreshToken(refreshToken);
+    localStorage.setItem('accessToken', loginAccessToken);
+    localStorage.setItem('refreshToken', loginRefreshToken);
   };
 
-  // Update access token without logging out
-  const updateAccessToken = (token: string) => {
-    setAccessToken(token);
-    localStorage.setItem('accessToken', token);
+  const refreshAccessToken = useCallback(async () => {
+    if (refreshToken === null || refreshToken === '') {
+      console.error('No refresh token available');
+      logout();
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/token/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to refresh access token');
+      }
+
+      const data = (await response.json()) as {
+        access_token: string;
+        refresh_token: string;
+      };
+      setAccessToken(data.access_token);
+      setRefreshToken(data.refresh_token);
+      localStorage.setItem('accessToken', data.access_token);
+      localStorage.setItem('refreshToken', data.refresh_token);
+    } catch (err) {
+      console.error('Error refreshing token:', err);
+      logout(); // Log the user out if refreshing fails
+    }
+  }, [refreshToken, logout]);
+
+  useEffect(() => {
+    if (accessToken === null || accessToken === '') return;
+
+    const tokenParts = accessToken.split('.');
+
+    if (tokenParts[1] === undefined || tokenParts[1].trim() === '') {
+      console.error('Invalid token');
+      logout();
+      return;
+    }
+    const tokenPayload: { exp: number } = JSON.parse(atob(tokenParts[1])) as {
+      exp: number;
+    };
+    const expirationTime = tokenPayload.exp * 1000; // Convert to milliseconds
+    const currentTime = Date.now();
+
+    // Calculate the time to refresh the token (e.g., 1 minute before expiration)
+    const refreshTime = expirationTime - currentTime - 60 * 1000;
+
+    if (refreshTime > 0) {
+      const timer = setTimeout(() => {
+        void refreshAccessToken();
+      }, refreshTime);
+
+      return () => {
+        clearTimeout(timer);
+      }; // Clear timer on cleanup
+    }
+  }, [accessToken, refreshAccessToken, logout]);
+
+  // Fetch user information
+  const fetchUser = async () => {
+    if (accessToken === null || accessToken === '') return;
+
+    try {
+      const response = await fetch('/api/users/me', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user information');
+      }
+
+      const data: User = (await response.json()) as User;
+      setUser(data); // Example response: { login_id: 'testid', username: 'testname' }
+      localStorage.setItem('user', JSON.stringify(data));
+    } catch (err) {
+      console.error(err);
+      logout(); // Logout if the user info cannot be fetched
+    }
   };
+
+  // Load tokens and user info from localStorage on app initialization
+  useEffect(() => {
+    const storedAccessToken = localStorage.getItem('accessToken');
+    const storedRefreshToken = localStorage.getItem('refreshToken');
+    const storedUser = localStorage.getItem('user');
+
+    if (
+      storedAccessToken !== null &&
+      storedAccessToken !== '' &&
+      storedRefreshToken !== null &&
+      storedRefreshToken !== ''
+    ) {
+      setAccessToken(storedAccessToken);
+      setRefreshToken(storedRefreshToken);
+      setIsLoggedIn(true);
+    }
+
+    if (storedUser !== null && storedUser !== '') {
+      setUser(JSON.parse(storedUser) as User);
+    }
+  }, []);
 
   return (
     <AuthContext.Provider
       value={{
         isLoggedIn,
+        user,
         accessToken,
         refreshToken,
         login,
+        fetchUser,
         logout,
-        updateAccessToken,
       }}
     >
       {children}
@@ -58,10 +176,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Hook to access the context easily
+// Custom hook to use the AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context == null) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
