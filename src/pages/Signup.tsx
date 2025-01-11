@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export const Signup = () => {
   const [name, setName] = useState('');
@@ -9,6 +9,7 @@ export const Signup = () => {
   const [password, setPassword] = useState('');
   const [isPasswordValid, setIsPasswordValid] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const nameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
   const idRegex = /^[a-zA-Z0-9_.]{6,20}$/;
@@ -55,6 +56,7 @@ export const Signup = () => {
       }
 
       alert('회원가입 성공!');
+      await navigate('/login');
     } catch (err) {
       setError((err as Error).message);
     }
@@ -78,7 +80,10 @@ export const Signup = () => {
           } rounded-md`}
         />
         {!isNameValid && (
-          <div className="text-red-500 text-sm">정확하지 않은 이름입니다.</div>
+          <div className="text-red-500 text-sm">
+            이름은 영문, 숫자, _, -를 조합하여 최소 3자리, 최대 20자리여야
+            합니다.
+          </div>
         )}
         <input
           type="id"
@@ -91,7 +96,8 @@ export const Signup = () => {
         />
         {!isIdValid && (
           <div className="text-red-500 text-sm">
-            정확하지 않은 아이디입니다.
+            아이디는 영문, 숫자, _, .를 조합하여 최소 6자리, 최대 20자리여야
+            합니다.
           </div>
         )}
         <input
