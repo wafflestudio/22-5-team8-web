@@ -55,7 +55,7 @@ export const Login = () => {
 
       console.debug('Login successful:', data);
       try {
-        await navigate('/mypage');
+        await navigate('/');
       } catch (err) {
         console.error('Navigation error:', err);
       }
