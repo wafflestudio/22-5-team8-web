@@ -10,17 +10,19 @@ export const MyPage = () => {
   const [user, setUser] = useState({ username: '', login_id: '' });
 
   useEffect(() => {
-    console.log('Fetching user data... in MyPage.tsx');
     const getUser = async () => {
       await fetchUser();
       const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+      if (storedUser !== null) {
+        setUser(
+          JSON.parse(storedUser) as { username: string; login_id: string },
+        );
       }
     };
-
-    getUser();
-  }, []);
+    getUser().catch((error: unknown) => {
+      console.error('Failed to fetch user:', error);
+    });
+  });
 
   const { username, login_id } = user;
 
@@ -35,12 +37,8 @@ export const MyPage = () => {
             <div className="w-20 h-20 rounded-full bg-gray-300"></div>
             {/* Profile Info */}
             <div className="text-left">
-              {user !== null && (
-                <h1 className="text-xl font-bold">{username}</h1>
-              )}
-              {user !== null && (
-                <p className="text-sm text-gray-600">{login_id}</p>
-              )}
+              {<h1 className="text-xl font-bold">{username}</h1>}
+              {<p className="text-sm text-gray-600">{login_id}</p>}
               <p className="text-sm text-gray-400 mt-2">
                 팔로워 <span className="text-black font-bold">0</span> | 팔로잉{' '}
                 <span className="text-black font-bold">1</span>
