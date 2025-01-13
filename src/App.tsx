@@ -1,5 +1,6 @@
 import './index.css';
 
+import { useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { AuthProvider } from './components/AuthContext';
@@ -17,6 +18,17 @@ import { Rating } from './pages/Rating';
 import { Signup } from './pages/Signup';
 
 export const App = () => {
+  useEffect(() => {
+    // Check if the page has already been refreshed
+    const hasRefreshed = localStorage.getItem('hasRefreshed');
+
+    if (hasRefreshed === null || hasRefreshed === '') {
+      // If not, reload the page
+      localStorage.setItem('hasRefreshed', 'true');
+      window.location.reload();
+    }
+  }, []);
+
   return (
     <div>
       <AuthProvider>
