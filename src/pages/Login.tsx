@@ -56,6 +56,7 @@ export const Login = () => {
       console.debug('Login successful:', data);
       try {
         await navigate('/');
+        window.location.reload();
       } catch (err) {
         console.error('Navigation error:', err);
       }
