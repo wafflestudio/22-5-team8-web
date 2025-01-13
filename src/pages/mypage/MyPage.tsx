@@ -11,18 +11,25 @@ export const MyPage = () => {
 
   useEffect(() => {
     const getUser = async () => {
+      console.debug('Fetching user...');
       await fetchUser();
       const storedUser = localStorage.getItem('user');
+      console.debug('Stored user:', storedUser);
       if (storedUser !== null) {
         setUser(
           JSON.parse(storedUser) as { username: string; login_id: string },
         );
       }
     };
-    getUser().catch((error: unknown) => {
-      console.error('Failed to fetch user:', error);
-    });
-  });
+    const storedUser = localStorage.getItem('user');
+    if (storedUser !== null) {
+      setUser(JSON.parse(storedUser) as { username: string; login_id: string });
+    } else {
+      getUser().catch((error: unknown) => {
+        console.error('Failed to fetch user:', error);
+      });
+    }
+  }, [fetchUser]);
 
   const { username, login_id } = user;
 
