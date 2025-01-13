@@ -1,11 +1,28 @@
+import { useContext, useEffect, useState } from 'react';
 import { FaCog } from 'react-icons/fa'; // Cogwheel icon from react-icons
 import { Link } from 'react-router-dom';
 
-import { useAuth } from '../../components/AuthContext';
+import { AuthContext } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
 
 export const MyPage = () => {
-  const { user } = useAuth();
+  const { fetchUser } = useContext(AuthContext);
+  const [user, setUser] = useState({ username: '', login_id: '' });
+
+  useEffect(() => {
+    console.log('Fetching user data... in MyPage.tsx');
+    const getUser = async () => {
+      await fetchUser();
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    };
+
+    getUser();
+  }, []);
+
+  const { username, login_id } = user;
 
   return (
     <div className="flex flex-col h-screen">
@@ -19,11 +36,10 @@ export const MyPage = () => {
             {/* Profile Info */}
             <div className="text-left">
               {user !== null && (
-                <h1 className="text-xl font-bold">{user.username}</h1>
+                <h1 className="text-xl font-bold">{username}</h1>
               )}
-
               {user !== null && (
-                <p className="text-sm text-gray-600">{user.login_id}</p>
+                <p className="text-sm text-gray-600">{login_id}</p>
               )}
               <p className="text-sm text-gray-400 mt-2">
                 팔로워 <span className="text-black font-bold">0</span> | 팔로잉{' '}

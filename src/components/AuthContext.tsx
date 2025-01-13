@@ -22,7 +22,15 @@ interface AuthContextType {
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType>({
+  isLoggedIn: false,
+  user: null,
+  accessToken: null,
+  refreshToken: null,
+  login: () => {},
+  fetchUser: async () => {},
+  logout: () => {},
+});
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -43,6 +51,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Login function
   const login = (loginAccessToken: string, loginRefreshToken: string) => {
+    console.log('Logging in...');
+
     setIsLoggedIn(true);
     setAccessToken(accessToken);
     setRefreshToken(refreshToken);
@@ -51,6 +61,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const refreshAccessToken = useCallback(async () => {
+    console.log('Refreshing access token...');
+
     if (refreshToken === null || refreshToken === '') {
       console.error('No refresh token available');
       logout();
@@ -72,6 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         access_token: string;
         refresh_token: string;
       };
+      console.log('Access token refreshed:', data);
       setAccessToken(data.access_token);
       setRefreshToken(data.refresh_token);
       localStorage.setItem('accessToken', data.access_token);
@@ -83,6 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [refreshToken, logout]);
 
   useEffect(() => {
+    console.log('Setting up token refresh timer...');
     if (accessToken === null || accessToken === '') return;
 
     const tokenParts = accessToken.split('.');
@@ -114,6 +128,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Fetch user information
   const fetchUser = async () => {
+    console.log('Fetching user information...');
     if (accessToken === null || accessToken === '') return;
 
     try {
@@ -139,6 +154,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Load tokens and user info from localStorage on app initialization
   useEffect(() => {
+    console.log('Initializing auth context...');
     const storedAccessToken = localStorage.getItem('accessToken');
     const storedRefreshToken = localStorage.getItem('refreshToken');
     const storedUser = localStorage.getItem('user');
