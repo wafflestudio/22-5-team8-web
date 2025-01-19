@@ -64,3 +64,10 @@ export type PeopleMovieCreditResponse = {
   role: string;
   movies: PeopleMovieCredit[];
 };
+
+export type searchResult = {
+  movie_list: Array<number>;
+  user_list: Array<number>;
+  participant_list: Array<number>;
+  collection_list: Array<number>;
+};

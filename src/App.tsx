@@ -14,6 +14,7 @@ import { Settings } from './pages/mypage/Settings';
 import { News } from './pages/News';
 import PeoplePage from './pages/PeoplePage';
 import { Rating } from './pages/Rating';
+import { Search } from './pages/Search';
 import { Signup } from './pages/Signup';
 
 export const App = () => {
@@ -33,6 +34,7 @@ export const App = () => {
           <Route path="/movies/:movieId/comments" element={<CommentList />} />
           <Route path="/people/:peopleId" element={<PeoplePage />} />
           <Route path="/comments/:commentId" element={<ReplyPage />} />
+          <Route path="/search" element={<Search />} />
         </Routes>
       </AuthProvider>
     </div>
