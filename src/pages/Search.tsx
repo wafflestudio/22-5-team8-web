@@ -16,7 +16,6 @@ export const Search = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category>('영화');
 
-
   useEffect(() => {
     const query = searchParams.get('query');
     if (query != null) {
@@ -33,18 +32,21 @@ export const Search = () => {
   const performSearch = async (query: string) => {
     setError(null);
     try {
-      const response = await fetch(`/api/search?search_q=${encodeURIComponent(query)}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `/api/search?search_q=${encodeURIComponent(query)}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         throw new Error('Failed to fetch search results');
       }
 
-      const data = await response.json() as searchResult;
+      const data = (await response.json()) as searchResult;
       setSearchResults(data);
     } catch (err) {
       setError((err as Error).message);
@@ -65,7 +67,9 @@ export const Search = () => {
           <input
             type="text"
             value={searchText}
-            onChange={(e) => { setSearchText(e.target.value); }}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+            }}
             placeholder="콘텐츠, 인물, 컬렉션, 유저를 검색하세요"
             className="w-full px-4 py-2 pl-12 pr-10 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             onKeyDown={(e) => {
@@ -76,9 +80,11 @@ export const Search = () => {
             src={search}
             alt="search"
             className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 opacity-50 cursor-pointer"
-            onClick={() => { handleSearch(); }}
+            onClick={() => {
+              handleSearch();
+            }}
           />
-          {(searchText !== "") && (
+          {searchText !== '' && (
             <button
               onClick={handleClear}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
@@ -92,7 +98,7 @@ export const Search = () => {
         )}
       </div>
       <div className="flex-1 text-left px-4 py-2 pb-16 pt-16">
-        {(searchResults != null) && (
+        {searchResults != null && (
           <SearchResultBlock
             searchResults={searchResults}
             selectedCategory={selectedCategory}

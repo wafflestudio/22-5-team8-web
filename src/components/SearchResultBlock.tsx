@@ -1,5 +1,9 @@
+import { useEffect, useState } from 'react';
+
+import noProfile from '../assets/no_profile.svg';
 import NoResultSvg from '../assets/no_result.svg';
-import type { searchResult } from '../utils/Types';
+import { fetchCollection, fetchMovie, fetchPeople, fetchUser } from '../utils/Functions';
+import type { Collection, Movie, People, searchResult, UserProfile } from '../utils/Types';
 
 type Category = '영화' | '인물' | '컬렉션' | '유저';
 
@@ -9,48 +13,157 @@ interface SearchResultBlockProps {
   setSelectedCategory: (category: Category) => void;
 }
 
-export const SearchResultBlock = ({ searchResults, selectedCategory, setSelectedCategory }: SearchResultBlockProps) => {
-  const categories: Category[] = ['영화', '인물', '컬렉션', '유저'];
+export const SearchResultBlock = ({
+  searchResults,
+  selectedCategory,
+  setSelectedCategory,
+}: SearchResultBlockProps) => {
+  const [movieDetails, setMovieDetails] = useState<Movie[]>([]);
+  const [peopleDetails, setPeopleDetails] = useState<People[]>([]);
+  const [collectionDetails, setCollectionDetails] = useState<Collection[]>([]);
+  const [userDetails, setUserDetails] = useState<UserProfile[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  const getCategoryContent = () => {
-    const categoryMap = {
-      '영화': {
-        list: searchResults.movie_list,
-        render: (id: number) => <li key={id}>Movie ID: {id}</li>
-      },
-      '인물': {
-        list: searchResults.participant_list,
-        render: (id: number) => <li key={id}>Participant ID: {id}</li>
-      },
-      '컬렉션': {
-        list: searchResults.collection_list,
-        render: (id: number) => <li key={id}>Collection ID: {id}</li>
-      },
-      '유저': {
-        list: searchResults.user_list,
-        render: (id: number) => <li key={id}>User ID: {id}</li>
+  const categories: Category[] = ['영화', '인물', '컬렉션', '유저'];
+  useEffect(() => {
+    const fetchSearchResults = async () => {
+      try {
+        const _movieDetails = await Promise.all(
+          searchResults.movie_list.map((id) => fetchMovie(id)),
+        );
+        setMovieDetails(
+          _movieDetails.filter((detail): detail is Movie => detail !== null),
+        );
+        const _peopleDetails = await Promise.all(
+            searchResults.participant_list.map((id) => fetchPeople(id)),
+        );
+        setPeopleDetails(
+        _peopleDetails.filter((detail): detail is People => detail !== null),
+        );
+        const _collectionDetails = await Promise.all(
+            searchResults.collection_list.map((id) => fetchCollection(id)),
+        );
+        setCollectionDetails(
+        _collectionDetails.filter((detail): detail is Collection => detail !== null),
+        );
+        const _userDetails = await Promise.all(
+            searchResults.user_list.map((id) => fetchUser(id)),
+        );
+        setUserDetails(
+        _userDetails.filter((detail): detail is UserProfile => detail !== null),
+        );
+        console.debug(_userDetails);
+      } catch (err) {
+        setError((err as Error).message);
       }
     };
 
-    const { list, render } = categoryMap[selectedCategory];
-    
-    if (list.length === 0) {
-      return (
-        <div className="flex flex-col items-center justify-center h-[400px]">
-          <img 
-            src={NoResultSvg} 
-            alt="검색 결과 없음" 
-            className="w-16 h-16 mb-4 opacity-30 filter grayscale" 
-          />
-          <p className="text-gray-500 text-sm">검색 결과가 없어요. 다른 검색어를 입력해보세요.</p>
-        </div>
-      );
+    void fetchSearchResults();
+  }, [searchResults]);
+
+  const getCategoryContent = () => {
+    if (error != null) {
+      return <p className="text-red-500 mt-4">Error: {error}</p>;
     }
 
+    if (selectedCategory === '영화' && movieDetails.length > 0) {
+      return (
+        <ul className="mt-4">
+          {movieDetails.map((movie) => (
+            <li key={movie.id} className="border-b border-gray-200 last:border-b-0">
+              <a 
+                href={`/movies/${movie.id}`}
+                className="flex py-4 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                <img
+                  src={movie.poster_url}
+                  className="w-16 h-24 object-cover rounded"
+                />
+                <div className="ml-4 flex flex-col justify-center">
+                  <h3 className="text-sm">{movie.title}</h3>
+                  <p className="text-gray-500 text-sm mt-1">{movie.year}</p>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+      );
+    }
+    if (selectedCategory === '인물' && peopleDetails.length > 0) {
+        return (
+          <ul className="mt-4">
+            {peopleDetails.map((people) => (
+              <li key={people.id} className="border-b border-gray-200 last:border-b-0">
+                <a 
+                  href={`/people/${people.id}`}
+                  className="flex py-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  <img
+                    src={people.profile_url === null ? noProfile : people.profile_url}
+                    className="w-16 h-16 object-cover rounded"
+                  />
+                  <div className="ml-4 flex flex-col justify-center">
+                    <h3 className="text-sm">{people.name}</h3>
+                    <p className="text-gray-500 text-sm mt-1">{people.roles.join(', ')}</p>
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        );
+    }
+    if (selectedCategory === '컬렉션' &&    collectionDetails.length > 0) {
+        return (
+          <ul className="mt-4">
+            {collectionDetails.map((collection) => (
+              <li key={collection.id} className="border-b border-gray-200 last:border-b-0">
+                <a 
+                  href={`/collection/${collection.id}`}
+                  className="flex py-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  <div className="ml-4 flex flex-col justify-center">
+                    <h3 className="text-sm">{collection.title}</h3>
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        );
+    }
+    if (selectedCategory === '유저' && userDetails.length > 0) {
+        return (
+          <ul className="mt-4">
+            {userDetails.map((user, index) => (
+              <li key={index} className="border-b border-gray-200 last:border-b-0">
+              <a 
+                href={`/user/${user.login_id}`}
+                className="flex py-4 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                <img
+                  src={user.profile_url === null ? noProfile : user.profile_url}
+                  className="w-16 h-24 object-cover rounded"
+                />
+                <div className="ml-4 flex flex-col justify-center">
+                  <h3 className="text-sm">{user.username}</h3>
+                  <p className="text-gray-500 text-sm mt-1">평가 {user.review_count}</p>
+                </div>
+              </a>
+            </li>
+            ))}
+          </ul>
+        );
+    }
     return (
-      <ul className="space-y-2 mt-4">
-        {list.map(render)}
-      </ul>
+      <div className="flex flex-col items-center justify-center h-[400px]">
+        <img
+          src={NoResultSvg}
+          alt="검색 결과 없음"
+          className="w-16 h-16 mb-4 opacity-30 filter grayscale"
+        />
+        <p className="text-gray-500 text-sm">
+          검색 결과가 없어요. 다른 검색어를 입력해보세요.
+        </p>
+      </div>
     );
   };
 
@@ -60,7 +173,9 @@ export const SearchResultBlock = ({ searchResults, selectedCategory, setSelected
         {categories.map((category) => (
           <button
             key={category}
-            onClick={() => { setSelectedCategory(category); }}
+            onClick={() => {
+              setSelectedCategory(category);
+            }}
             className={`py-3 px-4 text-center whitespace-nowrap ${
               selectedCategory === category
                 ? 'border-b-2 border-black text-black'
@@ -71,9 +186,7 @@ export const SearchResultBlock = ({ searchResults, selectedCategory, setSelected
           </button>
         ))}
       </div>
-      <div className="mt-4">
-        {getCategoryContent()}
-      </div>
+      <div className="mt-4">{getCategoryContent()}</div>
     </>
   );
 };
