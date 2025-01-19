@@ -65,7 +65,7 @@ export type PeopleMovieCreditResponse = {
   movies: PeopleMovieCredit[];
 };
 
-export type searchResult = {
+export type SearchResult = {
   movie_list: Array<number>;
   user_list: Array<number>;
   participant_list: Array<number>;
@@ -81,7 +81,7 @@ export type Collection = {
   comments_count: number;
   created_at: string;
   movies: Movie[];
-}
+};
 
 export type UserProfile = {
   username: string;
@@ -93,4 +93,6 @@ export type UserProfile = {
   review_count: number;
   comment_count: number;
   collection_count: number;
-}
+};
+
+export type SearchCategory = 'movie' | 'person' | 'collection' | 'user';

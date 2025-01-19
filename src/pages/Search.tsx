@@ -4,20 +4,29 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import search from '../assets/search.svg';
 import { Footerbar } from '../components/Footerbar';
 import { SearchResultBlock } from '../components/SearchResultBlock';
-import type { searchResult } from '../utils/Types';
-
-type Category = '영화' | '인물' | '컬렉션' | '유저';
+import type { SearchCategory, SearchResult } from '../utils/Types';
 
 export const Search = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [searchText, setSearchText] = useState('');
-  const [searchResults, setSearchResults] = useState<searchResult | null>(null);
+  const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<Category>('영화');
+  const [selectedCategory, setSelectedCategory] =
+    useState<SearchCategory>('movie');
 
   useEffect(() => {
     const query = searchParams.get('query');
+    const category = searchParams.get('category') as SearchCategory;
+    console.debug(category);
+
+    if (
+      category.length > 0 &&
+      ['movie', 'person', 'collection', 'user'].includes(category)
+    ) {
+      setSelectedCategory(category);
+    }
+
     if (query != null) {
       setSearchText(query);
       void performSearch(query);
@@ -46,7 +55,7 @@ export const Search = () => {
         throw new Error('Failed to fetch search results');
       }
 
-      const data = (await response.json()) as searchResult;
+      const data = (await response.json()) as SearchResult;
       setSearchResults(data);
     } catch (err) {
       setError((err as Error).message);
@@ -56,7 +65,10 @@ export const Search = () => {
 
   const handleSearch = () => {
     if (searchText.trim().length > 0) {
-      void navigate(`/search?query=${encodeURIComponent(searchText.trim())}`);
+      const searchQuery = `query=${encodeURIComponent(searchText.trim())}`;
+      const categoryQuery =
+        selectedCategory !== 'movie' ? `&category=${selectedCategory}` : '';
+      void navigate(`/search?${searchQuery}${categoryQuery}`);
     }
   };
 

@@ -1,14 +1,26 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import noProfile from '../assets/no_profile.svg';
 import NoResultSvg from '../assets/no_result.svg';
-import { fetchCollection, fetchMovie, fetchPeople, fetchUser } from '../utils/Functions';
-import type { Collection, Movie, People, searchResult, UserProfile } from '../utils/Types';
+import {
+  fetchCollection,
+  fetchMovie,
+  fetchPeople,
+  fetchUser,
+} from '../utils/Functions';
+import type {
+  Collection,
+  Movie,
+  People,
+  SearchResult,
+  UserProfile,
+} from '../utils/Types';
 
-type Category = '영화' | '인물' | '컬렉션' | '유저';
+type Category = 'movie' | 'person' | 'collection' | 'user';
 
 interface SearchResultBlockProps {
-  searchResults: searchResult;
+  searchResults: SearchResult;
   selectedCategory: Category;
   setSelectedCategory: (category: Category) => void;
 }
@@ -18,13 +30,14 @@ export const SearchResultBlock = ({
   selectedCategory,
   setSelectedCategory,
 }: SearchResultBlockProps) => {
+  const [, setSearchParams] = useSearchParams();
   const [movieDetails, setMovieDetails] = useState<Movie[]>([]);
   const [peopleDetails, setPeopleDetails] = useState<People[]>([]);
   const [collectionDetails, setCollectionDetails] = useState<Collection[]>([]);
   const [userDetails, setUserDetails] = useState<UserProfile[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const categories: Category[] = ['영화', '인물', '컬렉션', '유저'];
+  const categories: Category[] = ['movie', 'person', 'collection', 'user'];
   useEffect(() => {
     const fetchSearchResults = async () => {
       try {
@@ -35,24 +48,27 @@ export const SearchResultBlock = ({
           _movieDetails.filter((detail): detail is Movie => detail !== null),
         );
         const _peopleDetails = await Promise.all(
-            searchResults.participant_list.map((id) => fetchPeople(id)),
+          searchResults.participant_list.map((id) => fetchPeople(id)),
         );
         setPeopleDetails(
-        _peopleDetails.filter((detail): detail is People => detail !== null),
+          _peopleDetails.filter((detail): detail is People => detail !== null),
         );
         const _collectionDetails = await Promise.all(
-            searchResults.collection_list.map((id) => fetchCollection(id)),
+          searchResults.collection_list.map((id) => fetchCollection(id)),
         );
         setCollectionDetails(
-        _collectionDetails.filter((detail): detail is Collection => detail !== null),
+          _collectionDetails.filter(
+            (detail): detail is Collection => detail !== null,
+          ),
         );
         const _userDetails = await Promise.all(
-            searchResults.user_list.map((id) => fetchUser(id)),
+          searchResults.user_list.map((id) => fetchUser(id)),
         );
         setUserDetails(
-        _userDetails.filter((detail): detail is UserProfile => detail !== null),
+          _userDetails.filter(
+            (detail): detail is UserProfile => detail !== null,
+          ),
         );
-        console.debug(_userDetails);
       } catch (err) {
         setError((err as Error).message);
       }
@@ -61,17 +77,28 @@ export const SearchResultBlock = ({
     void fetchSearchResults();
   }, [searchResults]);
 
+  const handleCategoryClick = (category: Category) => {
+    setSelectedCategory(category);
+    setSearchParams((params) => {
+      params.set('category', category);
+      return params;
+    });
+  };
+
   const getCategoryContent = () => {
     if (error != null) {
       return <p className="text-red-500 mt-4">Error: {error}</p>;
     }
 
-    if (selectedCategory === '영화' && movieDetails.length > 0) {
+    if (selectedCategory === 'movie' && movieDetails.length > 0) {
       return (
         <ul className="mt-4">
           {movieDetails.map((movie) => (
-            <li key={movie.id} className="border-b border-gray-200 last:border-b-0">
-              <a 
+            <li
+              key={movie.id}
+              className="border-b border-gray-200 last:border-b-0"
+            >
+              <a
                 href={`/movies/${movie.id}`}
                 className="flex py-4 hover:bg-gray-50 transition-colors cursor-pointer"
               >
@@ -89,53 +116,66 @@ export const SearchResultBlock = ({
         </ul>
       );
     }
-    if (selectedCategory === '인물' && peopleDetails.length > 0) {
-        return (
-          <ul className="mt-4">
-            {peopleDetails.map((people) => (
-              <li key={people.id} className="border-b border-gray-200 last:border-b-0">
-                <a 
-                  href={`/people/${people.id}`}
-                  className="flex py-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                >
-                  <img
-                    src={people.profile_url === null ? noProfile : people.profile_url}
-                    className="w-16 h-16 object-cover rounded"
-                  />
-                  <div className="ml-4 flex flex-col justify-center">
-                    <h3 className="text-sm">{people.name}</h3>
-                    <p className="text-gray-500 text-sm mt-1">{people.roles.join(', ')}</p>
-                  </div>
-                </a>
-              </li>
-            ))}
-          </ul>
-        );
+    if (selectedCategory === 'person' && peopleDetails.length > 0) {
+      return (
+        <ul className="mt-4">
+          {peopleDetails.map((people) => (
+            <li
+              key={people.id}
+              className="border-b border-gray-200 last:border-b-0"
+            >
+              <a
+                href={`/people/${people.id}`}
+                className="flex py-4 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                <img
+                  src={
+                    people.profile_url === null ? noProfile : people.profile_url
+                  }
+                  className="w-16 h-16 object-cover rounded"
+                />
+                <div className="ml-4 flex flex-col justify-center">
+                  <h3 className="text-sm">{people.name}</h3>
+                  <p className="text-gray-500 text-sm mt-1">
+                    {people.roles.join(', ')}
+                  </p>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+      );
     }
-    if (selectedCategory === '컬렉션' &&    collectionDetails.length > 0) {
-        return (
-          <ul className="mt-4">
-            {collectionDetails.map((collection) => (
-              <li key={collection.id} className="border-b border-gray-200 last:border-b-0">
-                <a 
-                  href={`/collection/${collection.id}`}
-                  className="flex py-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                >
-                  <div className="ml-4 flex flex-col justify-center">
-                    <h3 className="text-sm">{collection.title}</h3>
-                  </div>
-                </a>
-              </li>
-            ))}
-          </ul>
-        );
+    if (selectedCategory === 'collection' && collectionDetails.length > 0) {
+      return (
+        <ul className="mt-4">
+          {collectionDetails.map((collection) => (
+            <li
+              key={collection.id}
+              className="border-b border-gray-200 last:border-b-0"
+            >
+              <a
+                href={`/collection/${collection.id}`}
+                className="flex py-4 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                <div className="ml-4 flex flex-col justify-center">
+                  <h3 className="text-sm">{collection.title}</h3>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+      );
     }
-    if (selectedCategory === '유저' && userDetails.length > 0) {
-        return (
-          <ul className="mt-4">
-            {userDetails.map((user, index) => (
-              <li key={index} className="border-b border-gray-200 last:border-b-0">
-              <a 
+    if (selectedCategory === 'user' && userDetails.length > 0) {
+      return (
+        <ul className="mt-4">
+          {userDetails.map((user, index) => (
+            <li
+              key={index}
+              className="border-b border-gray-200 last:border-b-0"
+            >
+              <a
                 href={`/user/${user.login_id}`}
                 className="flex py-4 hover:bg-gray-50 transition-colors cursor-pointer"
               >
@@ -145,13 +185,15 @@ export const SearchResultBlock = ({
                 />
                 <div className="ml-4 flex flex-col justify-center">
                   <h3 className="text-sm">{user.username}</h3>
-                  <p className="text-gray-500 text-sm mt-1">평가 {user.review_count}</p>
+                  <p className="text-gray-500 text-sm mt-1">
+                    평가 {user.review_count}
+                  </p>
                 </div>
               </a>
             </li>
-            ))}
-          </ul>
-        );
+          ))}
+        </ul>
+      );
     }
     return (
       <div className="flex flex-col items-center justify-center h-[400px]">
@@ -167,6 +209,16 @@ export const SearchResultBlock = ({
     );
   };
 
+  const getCategoryLabel = (category: Category): string => {
+    const labels: Record<Category, string> = {
+      movie: '영화',
+      person: '인물',
+      collection: '컬렉션',
+      user: '유저',
+    };
+    return labels[category];
+  };
+
   return (
     <>
       <div className="flex space-x-2 border-b">
@@ -174,7 +226,7 @@ export const SearchResultBlock = ({
           <button
             key={category}
             onClick={() => {
-              setSelectedCategory(category);
+              handleCategoryClick(category);
             }}
             className={`py-3 px-4 text-center whitespace-nowrap ${
               selectedCategory === category
@@ -182,7 +234,7 @@ export const SearchResultBlock = ({
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            {category}
+            {getCategoryLabel(category)}
           </button>
         ))}
       </div>
