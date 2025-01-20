@@ -64,3 +64,35 @@ export type PeopleMovieCreditResponse = {
   role: string;
   movies: PeopleMovieCredit[];
 };
+
+export type SearchResult = {
+  movie_list: Array<number>;
+  user_list: Array<number>;
+  participant_list: Array<number>;
+  collection_list: Array<number>;
+};
+
+export type Collection = {
+  id: number;
+  user_id: number;
+  title: string;
+  overview: string | null;
+  likes_count: number;
+  comments_count: number;
+  created_at: string;
+  movies: Movie[];
+};
+
+export type UserProfile = {
+  username: string;
+  login_id: string;
+  profile_url: string | null;
+  status_message: string | null;
+  following_count: number;
+  follower_count: number;
+  review_count: number;
+  comment_count: number;
+  collection_count: number;
+};
+
+export type SearchCategory = 'movie' | 'person' | 'collection' | 'user';
