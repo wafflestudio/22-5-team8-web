@@ -17,14 +17,13 @@ export const Search = () => {
 
   useEffect(() => {
     const query = searchParams.get('query');
-    const category = searchParams.get('category') as SearchCategory;
-    console.debug(category);
+    const category = searchParams.get('category') ?? 'movie';
 
     if (
       category.length > 0 &&
       ['movie', 'person', 'collection', 'user'].includes(category)
     ) {
-      setSelectedCategory(category);
+      setSelectedCategory(category as SearchCategory);
     }
 
     if (query != null) {
