@@ -81,17 +81,19 @@ export const Profile = () => {
           </div>
           {/* Follow Button */}
           <div className="w-full mt-3">
-              <button
-                onClick={() => {
-                  void toggleFollow();
-                }}
-                className={`w-full py-2 px-4 rounded-md font-semibold ${
-                  following ? 'bg-white border border-gray-300 text-black' : 'bg-black text-white'
-                }`}
-              >
-                {following ? '팔로잉' : '팔로우'}
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                void toggleFollow();
+              }}
+              className={`w-full py-2 px-4 rounded-md font-semibold ${
+                following
+                  ? 'bg-white border border-gray-300 text-black'
+                  : 'bg-black text-white'
+              }`}
+            >
+              {following ? '팔로잉' : '팔로우'}
+            </button>
+          </div>
         </div>
         {/* Stats Section */}
         <div className="grid grid-cols-3 text-center pb-4 bg-white">
