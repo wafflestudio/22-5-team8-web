@@ -10,6 +10,7 @@ import ReplyPage from './pages/movie/CommentPage';
 import { MoviePage } from './pages/movie/MoviePage';
 import { Movies } from './pages/Movies';
 import { MyPage } from './pages/mypage/MyPage';
+import { Profile } from './pages/mypage/Profile';
 import { Settings } from './pages/mypage/Settings';
 import { News } from './pages/News';
 import PeoplePage from './pages/PeoplePage';
@@ -29,6 +30,7 @@ export const App = () => {
           <Route path="/signup" element={<Signup />} />\
           <Route path="/rating" element={<Rating />} />
           <Route path="/news" element={<News />} />
+          <Route path="/profile/:user_id" element={<Profile />} />
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/mypage/settings" element={<Settings />} />
           <Route path="/movies/:movieId/comments" element={<CommentList />} />

@@ -114,7 +114,9 @@ const CommnetFragment = ({ viewMode, initialReview }: CommnetFragmentProps) => {
             alt="프로필"
             className="w-10 h-10 rounded-full"
           />
-          <h2 className="ml-2">{review.user_name}</h2>
+          <Link to={`/profile/${review.user_id}`} className="ml-2">
+            {review.user_name}
+          </Link>
           <div className="ml-auto mr-2 text-sm bg-white rounded-full px-2 text-center">
             &#9733; {review.rating.toFixed(1)}
           </div>
