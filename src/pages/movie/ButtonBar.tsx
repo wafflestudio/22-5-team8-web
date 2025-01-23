@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import add from '../../assets/add.svg';
 import bookmark from '../../assets/bookmark.svg';
@@ -7,17 +7,64 @@ import notWatching from '../../assets/not_watching.svg';
 import comment from '../../assets/pencil.svg';
 import watching from '../../assets/watching.svg';
 import { useAuth } from '../../components/AuthContext';
-import type { Movie } from '../../utils/Types';
+import { newReview, updateReview } from '../../utils/Functions';
+import type { Movie, Review } from '../../utils/Types';
 import CommentPopup from './CommentPopup';
 import NeedLoginPopup from './NeedLoginPopup';
 
-const ButtonBar = ({ movie }: { movie: Movie }) => {
-  const { isLoggedIn } = useAuth();
+const ButtonBar = ({
+  movie,
+  myReview,
+  onReviewUpdate,
+}: {
+  movie: Movie;
+  myReview: Review | null;
+  onReviewUpdate: (updatedReview: Review | null) => void;
+}) => {
+  const { isLoggedIn, accessToken } = useAuth();
 
-  const [buttonState, setButtonState] = useState<string>('');
+  const [buttonState, setButtonState] = useState<'' | 'WatchList' | 'Watching'>(
+    '',
+  );
   const [isNeedLoginPopupOpen, setIsNeedLoginPopupOpen] =
     useState<boolean>(false);
   const [isCommentPopupOpen, setIsCommentPopupOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    //console.log("myReview: ", myReview);
+    if (myReview !== null) {
+      setButtonState(myReview.status);
+    }
+  }, [myReview]);
+
+  const onStateChange = (state: '' | 'WatchList' | 'Watching') => {
+    //console.log(buttonState);
+    if (!isLoggedIn || accessToken === null) {
+      return;
+    }
+
+    if (myReview === null) {
+      void newReview(
+        movie.id,
+        accessToken,
+        '',
+        0,
+        false,
+        state,
+        onReviewUpdate,
+      );
+    } else {
+      void updateReview(
+        myReview.id,
+        accessToken,
+        myReview.content,
+        myReview.rating === null ? 0 : myReview.rating,
+        myReview.spoiler,
+        state,
+        onReviewUpdate,
+      );
+    }
+  };
 
   const onClickBookmark = () => {
     if (!isLoggedIn) {
@@ -25,11 +72,13 @@ const ButtonBar = ({ movie }: { movie: Movie }) => {
       return;
     }
 
-    if (buttonState === 'bookmark') {
+    if (buttonState === 'WatchList') {
       setButtonState('');
+      onStateChange('');
       return;
     }
-    setButtonState('bookmark');
+    setButtonState('WatchList');
+    onStateChange('WatchList');
   };
 
   const onClickWatching = () => {
@@ -38,11 +87,13 @@ const ButtonBar = ({ movie }: { movie: Movie }) => {
       return;
     }
 
-    if (buttonState === 'watching') {
+    if (buttonState === 'Watching') {
       setButtonState('');
+      onStateChange('');
       return;
     }
-    setButtonState('watching');
+    setButtonState('Watching');
+    onStateChange('Watching');
   };
 
   const onClickComment = () => {
@@ -68,10 +119,10 @@ const ButtonBar = ({ movie }: { movie: Movie }) => {
           className="flex flex-col w-1/4 items-center gap-2"
         >
           <img
-            src={buttonState === 'bookmark' ? bookmark : add}
+            src={buttonState === 'WatchList' ? bookmark : add}
             alt="bookmark"
           />
-          <span className={buttonState === 'bookmark' ? 'text-hotPink' : ''}>
+          <span className={buttonState === 'WatchList' ? 'text-hotPink' : ''}>
             보고싶어요
           </span>
         </button>
@@ -87,10 +138,10 @@ const ButtonBar = ({ movie }: { movie: Movie }) => {
           className="flex flex-col w-1/4 items-center gap-2"
         >
           <img
-            src={buttonState === 'watching' ? watching : notWatching}
+            src={buttonState === 'Watching' ? watching : notWatching}
             alt="watching"
           />
-          <span className={buttonState === 'watching' ? 'text-hotPink' : ''}>
+          <span className={buttonState === 'Watching' ? 'text-hotPink' : ''}>
             보는 중
           </span>
         </button>
@@ -114,6 +165,8 @@ const ButtonBar = ({ movie }: { movie: Movie }) => {
           setIsCommentPopupOpen(false);
         }}
         movie={movie}
+        myReview={myReview}
+        onReviewUpdate={onReviewUpdate}
       />
     </>
   );

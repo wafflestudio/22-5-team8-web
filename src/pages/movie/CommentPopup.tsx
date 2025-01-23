@@ -1,19 +1,35 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAuth } from '../../components/AuthContext';
 import ToggleButton from '../../components/ToggleButton';
-import type { Movie } from '../../utils/Types';
+import { newReview, updateReview } from '../../utils/Functions';
+import type { Movie, Review } from '../../utils/Types';
 
-type NeedLoginPopupProps = {
+type CommentPopupProps = {
   isOpen: boolean;
   onClose: () => void;
   movie: Movie;
+  myReview: Review | null;
+  onReviewUpdate: (updatedReview: Review | null) => void;
 };
 
-const CommentPopup = ({ isOpen, onClose, movie }: NeedLoginPopupProps) => {
+const CommentPopup = ({
+  isOpen,
+  onClose,
+  movie,
+  myReview,
+  onReviewUpdate,
+}: CommentPopupProps) => {
   const [isOn, setIsOn] = useState(false);
   const [text, setText] = useState('');
   const { accessToken } = useAuth();
+
+  useEffect(() => {
+    if (myReview !== null) {
+      setText(myReview.content);
+      setIsOn(myReview.spoiler);
+    }
+  }, [myReview]);
 
   if (isOpen) {
     document.body.style.overflow = 'hidden';
@@ -38,6 +54,28 @@ const CommentPopup = ({ isOpen, onClose, movie }: NeedLoginPopupProps) => {
         return;
       }
 
+      if (myReview === null) {
+        void newReview(
+          movie.id,
+          accessToken,
+          text,
+          0,
+          isOn,
+          '',
+          onReviewUpdate,
+        );
+      } else {
+        void updateReview(
+          myReview.id,
+          accessToken,
+          text,
+          myReview.rating === null ? 0 : myReview.rating,
+          isOn,
+          myReview.status,
+          onReviewUpdate,
+        );
+      }
+
       try {
         const response = await fetch(`/api/reviews/${movie.id}`, {
           method: 'POST',
@@ -45,7 +83,7 @@ const CommentPopup = ({ isOpen, onClose, movie }: NeedLoginPopupProps) => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`,
           },
-          body: JSON.stringify({ content: text, rating: 3 }),
+          body: JSON.stringify({ content: text, spoiler: isOn, status: '' }),
         });
 
         //const data = (await response.json()) as Review;

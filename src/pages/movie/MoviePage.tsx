@@ -1,17 +1,21 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
+import { useAuth } from '../../components/AuthContext';
+import CommnetFragment from '../../components/CommentFragment';
 import { Footerbar } from '../../components/Footerbar';
+import { fetchUserReviews } from '../../utils/Functions';
 import type { Movie, Review } from '../../utils/Types';
 import ButtonBar from './ButtonBar';
 import CastList from './CastList';
-import CommnetFragment from './CommentFragment';
+import CommentPopup from './CommentPopup';
 import { Header } from './Header';
 import StarRating from './StarRating';
 
 export const MoviePage = () => {
   const { movieId } = useParams();
   const id: number = parseInt(movieId == null ? '0' : movieId);
+  const { accessToken } = useAuth();
 
   // test cast data
   /*
@@ -46,9 +50,13 @@ export const MoviePage = () => {
 
   const [movieData, setMovieData] = useState<Movie | null>(null);
   const [reviewList, setReviewList] = useState<Review[] | null>(null);
+  const [validContentReviewList, setValidContentReviewList] = useState<
+    Review[] | null
+  >(null);
   const [firstReview, setFirstReview] = useState<Review | null>(null);
   const [myReview, setMyReview] = useState<Review | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isCommentPopupOpen, setIsCommentPopupOpen] = useState(false);
 
   useEffect(() => {
     const fetchMovieData = async () => {
@@ -69,11 +77,14 @@ export const MoviePage = () => {
           throw new Error('Failed to fetch reviews');
         }
         const reviewData = (await reviewResponse.json()) as Review[];
-        setMyReview(null); // 임시 코드(나중에 수정 필요)
+        const validContentReviewData = reviewData.filter(
+          (review) => review.content !== '',
+        );
 
         setReviewList(reviewData);
+        setValidContentReviewList(validContentReviewData);
 
-        const firstReviewData = reviewData.find(
+        const firstReviewData = validContentReviewData.find(
           (review) => review.content !== '',
         );
         setFirstReview(firstReviewData === undefined ? null : firstReviewData);
@@ -86,9 +97,26 @@ export const MoviePage = () => {
 
     void fetchMovieData();
     // setMovieData(testData);
-  }, [id]);
+
+    if (accessToken !== null) {
+      fetchUserReviews(accessToken)
+        .then((data) => {
+          if (data === null) {
+            setMyReview(null);
+          } else {
+            const myReviewData = data.find((review) => review.movie_id === id);
+            setMyReview(myReviewData === undefined ? null : myReviewData);
+            //console.log(myReviewData);
+          }
+        })
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+    }
+  }, [accessToken, id]);
 
   if (movieData == null || !isLoaded) {
+    console.debug(reviewList);
     return (
       <div className="flex flex-col min-h-screen relative">
         <div className="flex-none fixed z-10 top-0 w-full">
@@ -104,77 +132,143 @@ export const MoviePage = () => {
     );
   }
 
+  const handleMyReviewUpdate = (updatedReview: Review | null) => {
+    setMyReview(updatedReview);
+  };
+
   return (
-    <div className="flex flex-col min-h-screen relative">
-      <div className="flex-none drop-shadow fixed z-10 top-0 w-full">
-        <Header title={movieData.title} />
-      </div>
-      <div className="flex-1 flex flex-col items-center justify-start py-16">
-        <div className="relative w-full h-[550px] mb-3">
-          <img
-            src={movieData.backdrop_url}
-            alt={movieData.title}
-            className="w-full h-full object-cover"
+    <>
+      <div className="flex flex-col min-h-screen relative">
+        <div className="flex-none drop-shadow fixed z-10 top-0 w-full">
+          <Header title={movieData.title} />
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-start py-16">
+          <div className="relative w-full h-[550px] mb-3">
+            <img
+              src={movieData.backdrop_url}
+              alt={movieData.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 to-transparent p-6 text-white">
+              <p className="text-4xl font-semibold">{movieData.title}</p>
+              <p className="text-sm mt-6">{movieData.original_title}</p>
+              <p className="text-sm mt-2">
+                {movieData.year} · {movieData.genres.join('/')} ·{' '}
+                {movieData.countries.join(', ')}
+              </p>
+              <p className="text-sm my-2">
+                {Math.floor(movieData.running_time / 60)}시간{' '}
+                {movieData.running_time % 60}분 · {movieData.grade}
+              </p>
+            </div>
+          </div>
+          <StarRating
+            movieId={id}
+            myReview={myReview}
+            onReviewUpdate={handleMyReviewUpdate}
           />
-          <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 to-transparent p-6 text-white">
-            <p className="text-4xl font-semibold">{movieData.title}</p>
-            <p className="text-sm mt-6">{movieData.original_title}</p>
-            <p className="text-sm mt-2">
-              {movieData.year} · {movieData.genres.join('/')} ·{' '}
-              {movieData.countries.join(', ')}
-            </p>
-            <p className="text-sm my-2">
-              {Math.floor(movieData.running_time / 60)}시간{' '}
-              {movieData.running_time % 60}분 · {movieData.grade}
-            </p>
+          <hr className="w-11/12 my-3 bg-gray-300" />
+          <div className="flex w-11/12 justify-center items-center my-2">
+            <div className="text-sm text-gray-500 whitespace-pre-line text-center">
+              평균 별점
+              <br />({movieData.ratings_count}명)
+            </div>
+            <div className="ml-4 mr-4 text-4xl font-bold text-gray-700">
+              {movieData.average_rating === null
+                ? '-'
+                : movieData.average_rating.toFixed(1)}
+            </div>
+          </div>
+          <hr className="w-11/12 my-3 bg-gray-300" />
+          <ButtonBar
+            movie={movieData}
+            myReview={myReview}
+            onReviewUpdate={handleMyReviewUpdate}
+          />
+          <hr className="w-11/12 my-3 bg-gray-300" />
+          {(() => {
+            if (myReview === null) return null;
+            else if (myReview.content !== '')
+              return (
+                <>
+                  <div className="flex flex-col justify-start w-11/12">
+                    <h2 className="px-4 py-2 text-xs text-gray-600">
+                      내가 쓴 코멘트
+                    </h2>
+                    <CommnetFragment
+                      initialReview={myReview}
+                      viewMode="myComment"
+                      openPopup={() => {
+                        setIsCommentPopupOpen(true);
+                      }}
+                    />
+                  </div>
+                  <hr className="w-11/12 bg-gray-300 my-3" />
+                </>
+              );
+            else if (myReview.rating !== 0)
+              return (
+                <>
+                  <div className="bg-gray-100 rounded flex flex-col text-center item-center justify-start w-11/12">
+                    <div className="text-gray-600 p-4">
+                      이 작품에 대한 평가를 글로 남겨보세요.
+                    </div>
+                    <button
+                      onClick={() => {
+                        setIsCommentPopupOpen(true);
+                      }}
+                      className="text-hotPink px-4 pb-4"
+                    >
+                      코멘트 남기기
+                    </button>
+                  </div>
+                  <hr className="w-11/12 bg-gray-300 my-3" />
+                </>
+              );
+            else return null;
+          })()}
+          <div className="w-11/12 my-3 text-gray-700 text-sm whitespace-pre-line">
+            {movieData.synopsis.replace(/\\n/g, '\n')}
+          </div>
+          <div className="flex w-9/12 my-5 justify-center">
+            <img src={movieData.poster_url} alt={movieData.title} />
+          </div>
+          <hr className="w-11/12 my-5 bg-gray-300" />
+          <div className="w-11/12 overflow-hidden">
+            <CastList participants={movieData.participants} />
+          </div>
+          <hr className="w-11/12 my-5 bg-gray-300" />
+          <div className="flex flex-col justify-start w-11/12 mb-10">
+            <div className="flex items-center px-4">
+              <h2 className="text-lg font-semibold">코멘트</h2>
+              <h2 className="ml-2 text-hotPink">
+                {validContentReviewList === null
+                  ? 0
+                  : validContentReviewList.length}
+              </h2>
+              <Link
+                to={`/movies/${id}/comments`}
+                className="ml-auto text-hotPink"
+              >
+                더보기
+              </Link>
+            </div>
+            <CommnetFragment initialReview={firstReview} viewMode="moviePage" />
           </div>
         </div>
-        <StarRating movieId={id} myReview={myReview} />
-        <hr className="w-11/12 my-3 bg-gray-300" />
-        <div className="flex w-11/12 justify-center items-center my-2">
-          <div className="text-sm text-gray-500 whitespace-pre-line text-center">
-            평균 별점
-            <br />({movieData.ratings_count}명)
-          </div>
-          <div className="ml-4 mr-4 text-4xl font-bold text-gray-700">
-            {movieData.average_rating === null
-              ? '-'
-              : movieData.average_rating.toFixed(1)}
-          </div>
-        </div>
-        <hr className="w-11/12 my-3 bg-gray-300" />
-        <ButtonBar movie={movieData} />
-        <hr className="w-11/12 my-3 bg-gray-300" />
-        <div className="w-11/12 my-3 text-gray-700 text-sm whitespace-pre-line">
-          {movieData.synopsis.replace(/\\n/g, '\n')}
-        </div>
-        <div className="flex w-9/12 my-5 justify-center">
-          <img src={movieData.poster_url} alt={movieData.title} />
-        </div>
-        <hr className="w-11/12 my-5 bg-gray-300" />
-        <div className="w-11/12 overflow-hidden">
-          <CastList participants={movieData.participants} />
-        </div>
-        <hr className="w-11/12 my-5 bg-gray-300" />
-        <div className="flex flex-col justify-start w-11/12 mb-10">
-          <div className="flex items-center px-4">
-            <h2 className="text-lg font-semibold">코멘트</h2>
-            <h2 className="ml-2 text-hotPink">
-              {reviewList === null ? 0 : reviewList.length}
-            </h2>
-            <Link
-              to={`/movies/${id}/comments`}
-              className="ml-auto text-hotPink"
-            >
-              더보기
-            </Link>
-          </div>
-          <CommnetFragment initialReview={firstReview} viewMode="moviePage" />
+        <div className="flex-none fixed z-10 bottom-0 w-full">
+          <Footerbar />
         </div>
       </div>
-      <div className="flex-none fixed z-10 bottom-0 w-full">
-        <Footerbar />
-      </div>
-    </div>
+      <CommentPopup
+        isOpen={isCommentPopupOpen}
+        onClose={() => {
+          setIsCommentPopupOpen(false);
+        }}
+        movie={movieData}
+        myReview={myReview}
+        onReviewUpdate={handleMyReviewUpdate}
+      />
+    </>
   );
 };

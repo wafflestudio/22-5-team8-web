@@ -3,15 +3,18 @@ import { useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 
 import { useAuth } from '../../components/AuthContext';
+import { newReview, updateReview } from '../../utils/Functions';
 import type { Review } from '../../utils/Types';
 import NeedLoginPopup from './NeedLoginPopup';
 
 const StarRating = ({
   movieId,
   myReview = null,
+  onReviewUpdate,
 }: {
   movieId: number;
   myReview: Review | null;
+  onReviewUpdate: (updatedReview: Review | null) => void;
 }) => {
   const [rating, setRating] = useState<number>(0);
   const [hover, setHover] = useState<number>(0);
@@ -27,13 +30,16 @@ const StarRating = ({
   };
 
   useEffect(() => {
+    //console.log("myReview: ", myReview);
     if (myReview !== null) {
-      setRating(myReview.rating);
+      setRating(myReview.rating === null ? 0 : myReview.rating);
+      //console.log("myReview.rating: ", myReview.rating);
     }
   }, [myReview]);
 
   const handleClick = (value: number, event: MouseEvent<HTMLSpanElement>) => {
     if (!isLoggedIn || accessToken === null) {
+      //console.log(isLoggedIn, accessToken);
       openNeedLoginPopup();
       return;
     }
@@ -49,27 +55,31 @@ const StarRating = ({
     // 별점을 클릭할 때마다 서버에 저장
     // 이미 리뷰 존재 시 Patch, 없으면 Post로 구현해야 함
 
-    void (async () => {
-      try {
-        const response = await fetch(`/api/reviews/${movieId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({ content: 'test', rating: newRating }),
-        });
+    //console.log(myReview)
 
-        //const data = (await response.json()) as Review;
-        //console.log(data);
+    if (myReview !== null) {
+      void updateReview(
+        myReview.id,
+        accessToken,
+        myReview.content,
+        myReview.rating === newRating ? 0 : newRating,
+        myReview.spoiler,
+        myReview.status,
+        onReviewUpdate,
+      );
 
-        if (!response.ok) {
-          throw new Error('Failed to save rating');
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    })();
+      return;
+    }
+
+    void newReview(
+      movieId,
+      accessToken,
+      '',
+      newRating,
+      false,
+      '',
+      onReviewUpdate,
+    );
   };
 
   const handleMouseEvent = (
