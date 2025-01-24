@@ -1,47 +1,68 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import search from '../assets/search.svg';
 import { Footerbar } from '../components/Footerbar';
 import { SearchResultBlock } from '../components/SearchResultBlock';
-import type { SearchCategory, SearchResult } from '../utils/Types';
+import {
+  fetchCollection,
+  fetchMovie,
+  fetchPeople,
+  fetchUser,
+} from '../utils/Functions';
+import type {
+  Collection,
+  Movie,
+  People,
+  SearchCategory,
+  SearchResult,
+  SearchResultRaw,
+  UserProfile,
+} from '../utils/Types';
 
 export const Search = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [searchText, setSearchText] = useState('');
-  const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] =
     useState<SearchCategory>('movie');
+  const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const query = useMemo(() => searchParams.get('query'), [searchParams]);
+  const category = useMemo(
+    () => searchParams.get('category') ?? 'movie',
+    [searchParams],
+  );
 
   useEffect(() => {
-    const query = searchParams.get('query');
-    const category = searchParams.get('category') ?? 'movie';
-
     if (
       category.length > 0 &&
       ['movie', 'person', 'collection', 'user'].includes(category)
     ) {
       setSelectedCategory(category as SearchCategory);
     }
+  }, [category]);
 
+  useEffect(() => {
     if (query != null) {
       setSearchText(query);
       void performSearch(query);
     }
-  }, [searchParams]);
+  }, [query]);
 
   const handleClear = () => {
     setSearchText('');
     setSearchResults(null);
   };
 
-  const performSearch = async (query: string) => {
+  const performSearch = async (searchQuery: string) => {
     setError(null);
+    setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/search?search_q=${encodeURIComponent(query)}`,
+        `/api/search?search_q=${encodeURIComponent(searchQuery)}`,
         {
           method: 'GET',
           headers: {
@@ -54,11 +75,30 @@ export const Search = () => {
         throw new Error('Failed to fetch search results');
       }
 
-      const data = (await response.json()) as SearchResult;
-      setSearchResults(data);
+      const data = (await response.json()) as SearchResultRaw;
+      const movieDetails = (await Promise.all(
+        data.movie_list.map((id) => fetchMovie(id)),
+      )) as Movie[];
+      const peopleDetails = (await Promise.all(
+        data.participant_list.map((id) => fetchPeople(id)),
+      )) as People[];
+      const _collectionDetails = (await Promise.all(
+        data.collection_list.map((id) => fetchCollection(id)),
+      )) as Collection[];
+      const _userDetails = (await Promise.all(
+        data.user_list.map((id) => fetchUser(id)),
+      )) as UserProfile[];
+      setSearchResults({
+        movies: movieDetails,
+        users: _userDetails,
+        people: peopleDetails,
+        collections: _collectionDetails,
+      });
     } catch (err) {
       setError((err as Error).message);
       console.error('Search error:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -109,12 +149,16 @@ export const Search = () => {
         )}
       </div>
       <div className="flex-1 text-left px-4 py-2 pb-16 pt-16">
-        {searchResults != null && (
-          <SearchResultBlock
-            searchResults={searchResults}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-          />
+        {isLoading ? (
+          <div className="text-center mt-8">검색 중...</div>
+        ) : (
+          searchResults != null && (
+            <SearchResultBlock
+              searchResults={searchResults}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+            />
+          )
         )}
       </div>
 
