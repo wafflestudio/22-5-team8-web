@@ -72,7 +72,7 @@ export const fetchUser = async (userId: number) => {
     if (!response.ok) {
       throw new Error('Failed to fetch user details');
     }
-    return (await response.json()) as UserProfile;
+    return { ...(await response.json()), user_id: userId } as UserProfile;
   } catch (err) {
     console.error('User fetch error:', err);
     return null;

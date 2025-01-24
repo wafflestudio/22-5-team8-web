@@ -85,6 +85,7 @@ export type Collection = {
 
 export type UserProfile = {
   username: string;
+  user_id: number;
   login_id: string;
   profile_url: string | null;
   status_message: string | null;

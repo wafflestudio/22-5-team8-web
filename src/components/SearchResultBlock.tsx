@@ -64,6 +64,7 @@ export const SearchResultBlock = ({
         const _userDetails = await Promise.all(
           searchResults.user_list.map((id) => fetchUser(id)),
         );
+        console.debug(_userDetails);
         setUserDetails(
           _userDetails.filter(
             (detail): detail is UserProfile => detail !== null,
@@ -176,7 +177,7 @@ export const SearchResultBlock = ({
               className="border-b border-gray-200 last:border-b-0"
             >
               <a
-                href={`/user/${user.login_id}`}
+                href={`/profile/${user.user_id}`}
                 className="flex py-4 hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 <img
