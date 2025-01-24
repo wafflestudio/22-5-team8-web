@@ -35,7 +35,7 @@ const PeoplePage = () => {
           throw new Error('Failed to fetch people');
         }
         const data = (await response.json()) as People;
-        //console.log(data);
+        console.debug(data);
 
         setPeople(data);
 

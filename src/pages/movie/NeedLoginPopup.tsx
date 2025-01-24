@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+
+import { useReturnPath } from '../../components/ReturnPathContext';
 
 type NeedLoginPopupProps = {
   isOpen: boolean;
@@ -6,12 +8,21 @@ type NeedLoginPopupProps = {
 };
 
 const NeedLoginPopup = ({ isOpen, onClose }: NeedLoginPopupProps) => {
+  const { setReturnPath } = useReturnPath();
+  const location = useLocation();
+  const navigate = useNavigate();
+
   if (isOpen) {
     document.body.style.overflow = 'hidden';
   } else {
     document.body.style.overflow = '';
     return null;
   }
+
+  const handleOnLoginClick = () => {
+    setReturnPath(location.pathname);
+    void navigate('/login');
+  };
 
   return (
     <div className="flex flex-col fixed inset-0 z-50 w-100 h-100 bg-white color-hotPink">
@@ -50,9 +61,9 @@ const NeedLoginPopup = ({ isOpen, onClose }: NeedLoginPopupProps) => {
           >
             회원가입
           </Link>
-          <Link to="/login" className="text-hotPink">
+          <button onClick={handleOnLoginClick} className="text-hotPink">
             로그인
-          </Link>
+          </button>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../components/AuthContext';
+import { useReturnPath } from '../components/ReturnPathContext';
 
 type LoginResponse = {
   access_token: string;
@@ -16,6 +17,7 @@ export const Login = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { returnPath, setReturnPath } = useReturnPath();
 
   const idRegex = /^[a-zA-Z0-9_.]{6,20}$/;
   const passwordRegex = /^.{8,20}$/;
@@ -55,7 +57,12 @@ export const Login = () => {
 
       console.debug('Login successful:', data);
       try {
-        await navigate('/');
+        if (returnPath !== null) {
+          await navigate(returnPath);
+          setReturnPath(null);
+        } else {
+          await navigate('/');
+        }
         window.location.reload();
       } catch (err) {
         console.error('Navigation error:', err);

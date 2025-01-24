@@ -26,17 +26,21 @@ export type Review = {
   id: number;
   user_id: number;
   user_name: string;
+  profile_url: string | null;
   movie_id: number;
   content: string;
-  rating: number;
+  rating: number | null;
   likes_count: number;
   created_at: string;
+  spoiler: boolean;
+  status: '' | 'WatchList' | 'Watching';
 };
 
 export type Reply = {
   id: number;
   user_id: number;
   user_name: string;
+  profile_url: string | null;
   review_id: number;
   content: string;
   likes_count: number;

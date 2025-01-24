@@ -3,9 +3,9 @@ import { isMobile } from 'react-device-detect';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import back from '../../assets/back.svg';
+import CommnetFragment from '../../components/CommentFragment';
 import { Footerbar } from '../../components/Footerbar';
 import type { Review } from '../../utils/Types';
-import CommnetFragment from './CommentFragment';
 
 const CommentList = () => {
   const navigate = useNavigate();
@@ -26,7 +26,8 @@ const CommentList = () => {
           throw new Error('Failed to fetch comment list');
         }
         const data = (await response.json()) as Review[];
-        setCommentList(data);
+        const validData = data.filter((review) => review.content !== '');
+        setCommentList(validData);
         //console.log(data);
       } catch (err) {
         console.error(err);
