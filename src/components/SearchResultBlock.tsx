@@ -2,9 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import noProfile from '../assets/no_profile.svg';
 import NoResultSvg from '../assets/no_result.svg';
-import type {
-  SearchResult,
-} from '../utils/Types';
+import type { SearchResult } from '../utils/Types';
 
 type Category = 'movie' | 'person' | 'collection' | 'user';
 
@@ -12,7 +10,7 @@ type SearchResultBlockProps = {
   searchResults: SearchResult;
   selectedCategory: Category;
   setSelectedCategory: (category: Category) => void;
-}
+};
 
 export const SearchResultBlock = ({
   searchResults,
@@ -32,7 +30,6 @@ export const SearchResultBlock = ({
   };
 
   const getCategoryContent = () => {
-
     if (selectedCategory === 'movie' && searchResults.movies.length > 0) {
       return (
         <ul className="mt-4">
@@ -89,7 +86,10 @@ export const SearchResultBlock = ({
         </ul>
       );
     }
-    if (selectedCategory === 'collection' && searchResults.collections.length > 0) {
+    if (
+      selectedCategory === 'collection' &&
+      searchResults.collections.length > 0
+    ) {
       return (
         <ul className="mt-4">
           {searchResults.collections.map((collection) => (

@@ -1,18 +1,31 @@
-import { useEffect, useMemo,useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import search from '../assets/search.svg';
 import { Footerbar } from '../components/Footerbar';
 import { SearchResultBlock } from '../components/SearchResultBlock';
-import { fetchCollection,fetchMovie,fetchPeople,fetchUser } from '../utils/Functions';
-import type { Collection, Movie,People,SearchCategory, SearchResult,SearchResultRaw, UserProfile } from '../utils/Types';
+import {
+  fetchCollection,
+  fetchMovie,
+  fetchPeople,
+  fetchUser,
+} from '../utils/Functions';
+import type {
+  Collection,
+  Movie,
+  People,
+  SearchCategory,
+  SearchResult,
+  SearchResultRaw,
+  UserProfile,
+} from '../utils/Types';
 
 export const Search = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [searchText, setSearchText] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = 
+  const [selectedCategory, setSelectedCategory] =
     useState<SearchCategory>('movie');
   const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +33,7 @@ export const Search = () => {
   const query = useMemo(() => searchParams.get('query'), [searchParams]);
   const category = useMemo(
     () => searchParams.get('category') ?? 'movie',
-    [searchParams]
+    [searchParams],
   );
 
   useEffect(() => {
@@ -63,20 +76,24 @@ export const Search = () => {
       }
 
       const data = (await response.json()) as SearchResultRaw;
-      const movieDetails = await Promise.all(
+      const movieDetails = (await Promise.all(
         data.movie_list.map((id) => fetchMovie(id)),
-      ) as Movie[];
-      const peopleDetails = await Promise.all(
+      )) as Movie[];
+      const peopleDetails = (await Promise.all(
         data.participant_list.map((id) => fetchPeople(id)),
-      ) as People[];
-      const _collectionDetails = await Promise.all(
+      )) as People[];
+      const _collectionDetails = (await Promise.all(
         data.collection_list.map((id) => fetchCollection(id)),
-      ) as Collection[];
-      const _userDetails = await Promise.all(
+      )) as Collection[];
+      const _userDetails = (await Promise.all(
         data.user_list.map((id) => fetchUser(id)),
-      ) as UserProfile[];
-      setSearchResults({movies: movieDetails, users: _userDetails, people: peopleDetails, collections: _collectionDetails});
-
+      )) as UserProfile[];
+      setSearchResults({
+        movies: movieDetails,
+        users: _userDetails,
+        people: peopleDetails,
+        collections: _collectionDetails,
+      });
     } catch (err) {
       setError((err as Error).message);
       console.error('Search error:', err);
