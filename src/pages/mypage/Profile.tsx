@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { Footerbar } from '../../components/Footerbar';
 import { type UserProfile } from '../../utils/Types';
 
 export const Profile = () => {
   const { user_id } = useParams();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [following, setFollowing] = useState(false);
 
@@ -105,7 +106,13 @@ export const Profile = () => {
             <p className="font-bold">{profile?.comment_count}</p>
             <p className="text-gray-500">코멘트</p>
           </div>
-          <div>
+          <div
+            onClick={() => {
+              if (user_id != null) {
+                void navigate(`/profile/${user_id}/collections`);
+              }
+            }}
+          >
             <p className="font-bold">{profile?.collection_count}</p>
             <p className="text-gray-500">컬렉션</p>
           </div>
