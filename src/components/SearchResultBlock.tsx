@@ -1,25 +1,14 @@
-import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import noProfile from '../assets/no_profile.svg';
 import NoResultSvg from '../assets/no_result.svg';
-import {
-  fetchCollection,
-  fetchMovie,
-  fetchPeople,
-  fetchUser,
-} from '../utils/Functions';
 import type {
-  Collection,
-  Movie,
-  People,
   SearchResult,
-  UserProfile,
 } from '../utils/Types';
 
 type Category = 'movie' | 'person' | 'collection' | 'user';
 
-interface SearchResultBlockProps {
+type SearchResultBlockProps = {
   searchResults: SearchResult;
   selectedCategory: Category;
   setSelectedCategory: (category: Category) => void;
@@ -31,52 +20,8 @@ export const SearchResultBlock = ({
   setSelectedCategory,
 }: SearchResultBlockProps) => {
   const [, setSearchParams] = useSearchParams();
-  const [movieDetails, setMovieDetails] = useState<Movie[]>([]);
-  const [peopleDetails, setPeopleDetails] = useState<People[]>([]);
-  const [collectionDetails, setCollectionDetails] = useState<Collection[]>([]);
-  const [userDetails, setUserDetails] = useState<UserProfile[]>([]);
-  const [error, setError] = useState<string | null>(null);
 
   const categories: Category[] = ['movie', 'person', 'collection', 'user'];
-  useEffect(() => {
-    const fetchSearchResults = async () => {
-      try {
-        const _movieDetails = await Promise.all(
-          searchResults.movie_list.map((id) => fetchMovie(id)),
-        );
-        setMovieDetails(
-          _movieDetails.filter((detail): detail is Movie => detail !== null),
-        );
-        const _peopleDetails = await Promise.all(
-          searchResults.participant_list.map((id) => fetchPeople(id)),
-        );
-        setPeopleDetails(
-          _peopleDetails.filter((detail): detail is People => detail !== null),
-        );
-        const _collectionDetails = await Promise.all(
-          searchResults.collection_list.map((id) => fetchCollection(id)),
-        );
-        setCollectionDetails(
-          _collectionDetails.filter(
-            (detail): detail is Collection => detail !== null,
-          ),
-        );
-        const _userDetails = await Promise.all(
-          searchResults.user_list.map((id) => fetchUser(id)),
-        );
-        console.debug(_userDetails);
-        setUserDetails(
-          _userDetails.filter(
-            (detail): detail is UserProfile => detail !== null,
-          ),
-        );
-      } catch (err) {
-        setError((err as Error).message);
-      }
-    };
-
-    void fetchSearchResults();
-  }, [searchResults]);
 
   const handleCategoryClick = (category: Category) => {
     setSelectedCategory(category);
@@ -87,14 +32,11 @@ export const SearchResultBlock = ({
   };
 
   const getCategoryContent = () => {
-    if (error != null) {
-      return <p className="text-red-500 mt-4">Error: {error}</p>;
-    }
 
-    if (selectedCategory === 'movie' && movieDetails.length > 0) {
+    if (selectedCategory === 'movie' && searchResults.movies.length > 0) {
       return (
         <ul className="mt-4">
-          {movieDetails.map((movie) => (
+          {searchResults.movies.map((movie) => (
             <li
               key={movie.id}
               className="border-b border-gray-200 last:border-b-0"
@@ -117,10 +59,10 @@ export const SearchResultBlock = ({
         </ul>
       );
     }
-    if (selectedCategory === 'person' && peopleDetails.length > 0) {
+    if (selectedCategory === 'person' && searchResults.people.length > 0) {
       return (
         <ul className="mt-4">
-          {peopleDetails.map((people) => (
+          {searchResults.people.map((people) => (
             <li
               key={people.id}
               className="border-b border-gray-200 last:border-b-0"
@@ -147,10 +89,10 @@ export const SearchResultBlock = ({
         </ul>
       );
     }
-    if (selectedCategory === 'collection' && collectionDetails.length > 0) {
+    if (selectedCategory === 'collection' && searchResults.collections.length > 0) {
       return (
         <ul className="mt-4">
-          {collectionDetails.map((collection) => (
+          {searchResults.collections.map((collection) => (
             <li
               key={collection.id}
               className="border-b border-gray-200 last:border-b-0"
@@ -168,10 +110,10 @@ export const SearchResultBlock = ({
         </ul>
       );
     }
-    if (selectedCategory === 'user' && userDetails.length > 0) {
+    if (selectedCategory === 'user' && searchResults.users.length > 0) {
       return (
         <ul className="mt-4">
-          {userDetails.map((user, index) => (
+          {searchResults.users.map((user, index) => (
             <li
               key={index}
               className="border-b border-gray-200 last:border-b-0"

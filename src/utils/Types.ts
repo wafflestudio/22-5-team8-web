@@ -65,11 +65,18 @@ export type PeopleMovieCreditResponse = {
   movies: PeopleMovieCredit[];
 };
 
-export type SearchResult = {
+export type SearchResultRaw = {
   movie_list: Array<number>;
   user_list: Array<number>;
   participant_list: Array<number>;
   collection_list: Array<number>;
+};
+
+export type SearchResult = {
+  movies: Movie[];
+  users: UserProfile[];
+  people: People[];
+  collections: Collection[];
 };
 
 export type Collection = {
