@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import NoResultSvg from '../../assets/no_result.svg';
 import { Footerbar } from '../../components/Footerbar';
@@ -46,7 +46,9 @@ export const Collections = () => {
     <div className="flex flex-col min-h-screen relative">
       <div className="flex-none fixed top-0 w-full z-10 flex justify-between items-center px-4 py-3 bg-white">
         <span className="text-2xl font-bold text-black">컬렉션</span>
-        <span className="text-sm text-[hotpink]">새 컬렉션</span>
+        <Link to={`/profile/${user_id ?? ''}/collections/new`}>
+          <span className="text-sm text-[hotpink]">새 컬렉션</span>
+        </Link>
       </div>
       <div className="flex-1 text-center px-4 py-2 pb-16 pt-16">
         {isLoading && <div>Loading...</div>}

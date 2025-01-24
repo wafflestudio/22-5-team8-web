@@ -5,6 +5,7 @@ import { Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './components/AuthContext';
 import { ReturnPathProvider } from './components/ReturnPathContext';
 import { Collections } from './pages/collection/Collections';
+import { NewCollection } from './pages/collection/NewCollection';
 import ReplyPage from './pages/CommentPage';
 import { Index } from './pages/Index';
 import { Login } from './pages/Login';
@@ -37,6 +38,10 @@ export const App = () => {
             <Route
               path="/profile/:user_id/collections"
               element={<Collections />}
+            />
+            <Route
+              path="/profile/:user_id/collections/new"
+              element={<NewCollection />}
             />
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/mypage/settings" element={<Settings />} />
