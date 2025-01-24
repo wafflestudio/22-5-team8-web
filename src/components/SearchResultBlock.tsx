@@ -133,7 +133,7 @@ export const SearchResultBlock = ({
                   src={
                     people.profile_url === null ? noProfile : people.profile_url
                   }
-                  className="w-16 h-16 object-cover rounded"
+                  className="w-16 h-16 object-cover rounded-full"
                 />
                 <div className="ml-4 flex flex-col justify-center">
                   <h3 className="text-sm">{people.name}</h3>
@@ -182,7 +182,7 @@ export const SearchResultBlock = ({
               >
                 <img
                   src={user.profile_url === null ? noProfile : user.profile_url}
-                  className="w-16 h-24 object-cover rounded"
+                  className="w-16 h-16 object-cover rounded-full"
                 />
                 <div className="ml-4 flex flex-col justify-center">
                   <h3 className="text-sm">{user.username}</h3>
