@@ -3,8 +3,10 @@ import { isMobile } from 'react-device-detect';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import back from '../assets/back.svg';
+import bookmark from '../assets/bookmark_gray.svg';
 import noProfile from '../assets/no_profile.svg';
 import notRecommend from '../assets/not_recommend.svg';
+import watching from '../assets/not_watching.svg';
 import replyIcon from '../assets/reply.svg';
 import share from '../assets/share.svg';
 import { Footerbar } from '../components/Footerbar';
@@ -48,6 +50,8 @@ const CommentPage = () => {
       alert('링크 복사에 실패했습니다.');
     }
   };
+
+  const handleRecommend = async () => {};
 
   useEffect(() => {
     fetchMovie(movieId)
@@ -123,12 +127,23 @@ const CommentPage = () => {
                 <div>
                   <h2 className="text-sm font-bold">{movie.title}</h2>
                   <p className="text-xs text-gray-500">시리즈 · {movie.year}</p>
-                  <p className="text-xs flex items-center mt-2">
-                    <span className="">★</span>
-                    <span className="ml-1 text-gray-600">
-                      {review.rating ?? '평가 전'}
-                    </span>
-                  </p>
+                  <div className="w-fit mt-2 text-sm bg-gray-100 rounded-full px-2 text-center">
+                    {review.rating !== null && review.rating !== 0 ? (
+                      `★ ${review.rating.toFixed(1)}`
+                    ) : review.status === '' ? (
+                      '평가 전'
+                    ) : review.status === 'Watching' ? (
+                      <div className="flex items-center justify-center">
+                        <img className="w-4 h-4 mr-1" src={watching}></img>
+                        {'보는 중'}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center">
+                        <img className="w-4 h-4 mr-1" src={bookmark}></img>
+                        {'보고싶어요'}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -165,7 +180,7 @@ const CommentPage = () => {
         </div>
         <div className="flex justify-between items-center px-16 border-y py-2">
           <button
-            onClick={() => void handleShare()}
+            onClick={() => void handleRecommend()}
             className="flex items-center text-gray-600"
           >
             <img src={notRecommend} alt="좋아요" className="w-5 h-5 mr-1" />

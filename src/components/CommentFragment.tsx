@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import bookmark from '../assets/bookmark_gray.svg';
 import comment from '../assets/comment.svg';
 import edit from '../assets/edit.svg';
 import noProfile from '../assets/no_profile.svg';
+import watching from '../assets/not_watching.svg';
 import recommend from '../assets/recommend.svg';
 import trash from '../assets/trash.svg';
 import NeedLoginPopup from '../pages/movie/NeedLoginPopup';
@@ -34,6 +36,16 @@ const CommnetFragment = ({
   const closeNeedLoginPopup = () => {
     setIsNeedLoginPopupOpen(false);
   };
+
+  useEffect(() => {
+    if (initialReview === null) {
+      return;
+    }
+
+    setReview(initialReview);
+    setLiked(initialReview.like);
+    //console.log(initialReview)
+  }, [initialReview]);
 
   useEffect(() => {
     const fetchReplyList = async () => {
@@ -202,8 +214,21 @@ const CommnetFragment = ({
             {review.user_name}
           </Link>
           <div className="ml-auto mr-2 text-sm bg-white rounded-full px-2 text-center">
-            &#9733;{' '}
-            {review.rating !== null ? review.rating.toFixed(1) : '평가 전'}
+            {review.rating !== null && review.rating !== 0 ? (
+              `★ ${review.rating.toFixed(1)}`
+            ) : review.status === '' ? (
+              '평가 전'
+            ) : review.status === 'Watching' ? (
+              <div className="flex items-center justify-center">
+                <img className="w-4 h-4 mr-1" src={watching}></img>
+                {'보는 중'}
+              </div>
+            ) : (
+              <div className="flex items-center justify-center">
+                <img className="w-4 h-4 mr-1" src={bookmark}></img>
+                {'보고싶어요'}
+              </div>
+            )}
           </div>
         </div>
         <hr className="my-1 bg-gray-300" />
@@ -240,7 +265,10 @@ const CommnetFragment = ({
           </div>
         </div>
         <hr className="my-1 bg-gray-300" />
-        <button className="text-hotPink" onClick={onClick}>
+        <button
+          className={`w-20 rounded ${liked ? 'text-white bg-hotPink' : 'text-hotPink'}`}
+          onClick={onClick}
+        >
           좋아요
         </button>
       </div>

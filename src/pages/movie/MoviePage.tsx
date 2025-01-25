@@ -54,6 +54,9 @@ export const MoviePage = () => {
     Review[] | null
   >(null);
   const [firstReview, setFirstReview] = useState<Review | null>(null);
+  const [loggedInFirstReview, setLoggedInFirstReview] = useState<Review | null>(
+    null,
+  );
   const [myReview, setMyReview] = useState<Review | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isCommentPopupOpen, setIsCommentPopupOpen] = useState(false);
@@ -113,6 +116,36 @@ export const MoviePage = () => {
           console.error(err);
         });
     }
+  }, [accessToken, id]);
+
+  useEffect(() => {
+    const fetchLoggedInFirstReview = async () => {
+      if (accessToken === null) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/reviews/list/${id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch first review');
+        }
+        const data = (await response.json()) as Review[];
+        const firstReviewData = data.find((review) => review.content !== '');
+        setLoggedInFirstReview(
+          firstReviewData === undefined ? null : firstReviewData,
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    void fetchLoggedInFirstReview();
   }, [accessToken, id]);
 
   if (movieData == null || !isLoaded) {
@@ -253,7 +286,12 @@ export const MoviePage = () => {
                 더보기
               </Link>
             </div>
-            <CommnetFragment initialReview={firstReview} viewMode="moviePage" />
+            <CommnetFragment
+              initialReview={
+                accessToken === null ? firstReview : loggedInFirstReview
+              }
+              viewMode="moviePage"
+            />
           </div>
         </div>
         <div className="flex-none fixed z-10 bottom-0 w-full">
