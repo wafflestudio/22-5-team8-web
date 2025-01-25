@@ -149,11 +149,13 @@ const CommnetFragment = ({
       <>
         <div className="py-2 px-4 rounded-lg">
           <div className="border rounded-lg p-4 bg-white flex flex-col items-center">
-            <img
-              src={noProfile}
-              alt="프로필"
-              className="w-16 h-16 bg-gray-200 rounded-full mb-2 flex items-center justify-center"
-            />
+            <Link to={`/profile/${review.user_id}`}>
+              <img
+                src={noProfile}
+                alt="프로필"
+                className="w-16 h-16 bg-gray-200 rounded-full mb-2 flex items-center justify-center"
+              />
+            </Link>
             <Link
               to={`/comments/${review.movie_id}/${review.id}`}
               className={`mb-2 text-ellipsis overflow-hidden line-clamp-3 whitespace-pre-line`}
@@ -187,11 +189,13 @@ const CommnetFragment = ({
     <>
       <div className={`flex flex-col rounded my-2 mx-4 p-2 bg-gray-100`}>
         <div className="flex items-center">
-          <img
-            src={noProfile}
-            alt="프로필"
-            className="w-10 h-10 rounded-full"
-          />
+          <Link to={`/profile/${review.user_id}`}>
+            <img
+              src={noProfile}
+              alt="프로필"
+              className="w-10 h-10 rounded-full"
+            />
+          </Link>
           <Link to={`/profile/${review.user_id}`} className="ml-2">
             {review.user_name}
           </Link>

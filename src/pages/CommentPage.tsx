@@ -7,6 +7,7 @@ import noProfile from '../assets/no_profile.svg';
 import notRecommend from '../assets/not_recommend.svg';
 import replyIcon from '../assets/reply.svg';
 import share from '../assets/share.svg';
+import { Footerbar } from '../components/Footerbar';
 import {
   fetchMovie,
   fetchReplyList,
@@ -95,7 +96,7 @@ const CommentPage = () => {
         </button>
         <h1 className="text-xl font-semibold">코멘트</h1>
       </div>
-      <div className="py-16 px-4 bg-gray-50 min-h-screen">
+      <div className="py-16 px-4 min-h-screen">
         <div className="pt-2 pb-2">
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
@@ -205,6 +206,9 @@ const CommentPage = () => {
             ))
           )}
         </div>
+      </div>
+      <div className="flex-none fixed z-10 bottom-0 w-full">
+        <Footerbar />
       </div>
       <NeedLoginPopup
         isOpen={isNeedLoginPopupOpen}
