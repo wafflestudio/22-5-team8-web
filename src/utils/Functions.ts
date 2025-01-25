@@ -88,7 +88,7 @@ export const fetchUser = async (userId: number) => {
 
 export const fetchUserReviews = async (accessToken: string) => {
   try {
-    const response = await fetch(`/api/reviews/list`, {
+    const response = await fetch(`/api/reviews/user`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

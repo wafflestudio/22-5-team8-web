@@ -6,9 +6,11 @@ import news from '../assets/news.svg';
 import search from '../assets/search.svg';
 import star from '../assets/star.svg';
 import { useAuth } from './AuthContext';
+import { useReturnPath } from './ReturnPathContext';
 
 export const Footerbar = () => {
   const { isLoggedIn, user_id } = useAuth();
+  const { setReturnPath } = useReturnPath();
 
   return (
     <div className="bg-white">
@@ -27,7 +29,12 @@ export const Footerbar = () => {
             </div>
           </Link>
           {!isLoggedIn && (
-            <Link to="/login">
+            <Link
+              to="/login"
+              onClick={() => {
+                setReturnPath(location.pathname);
+              }}
+            >
               <div className="flex flex-col items-center">
                 <img src={login} className="w-6 h-6 mb-1" />
                 <div className="text-xs">로그인</div>
