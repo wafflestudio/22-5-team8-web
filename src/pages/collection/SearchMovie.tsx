@@ -6,7 +6,7 @@ import type { Movie, SearchResultRaw } from '../../utils/Types';
 
 interface SearchMovieProps {
   onClose: () => void;
-  onSubmit: (selectedMovies: number[]) => void;
+  onSubmit?: (selectedMovies: number[]) => void; // optional로 변경
 }
 
 export const SearchMovie = ({ onClose, onSubmit }: SearchMovieProps) => {
@@ -58,7 +58,9 @@ export const SearchMovie = ({ onClose, onSubmit }: SearchMovieProps) => {
   };
 
   const handleSubmit = () => {
-    onSubmit(selectedMovies);
+    if (onSubmit != null) {
+      onSubmit(selectedMovies);
+    }
     onClose();
   };
 
@@ -168,24 +170,3 @@ export const SearchMovie = ({ onClose, onSubmit }: SearchMovieProps) => {
     </div>
   );
 };
-
-const App = () => {
-  const [isSearchMovieVisible, setIsSearchMovieVisible] = useState(false);
-
-  const handleOpenSearchMovie = () => {
-    setIsSearchMovieVisible(true);
-  };
-
-  const handleCloseSearchMovie = () => {
-    setIsSearchMovieVisible(false);
-  };
-
-  return (
-    <div>
-      <button onClick={handleOpenSearchMovie}>작품 추가</button>
-      {isSearchMovieVisible && <SearchMovie onClose={handleCloseSearchMovie} />}
-    </div>
-  );
-};
-
-export default App;
