@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { FaCog } from 'react-icons/fa'; //
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { Footerbar } from '../../components/Footerbar';
 import { type UserProfile } from '../../utils/Types';
@@ -28,7 +29,7 @@ export const Profile = () => {
     };
 
     void fetchProfile();
-  }, [user_id, profile]);
+  }, [user_id]);
 
   // Handle follow/unfollow button click
   const toggleFollow = async () => {
@@ -80,6 +81,11 @@ export const Profile = () => {
               {<h1 className="text-xl font-bold">{profile?.status_message}</h1>}
             </div>
           </div>
+          <Link to="/mypage/settings">
+            <button className="absolute top-3 right-3 text-gray-600 hover:text-gray-800">
+              <FaCog className="w-6 h-6" />
+            </button>
+          </Link>
           {/* Follow Button */}
           <div className="w-full mt-3">
             <button
