@@ -21,7 +21,7 @@ const CommentList = () => {
   useEffect(() => {
     const fetchCommentList = async () => {
       try {
-        const response = await fetch(`/api/reviews/${id}`);
+        const response = await fetch(`/api/reviews/movie/${id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch comment list');
         }

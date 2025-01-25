@@ -44,7 +44,7 @@ const CommnetFragment = ({
       if (review.spoiler) setShowContent(false);
 
       try {
-        const response = await fetch(`/api/comments/${review.id}`);
+        const response = await fetch(`/api/comments/review/${review.id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch reply list');
         }
@@ -65,7 +65,9 @@ const CommnetFragment = ({
       }
 
       try {
-        const response = await fetch(`/api/reviews/${initialReview.movie_id}`);
+        const response = await fetch(
+          `/api/reviews/movie/${initialReview.movie_id}`,
+        );
         if (!response.ok) {
           throw new Error('Failed to fetch review');
         }

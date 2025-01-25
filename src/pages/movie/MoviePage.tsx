@@ -64,7 +64,7 @@ export const MoviePage = () => {
         setIsLoaded(false);
         const [movieResponse, reviewResponse] = await Promise.all([
           fetch(`/api/movies/${id}`),
-          fetch(`/api/reviews/${id}`),
+          fetch(`/api/reviews/movie/${id}`),
         ]);
         if (!movieResponse.ok) {
           throw new Error('Failed to fetch movie data');

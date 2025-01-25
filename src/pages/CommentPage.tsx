@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import back from '../assets/back.svg';
 import noProfile from '../assets/no_profile.svg';
@@ -59,10 +59,10 @@ const CommentPage = () => {
         console.error(err);
       });
 
-    fetchReviewWithId(movieId, commentId)
+    fetchReviewWithId(commentId)
       .then((data) => {
-        setReview(data === undefined ? null : data);
-        if (data !== undefined && data !== null) {
+        setReview(data);
+        if (data !== null) {
           setShowContent(!data.spoiler);
         }
         //console.log(data);
@@ -102,15 +102,17 @@ const CommentPage = () => {
             <div className="flex flex-col">
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-start">
-                  <img
-                    src={
-                      review.profile_url === null
-                        ? noProfile
-                        : review.profile_url
-                    }
-                    alt={review.user_name}
-                    className="w-10 h-10 rounded-full mr-2"
-                  />
+                  <Link to={`/profile/${review.user_id}`}>
+                    <img
+                      src={
+                        review.profile_url === null
+                          ? noProfile
+                          : review.profile_url
+                      }
+                      alt={review.user_name}
+                      className="w-10 h-10 rounded-full mr-2"
+                    />
+                  </Link>
                   <div>
                     <p className="text-sm">{review.user_name}</p>
                     <p className="text-xs text-gray-500">{review.created_at}</p>
@@ -130,11 +132,13 @@ const CommentPage = () => {
                 </div>
               </div>
             </div>
-            <img
-              src={movie.poster_url}
-              alt={movie.title}
-              className="w-20 h-28 object-cover rounded mr-0 mt-0 mb-auto"
-            />
+            <Link to={`/movies/${movieId}`}>
+              <img
+                src={movie.poster_url}
+                alt={movie.title}
+                className="w-20 h-28 object-cover rounded mr-0 mt-0 mb-auto"
+              />
+            </Link>
           </div>
           <div className="text-gray-800 mb-10">
             {showContent ? (
@@ -180,8 +184,8 @@ const CommentPage = () => {
           </button>
         </div>
         <div>
-          {replyList === null ? (
-            <div>댓글이 없습니다.</div>
+          {replyList === null || replyList.length === 0 ? (
+            <div className="py-2 text-sm">댓글이 없습니다.</div>
           ) : (
             replyList.map((reply) => (
               <div key={reply.id} className="flex items-start border-b py-4">
