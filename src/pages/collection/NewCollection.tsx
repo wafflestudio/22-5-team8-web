@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
@@ -7,6 +8,7 @@ import type { Collection, Movie } from '../../utils/Types';
 import { SearchMovie } from './SearchMovie';
 
 export const NewCollection = () => {
+  const navigate = useNavigate();
   const { accessToken } = useContext(AuthContext);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -81,7 +83,7 @@ export const NewCollection = () => {
       }
 
       const data = (await response.json()) as Collection;
-      console.debug(data); //todo: collection 페이지로 이동
+      void navigate(`/collections/${data.id}`);
     } catch (err) {
       setError((err as Error).message);
       console.error('Collection creation error:', err);

@@ -4,6 +4,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import { AuthProvider } from './components/AuthContext';
 import { ReturnPathProvider } from './components/ReturnPathContext';
+import CollectionPage from './pages/collection/CollectionPage';
 import { Collections } from './pages/collection/Collections';
 import { NewCollection } from './pages/collection/NewCollection';
 import ReplyPage from './pages/CommentPage';
@@ -52,6 +53,10 @@ export const App = () => {
               element={<ReplyPage />}
             />
             <Route path="/search" element={<Search />} />
+            <Route
+              path="collections/:collectionId"
+              element={<CollectionPage />}
+            />
           </Routes>
         </AuthProvider>
       </ReturnPathProvider>

@@ -19,7 +19,6 @@ export const SearchMovie = ({ onClose, onSubmit }: SearchMovieProps) => {
     setError(null);
     setIsLoading(true);
     try {
-      console.debug(searchText);
       const response = await fetch(`/api/search?search_q=${searchText}`, {
         method: 'GET',
         headers: {
@@ -35,7 +34,6 @@ export const SearchMovie = ({ onClose, onSubmit }: SearchMovieProps) => {
       const movieDetails = (await Promise.all(
         data.movie_list.map((id) => fetchMovie(id)),
       )) as Movie[];
-      console.debug(movieDetails);
       setSearchResults(movieDetails);
     } catch (err) {
       setError((err as Error).message);
@@ -46,20 +44,17 @@ export const SearchMovie = ({ onClose, onSubmit }: SearchMovieProps) => {
   };
 
   const handleSearch = () => {
-    console.debug(searchText);
     if (searchText.trim().length > 0) {
       void performSearch();
     }
   };
 
   const handleMovieToggle = (movieId: number) => {
-    console.debug(selectedMovies);
     setSelectedMovies((prev) =>
       prev.includes(movieId)
         ? prev.filter((id) => id !== movieId)
         : [...prev, movieId],
     );
-    console.debug(selectedMovies);
   };
 
   const handleSubmit = () => {
