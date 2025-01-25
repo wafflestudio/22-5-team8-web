@@ -92,6 +92,7 @@ export type Collection = {
   comments_count: number;
   created_at: string;
   movies: Movie[];
+  user_profile: UserProfile;
 };
 
 export type UserProfile = {

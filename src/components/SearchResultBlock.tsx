@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import noProfile from '../assets/no_profile.svg';
 import NoResultSvg from '../assets/no_result.svg';
 import type { SearchResult } from '../utils/Types';
+import CollectionBlock from './CollectionBlock';
 
 type Category = 'movie' | 'person' | 'collection' | 'user';
 
@@ -93,19 +94,7 @@ export const SearchResultBlock = ({
       return (
         <ul className="mt-4">
           {searchResults.collections.map((collection) => (
-            <li
-              key={collection.id}
-              className="border-b border-gray-200 last:border-b-0"
-            >
-              <a
-                href={`/collection/${collection.id}`}
-                className="flex py-4 hover:bg-gray-50 transition-colors cursor-pointer"
-              >
-                <div className="ml-4 flex flex-col justify-center">
-                  <h3 className="text-sm">{collection.title}</h3>
-                </div>
-              </a>
-            </li>
+            <CollectionBlock key={collection.id} collection={collection} />
           ))}
         </ul>
       );

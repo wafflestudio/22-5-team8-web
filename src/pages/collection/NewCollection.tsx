@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
+import { AuthContext } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
 import { fetchMovie } from '../../utils/Functions';
-import type { Movie } from '../../utils/Types';
+import type { Collection, Movie } from '../../utils/Types';
 import { SearchMovie } from './SearchMovie';
 
 export const NewCollection = () => {
+  const { accessToken } = useContext(AuthContext);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -13,6 +15,8 @@ export const NewCollection = () => {
   const [tempMovies, setTempMovies] = useState<number[]>([]);
   const [movieDetails, setMovieDetails] = useState<Movie[]>([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleMoviesSubmit = (movies: number[]) => {
     setSelectedMovies((prev) => {
@@ -53,6 +57,39 @@ export const NewCollection = () => {
     setTempMovies(tempMovies.filter((id) => id !== movieId));
   };
 
+  const createCollection = async () => {
+    if (title.length === 0 || isEditing || isLoading) return;
+
+    setError(null);
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/collections`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken ?? ''}`,
+        },
+        body: JSON.stringify({
+          title,
+          overview: description,
+          movie_ids: movieDetails.map((movie) => movie.id),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create collection');
+      }
+
+      const data = (await response.json()) as Collection;
+      console.debug(data); //todo: collection 페이지로 이동
+    } catch (err) {
+      setError((err as Error).message);
+      console.error('Collection creation error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   /* 내 id가 아니면 이 페이지에 못 들어오게 막을 거긴 하지만 그래도 주소 같은 걸 치고 들어왔다면 접근할 수 없다는 뭐 그런 걸 해야 됨 */
   /* NewCollection에 이미 추가된 영화는 SearchMovies에서 선택 못하게 해야 함 */
   return (
@@ -62,12 +99,25 @@ export const NewCollection = () => {
       </div>
       <div className="flex-grow pt-16 pb-20 px-4">
         <div className="flex justify-end mb-2">
-          <button className="px-3 py-1 border border-gray-300 rounded text-gray-500 text-sm">
-            만들기
+          <button
+            onClick={() => {
+              void createCollection();
+            }}
+            disabled={title.length === 0 || isEditing || isLoading}
+            className={`px-3 py-1 border border-gray-300 rounded text-sm ${
+              title.length > 0 && !isEditing && !isLoading
+                ? 'text-hotPink'
+                : 'text-gray-500'
+            }`}
+          >
+            {isLoading ? '생성 중...' : '만들기'}
           </button>
         </div>
 
         <div className="space-y-4">
+          {error !== null && (
+            <div className="mt-2 text-red-500 text-center">{error}</div>
+          )}
           <div className="relative">
             <input
               type="text"
