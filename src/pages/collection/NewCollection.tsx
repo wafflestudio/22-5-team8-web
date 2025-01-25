@@ -10,7 +10,9 @@ export const NewCollection = () => {
   const [description, setDescription] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [selectedMovies, setSelectedMovies] = useState<number[]>([]);
+  const [tempMovies, setTempMovies] = useState<number[]>([]);
   const [movieDetails, setMovieDetails] = useState<Movie[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
 
   const handleMoviesSubmit = (movies: number[]) => {
     setSelectedMovies((prev) => {
@@ -21,16 +23,35 @@ export const NewCollection = () => {
 
   useEffect(() => {
     const getMovieDetails = async () => {
+      const moviesToFetch = isEditing ? tempMovies : selectedMovies;
       const details = await Promise.all(
-        selectedMovies.map((id) => fetchMovie(id)),
+        moviesToFetch.map((id) => fetchMovie(id)),
       );
       setMovieDetails(details as Movie[]);
     };
 
-    if (selectedMovies.length > 0) {
-      void getMovieDetails();
-    }
-  }, [selectedMovies]);
+    void getMovieDetails();
+  }, [selectedMovies, tempMovies, isEditing]);
+
+  const handleEditStart = () => {
+    setTempMovies([...selectedMovies]);
+    setIsEditing(true);
+  };
+
+  const handleEditCancel = () => {
+    setTempMovies([]);
+    setIsEditing(false);
+  };
+
+  const handleEditConfirm = () => {
+    setSelectedMovies([...tempMovies]);
+    setTempMovies([]);
+    setIsEditing(false);
+  };
+
+  const handleRemoveMovie = (movieId: number) => {
+    setTempMovies(tempMovies.filter((id) => id !== movieId));
+  };
 
   /* 내 id가 아니면 이 페이지에 못 들어오게 막을 거긴 하지만 그래도 주소 같은 걸 치고 들어왔다면 접근할 수 없다는 뭐 그런 걸 해야 됨 */
   /* NewCollection에 이미 추가된 영화는 SearchMovies에서 선택 못하게 해야 함 */
@@ -47,35 +68,82 @@ export const NewCollection = () => {
         </div>
 
         <div className="space-y-4">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-            }}
-            placeholder="컬렉션 제목"
-            className="w-full p-2 border-b border-gray-300 focus:outline-none"
-          />
+          <div className="relative">
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+              }}
+              placeholder="컬렉션 제목"
+              className="w-full p-2 border-none focus:ring-0"
+            />
+            <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gray-300"></div>
+          </div>
 
-          <textarea
-            value={description}
-            onChange={(e) => {
-              setDescription(e.target.value);
-            }}
-            placeholder="컬렉션 설명"
-            rows={6}
-            className="w-full p-2 border-b border-gray-300 focus:outline-none"
-          />
+          <div className="relative">
+            <textarea
+              value={description}
+              onChange={(e) => {
+                setDescription(e.target.value);
+              }}
+              placeholder="컬렉션 설명"
+              rows={6}
+              className="w-full p-2 border-none focus:ring-0"
+            />
+            <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gray-300"></div>
+          </div>
 
           <div className="mt-6">
-            <h2 className="text-black font-bold mb-2 text-lg">작품들</h2>
+            <div className="text-black mb-2 text-lg flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="font-bold">작품들</div>
+                <div className="ml-2 text-sm text-gray-400 font-medium">
+                  ({selectedMovies.length}/1000)
+                </div>
+              </div>
+              {selectedMovies.length > 0 && (
+                <div className="flex gap-4">
+                  {isEditing ? (
+                    <>
+                      <button
+                        className="text-sm text-hotPink"
+                        onClick={handleEditCancel}
+                      >
+                        취소
+                      </button>
+                      <button
+                        className={`text-sm ${
+                          selectedMovies.length - tempMovies.length > 0
+                            ? 'text-hotPink'
+                            : 'text-gray-400'
+                        }`}
+                        onClick={handleEditConfirm}
+                      >
+                        {selectedMovies.length - tempMovies.length}개 제거
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      className="text-sm text-hotPink"
+                      onClick={handleEditStart}
+                    >
+                      수정하기
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="flex flex-col gap-1">
                 <button
                   className="relative w-full작 pb-[150%] bg-gray-100"
                   onClick={() => {
-                    setShowSearch(true);
+                    if (!isEditing) {
+                      setShowSearch(true);
+                    }
                   }}
+                  disabled={isEditing}
                 >
                   <div className="absolute inset-0 border-2 border-gray-200 rounded-lg flex flex-col items-center justify-center">
                     <div className="text-7xl font-light text-gray-300">+</div>
@@ -86,6 +154,25 @@ export const NewCollection = () => {
               {movieDetails.map((movie) => (
                 <div key={movie.id} className="flex flex-col gap-1">
                   <div className="relative w-full pb-[150%]">
+                    {isEditing && (
+                      <button
+                        className="absolute left-2 top-2 z-10 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center"
+                        onClick={() => {
+                          handleRemoveMovie(movie.id);
+                        }}
+                      >
+                        <svg width="12" height="2" viewBox="0 0 12 2">
+                          <line
+                            x1="0"
+                            y1="1"
+                            x2="12"
+                            y2="1"
+                            stroke="white"
+                            strokeWidth="2"
+                          />
+                        </svg>
+                      </button>
+                    )}
                     <img
                       src={movie.poster_url}
                       alt={movie.title}
