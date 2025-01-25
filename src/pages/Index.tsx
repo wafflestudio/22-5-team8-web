@@ -19,11 +19,11 @@ export const Index = () => {
         </div>
         <div className="mt-2 mb-2">
           <h1 className="text-xl font-bold">박스오피스 순위</h1>
-          <MovieScroller chart_type="netflix" />
+          <MovieScroller chart_type="box_office" />
         </div>
         <div className="mt-2 mb-2">
           <h1 className="text-xl font-bold">넷플릭스 순위</h1>
-          <MovieScroller chart_type="box_office" />
+          <MovieScroller chart_type="netflix" />
         </div>
       </div>
       <div className="flex-none fixed bottom-0 w-full z-10">

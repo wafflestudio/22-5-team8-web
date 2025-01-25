@@ -4,6 +4,9 @@ import { Route, Routes } from 'react-router-dom';
 
 import { AuthProvider } from './components/AuthContext';
 import { ReturnPathProvider } from './components/ReturnPathContext';
+import CollectionPage from './pages/collection/CollectionPage';
+import { Collections } from './pages/collection/Collections';
+import { NewCollection } from './pages/collection/NewCollection';
 import ReplyPage from './pages/CommentPage';
 import { Index } from './pages/Index';
 import { Login } from './pages/Login';
@@ -33,6 +36,14 @@ export const App = () => {
             <Route path="/rating" element={<Rating />} />
             <Route path="/news" element={<News />} />
             <Route path="/profile/:user_id" element={<Profile />} />
+            <Route
+              path="/profile/:user_id/collections"
+              element={<Collections />}
+            />
+            <Route
+              path="/profile/:user_id/collections/new"
+              element={<NewCollection />}
+            />
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/mypage/settings" element={<Settings />} />
             <Route path="/movies/:movieId/comments" element={<CommentList />} />
@@ -42,6 +53,10 @@ export const App = () => {
               element={<ReplyPage />}
             />
             <Route path="/search" element={<Search />} />
+            <Route
+              path="collections/:collectionId"
+              element={<CollectionPage />}
+            />
           </Routes>
         </AuthProvider>
       </ReturnPathProvider>
