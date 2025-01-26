@@ -6,7 +6,7 @@ import type { Movie, SearchResultRaw } from '../../utils/Types';
 
 interface SearchMovieProps {
   onClose: () => void;
-  onSubmit?: (selectedMovies: number[]) => void; // optional로 변경
+  onSubmit?: (selectedMovies: number[]) => void;
 }
 
 export const SearchMovie = ({ onClose, onSubmit }: SearchMovieProps) => {
@@ -144,6 +144,7 @@ export const SearchMovie = ({ onClose, onSubmit }: SearchMovieProps) => {
                       <input
                         type="checkbox"
                         checked={selectedMovies.includes(movie.id)}
+                        readOnly
                         className="w-5 h-5 rounded-full appearance-none border-2 border-gray-300 bg-white transition-colors checked:bg-hotPink checked:border-hotPink pointer-events-none"
                       />
                     </div>

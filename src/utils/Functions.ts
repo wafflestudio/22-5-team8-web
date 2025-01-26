@@ -245,3 +245,37 @@ export const deleteReview = async (
     console.error(err);
   }
 };
+
+export const patchCollection = async (
+  collection_id: number,
+  title: string,
+  overview: string | null,
+  add_movie_ids: number[],
+  delete_movie_ids: number[],
+  accessToken: string,
+) => {
+  try {
+    const response = await fetch(`/api/collections/${collection_id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        title,
+        overview,
+        add_movie_ids,
+        delete_movie_ids,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update collection');
+    }
+
+    return (await response.json()) as string;
+  } catch (err) {
+    console.error('Collection update error:', err);
+    return null;
+  }
+};

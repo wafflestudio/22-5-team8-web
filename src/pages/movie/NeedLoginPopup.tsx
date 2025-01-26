@@ -26,7 +26,7 @@ const NeedLoginPopup = ({ isOpen, onClose }: NeedLoginPopupProps) => {
 
   return (
     <div className="flex flex-col fixed inset-0 z-50 w-100 h-100 bg-white color-hotPink">
-      <div className="p-4">
+      <div className="p-4 flex flex-col h-full">
         <svg
           className="cursor-pointer"
           onClick={onClose}
@@ -44,17 +44,17 @@ const NeedLoginPopup = ({ isOpen, onClose }: NeedLoginPopupProps) => {
             clipRule="evenodd"
           />
         </svg>
-        <div className="py-60 px-5 flex flex-col justify-center items-center">
+        <div className="flex-1 px-5 flex flex-col justify-center items-center">
           <div className="flex gap-1">
             <h1 className="text-4xl font-bold text-hotPink">WATCHA</h1>
             <h1 className="text-4xl font-bold text-gray-700">PEDIA</h1>
           </div>
-          <h2 className="pt-20 font-semibold text-center text-gray-700 whitespace-pre-line">
+          <h2 className="pt-10 font-semibold text-center text-gray-700 whitespace-pre-line">
             {`회원가입 혹은 로그인이 필요한 기능이에요.
             왓챠피디아를 더 편하게 이용해 보세요.`}
           </h2>
         </div>
-        <div className="flex flex-col gap-y-5 justify-center items-center">
+        <div className="px-4 pb-8 flex flex-col gap-y-5 justify-center items-center">
           <Link
             to="/signup"
             className="text-white bg-hotPink rounded w-full h-12 flex justify-center items-center"
