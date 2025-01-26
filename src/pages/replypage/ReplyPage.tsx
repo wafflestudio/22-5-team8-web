@@ -2,40 +2,45 @@ import { useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-import back from '../assets/back.svg';
-import bookmark from '../assets/bookmark_gray.svg';
-import noProfile from '../assets/no_profile.svg';
-import notRecommend from '../assets/not_recommend.svg';
-import watching from '../assets/not_watching.svg';
-import replyIcon from '../assets/reply.svg';
-import share from '../assets/share.svg';
-import { Footerbar } from '../components/Footerbar';
+import back from '../../assets/back.svg';
+import bookmark from '../../assets/bookmark_gray.svg';
+import noProfile from '../../assets/no_profile.svg';
+import notRecommend from '../../assets/not_recommend.svg';
+import watching from '../../assets/not_watching.svg';
+import replyIcon from '../../assets/reply.svg';
+import share from '../../assets/share.svg';
+import { useAuth } from '../../components/AuthContext';
+import { Footerbar } from '../../components/Footerbar';
 import {
   fetchMovie,
   fetchReplyList,
   fetchReviewWithId,
-} from '../utils/Functions';
-import type { Movie, Reply, Review } from '../utils/Types';
-import NeedLoginPopup from './movie/NeedLoginPopup';
+} from '../../utils/Functions';
+import type { Movie, Reply, Review } from '../../utils/Types';
+import NeedLoginPopup from '../movie/NeedLoginPopup';
+import ReplyFragment from './ReplyFragment';
+import ReplyPopup from './ReplyPopup';
 
 const CommentPage = () => {
-  const { movieId: movieIdString, commentId: commentIdString } = useParams();
+  const { movieId: movieIdString, commentId: reviewIdString } = useParams();
   const navigate = useNavigate();
   const movieId: number = parseInt(movieIdString == null ? '0' : movieIdString);
-  const commentId: number = parseInt(
-    commentIdString == null ? '0' : commentIdString,
+  const reviewId: number = parseInt(
+    reviewIdString == null ? '0' : reviewIdString,
   );
+  const { accessToken } = useAuth();
 
   const [movie, setMovie] = useState<Movie | null>(null);
   const [review, setReview] = useState<Review | null>(null);
   const [replyList, setReplyList] = useState<Reply[] | null>(null);
+  const [loggedInReplyList, setLoggedInReplyList] = useState<Reply[] | null>(
+    null,
+  );
   const [showContent, setShowContent] = useState<boolean>(true);
   const [isNeedLoginPopupOpen, setIsNeedLoginPopupOpen] =
     useState<boolean>(false);
-
-  const closeNeedLoginPopup = () => {
-    setIsNeedLoginPopupOpen(false);
-  };
+  const [isReplyPopupOpen, setIsReplyPopupOpen] = useState<boolean>(false);
+  const [isLike, setIsLike] = useState<boolean>(false);
 
   const handleBack = () => {
     void navigate(-1);
@@ -51,7 +56,90 @@ const CommentPage = () => {
     }
   };
 
-  const handleRecommend = async () => {};
+  const handleRecommend = () => {
+    if (accessToken === null) {
+      setIsNeedLoginPopupOpen(true);
+      return;
+    }
+
+    const updateLike = async () => {
+      try {
+        const response = await fetch(`/api/reviews/like/${reviewId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update like');
+        }
+        setIsLike(!isLike);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    void updateLike();
+  };
+
+  const handleReply = () => {
+    if (accessToken === null) {
+      setIsNeedLoginPopupOpen(true);
+      return;
+    }
+
+    setIsReplyPopupOpen(true);
+  };
+
+  useEffect(() => {
+    if (accessToken === null) {
+      return;
+    }
+
+    const fetchLoggedInReview = async () => {
+      try {
+        const response = await fetch(`/api/reviews/list/${movieId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch first review');
+        }
+        const data = (await response.json()) as Review[];
+        const reviewData = data.find((r) => r.id === reviewId);
+        setIsLike(reviewData?.like ?? false);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    const fetchLoggedInReplyList = async () => {
+      try {
+        const response = await fetch(`/api/comments/list/${reviewId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch reply list');
+        }
+        const data = (await response.json()) as Reply[];
+        setLoggedInReplyList(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    void fetchLoggedInReview();
+    void fetchLoggedInReplyList();
+  }, [accessToken, reviewId, movieId]);
 
   useEffect(() => {
     fetchMovie(movieId)
@@ -63,7 +151,7 @@ const CommentPage = () => {
         console.error(err);
       });
 
-    fetchReviewWithId(commentId)
+    fetchReviewWithId(reviewId)
       .then((data) => {
         setReview(data);
         if (data !== null) {
@@ -75,7 +163,7 @@ const CommentPage = () => {
         console.error(err);
       });
 
-    fetchReplyList(commentId)
+    fetchReplyList(reviewId)
       .then((data) => {
         setReplyList(data);
         //console.log(data);
@@ -83,7 +171,7 @@ const CommentPage = () => {
       .catch((err: unknown) => {
         console.error(err);
       });
-  }, [movieId, commentId]);
+  }, [movieId, reviewId, isLike]);
 
   if (review === null || movie === null) {
     return <div>데이터를 불러오는 중입니다.</div>;
@@ -119,7 +207,12 @@ const CommentPage = () => {
                   </Link>
                   <div>
                     <p className="text-sm">{review.user_name}</p>
-                    <p className="text-xs text-gray-500">{review.created_at}</p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(
+                        new Date(review.created_at).getTime() +
+                          9 * 60 * 60 * 1000,
+                      ).toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -180,13 +273,21 @@ const CommentPage = () => {
         </div>
         <div className="flex justify-between items-center px-16 border-y py-2">
           <button
-            onClick={() => void handleRecommend()}
+            onClick={() => {
+              handleRecommend();
+            }}
             className="flex items-center text-gray-600"
           >
-            <img src={notRecommend} alt="좋아요" className="w-5 h-5 mr-1" />
+            {isLike ? (
+              <Recommend className="w-5 h-5 mr-1" />
+            ) : (
+              <img src={notRecommend} alt="좋아요" className="w-5 h-5 mr-1" />
+            )}
           </button>
           <button
-            onClick={() => {}}
+            onClick={() => {
+              handleReply();
+            }}
             className="flex items-center text-gray-600"
           >
             <img src={replyIcon} alt="댓글" className="w-5 h-5 mr-1" />
@@ -202,25 +303,12 @@ const CommentPage = () => {
           {replyList === null || replyList.length === 0 ? (
             <div className="py-2 text-sm">댓글이 없습니다.</div>
           ) : (
-            replyList.map((reply) => (
-              <div key={reply.id} className="flex items-start border-b py-4">
-                <img
-                  src={
-                    reply.profile_url === null ? noProfile : reply.profile_url
-                  }
-                  alt={reply.user_name}
-                  className="w-8 h-8 rounded-full mr-4"
-                />
-                <div className="flex-1">
-                  <div className="flex justify-between">
-                    <p className="font-bold text-sm">{reply.user_name}</p>
-                    <p className="text-xs text-gray-500">{reply.created_at}</p>
-                  </div>
-                  <p className="text-sm text-gray-800 mt-2">{reply.content}</p>
-                  <div className="text-xs text-gray-500 mt-2">
-                    좋아요 {reply.likes_count}
-                  </div>
-                </div>
+            (accessToken === null || loggedInReplyList === null
+              ? replyList
+              : loggedInReplyList
+            ).map((reply) => (
+              <div key={reply.id}>
+                <ReplyFragment reply={reply} />
               </div>
             ))
           )}
@@ -231,9 +319,39 @@ const CommentPage = () => {
       </div>
       <NeedLoginPopup
         isOpen={isNeedLoginPopupOpen}
-        onClose={closeNeedLoginPopup}
+        onClose={() => {
+          setIsNeedLoginPopupOpen(false);
+        }}
+      />
+      <ReplyPopup
+        isOpen={isReplyPopupOpen}
+        onClose={() => {
+          setIsReplyPopupOpen(false);
+          window.location.reload();
+        }}
+        review={review}
+        onReplyUpdate={() => {}}
       />
     </div>
+  );
+};
+
+const Recommend = (props: React.SVGProps<SVGSVGElement>) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      fill="#FF2F6E"
+      viewBox="0 0 24 24"
+      className={props.className}
+    >
+      <rect width="4" height="11" x="2" y="10" fill="#FF2F6E" rx="0.75"></rect>
+      <path
+        fill="#FF2F6E"
+        d="M7.5 9.31a.75.75 0 0 1 .22-.53l5.75-5.75a.75.75 0 0 1 1.06 0l.679.679a.75.75 0 0 1 .202.693L14.5 8.5h6.75a.75.75 0 0 1 .75.75v3.018a6 6 0 0 1-.485 2.364l-2.32 5.413a.75.75 0 0 1-.69.455H8.25a.75.75 0 0 1-.75-.75z"
+      ></path>
+    </svg>
   );
 };
 

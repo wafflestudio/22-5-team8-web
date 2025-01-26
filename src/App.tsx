@@ -7,7 +7,6 @@ import { ReturnPathProvider } from './components/ReturnPathContext';
 import CollectionPage from './pages/collection/CollectionPage';
 import { Collections } from './pages/collection/Collections';
 import { NewCollection } from './pages/collection/NewCollection';
-import ReplyPage from './pages/CommentPage';
 import { Index } from './pages/Index';
 import { Login } from './pages/Login';
 import CommentList from './pages/movie/CommentList';
@@ -19,6 +18,7 @@ import { Settings } from './pages/mypage/Settings';
 import { News } from './pages/News';
 import PeoplePage from './pages/PeoplePage';
 import { Rating } from './pages/Rating';
+import ReplyPage from './pages/replypage/ReplyPage';
 import { Search } from './pages/Search';
 import { Signup } from './pages/Signup';
 

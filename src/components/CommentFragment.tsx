@@ -12,6 +12,7 @@ import NeedLoginPopup from '../pages/movie/NeedLoginPopup';
 import { deleteReview, newReview } from '../utils/Functions';
 import type { Reply, Review } from '../utils/Types';
 import { useAuth } from './AuthContext';
+import { Modal } from './Modal';
 
 type CommnetFragmentProps = {
   viewMode: 'moviePage' | 'commentPage' | 'myComment';
@@ -27,6 +28,7 @@ const CommnetFragment = ({
   const [review, setReview] = useState<Review | null>(initialReview);
   const [isNeedLoginPopupOpen, setIsNeedLoginPopupOpen] =
     useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [replyList, setReplyList] = useState<Reply[] | null>(null);
   const [showContent, setShowContent] = useState<boolean>(true);
   const [liked, setLiked] = useState<boolean>(false);
@@ -71,7 +73,7 @@ const CommnetFragment = ({
   }, [review]);
 
   useEffect(() => {
-    const updateReview = async () => {
+    const updateInitialReview = async () => {
       if (initialReview === null) {
         return;
       }
@@ -92,7 +94,7 @@ const CommnetFragment = ({
       }
     };
 
-    void updateReview();
+    void updateInitialReview();
   }, [liked, initialReview]);
 
   if (review === null) {
@@ -131,6 +133,15 @@ const CommnetFragment = ({
     void updateLike();
   };
 
+  const onClickDelete = () => {
+    if (accessToken === null) {
+      setIsNeedLoginPopupOpen(true);
+      return;
+    }
+
+    setIsModalOpen(true);
+  };
+
   const handleDelete = async () => {
     if (accessToken === null) {
       setIsNeedLoginPopupOpen(true);
@@ -148,6 +159,7 @@ const CommnetFragment = ({
         review.status,
         () => {},
       );
+      setIsModalOpen(false);
       window.location.reload();
     } catch (err) {
       console.error(err);
@@ -178,7 +190,7 @@ const CommnetFragment = ({
             </Link>
             <div className="flex items-center mb-1 space-x-4 scale-90">
               <button
-                onClick={void handleDelete}
+                onClick={onClickDelete}
                 className="flex items-center text-gray-600"
               >
                 <img src={trash} alt="삭제" className="w-5 h-5 mr-1" />
@@ -195,6 +207,17 @@ const CommnetFragment = ({
             </div>
           </div>
         </div>
+        <Modal
+          isOpen={isModalOpen}
+          title="알림"
+          message="댓글을 삭제하시겠어요?"
+          onConfirm={() => {
+            void handleDelete();
+          }}
+          onCancel={() => {
+            setIsModalOpen(false);
+          }}
+        />
       </>
     );
   }

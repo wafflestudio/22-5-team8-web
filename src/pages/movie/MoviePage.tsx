@@ -15,7 +15,7 @@ import StarRating from './StarRating';
 export const MoviePage = () => {
   const { movieId } = useParams();
   const id: number = parseInt(movieId == null ? '0' : movieId);
-  const { accessToken } = useAuth();
+  const { isLoggedIn, accessToken } = useAuth();
 
   // test cast data
   /*
@@ -101,7 +101,7 @@ export const MoviePage = () => {
     void fetchMovieData();
     // setMovieData(testData);
 
-    if (accessToken !== null) {
+    if (isLoggedIn && accessToken !== null) {
       fetchUserReviews(accessToken)
         .then((data) => {
           if (data === null) {
@@ -116,11 +116,11 @@ export const MoviePage = () => {
           console.error(err);
         });
     }
-  }, [accessToken, id]);
+  }, [isLoggedIn, accessToken, id]);
 
   useEffect(() => {
     const fetchLoggedInFirstReview = async () => {
-      if (accessToken === null) {
+      if (!isLoggedIn || accessToken === null) {
         return;
       }
 
@@ -146,7 +146,7 @@ export const MoviePage = () => {
     };
 
     void fetchLoggedInFirstReview();
-  }, [accessToken, id]);
+  }, [isLoggedIn, accessToken, id]);
 
   if (movieData == null || !isLoaded) {
     console.debug(reviewList);
@@ -288,7 +288,9 @@ export const MoviePage = () => {
             </div>
             <CommnetFragment
               initialReview={
-                accessToken === null ? firstReview : loggedInFirstReview
+                accessToken === null || !isLoggedIn
+                  ? firstReview
+                  : loggedInFirstReview
               }
               viewMode="moviePage"
             />
