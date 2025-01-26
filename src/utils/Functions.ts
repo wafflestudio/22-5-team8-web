@@ -127,14 +127,53 @@ export const fetchReviewWithId = async (reviewId: number) => {
   }
 };
 
-export const fetchReplyList = async (reviewId: number) => {
+export const fetchReplyList = async (
+  reviewId: number,
+  begin: number,
+  end: number,
+) => {
   try {
-    const response = await fetch(`/api/comments/review/${reviewId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `/api/comments/review/${reviewId}?begin=${begin}&end=${end}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       },
-    });
+    );
+
+    //console.log(await response.text());
+    if (!response.ok) {
+      throw new Error('Failed to fetch reply list');
+    }
+    return (await response.json()) as Reply[];
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+};
+
+export const fetchLoggedInReplyList = async (
+  reviewId: number,
+  accessToken: string,
+  begin: number,
+  end: number,
+) => {
+  try {
+    //console.log(`/api/comments/list/${reviewId}?begin=${begin}&end=${end}`);
+    const response = await fetch(
+      `/api/comments/list/${reviewId}?begin=${begin}&end=${end}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    //console.log(await response.text());
 
     if (!response.ok) {
       throw new Error('Failed to fetch reply list');
