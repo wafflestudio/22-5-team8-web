@@ -87,7 +87,7 @@ const CollectionPage = () => {
       try {
         if (collectionId != null) {
           const response = await fetch(
-            `/api/collection_comments/${collectionId}`,
+            `/api/collection_comments/${collectionId}/list`,
             {
               method: 'GET',
               headers: {
