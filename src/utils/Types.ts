@@ -20,6 +20,7 @@ export type Movie = {
   poster_url: string;
   backdrop_url: string;
   participants: Participant[];
+  reviews_count: number;
 };
 
 export type Review = {
@@ -35,6 +36,7 @@ export type Review = {
   spoiler: boolean;
   status: '' | 'WatchList' | 'Watching';
   like: boolean;
+  comments_count: number;
 };
 
 export type Reply = {

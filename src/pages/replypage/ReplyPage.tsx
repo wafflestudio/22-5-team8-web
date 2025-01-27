@@ -12,6 +12,7 @@ import share from '../../assets/share.svg';
 import { useAuth } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
 import {
+  fetchBlokedUserList,
   fetchLoggedInReplyList,
   fetchMovie,
   fetchReplyList,
@@ -30,7 +31,7 @@ const CommentPage = () => {
   const reviewId: number = parseInt(
     reviewIdString == null ? '0' : reviewIdString,
   );
-  const { accessToken } = useAuth();
+  const { accessToken, user_id } = useAuth();
 
   const PAGE_SIZE = 10;
 
@@ -47,6 +48,7 @@ const CommentPage = () => {
     useState<boolean>(false);
   const [isReplyPopupOpen, setIsReplyPopupOpen] = useState<boolean>(false);
   const [isLike, setIsLike] = useState<boolean>(false);
+  const [blockedUserList, setBlockedUserList] = useState<number[]>([]);
 
   const fetchReplies = useCallback(() => {
     if (isLoading || !hasMore) return;
@@ -137,7 +139,18 @@ const CommentPage = () => {
 
   useEffect(() => {
     isInitialRender.current = true;
-  }, [accessToken]);
+
+    if (user_id !== null) {
+      fetchBlokedUserList(user_id)
+        .then((data) => {
+          //console.log(data);
+          setBlockedUserList(data);
+        })
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+    }
+  }, [accessToken, user_id]);
 
   // 스크롤 이벤트 등록
   useEffect(() => {
@@ -159,6 +172,28 @@ const CommentPage = () => {
       console.error('링크 복사 실패:', error);
       alert('링크 복사에 실패했습니다.');
     }
+
+    /*
+    try {
+      if(accessToken === null || review === null) {
+        return;
+      }
+
+      const response = await fetch(`/api/users/block/${review.user_id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to block user');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    */
   };
 
   const handleRecommend = () => {
@@ -343,7 +378,7 @@ const CommentPage = () => {
           </div>
           <div className="flex justify-between items-center text-sm text-gray-600 py-2">
             <span>좋아요 {review.likes_count}</span>
-            <span className="ml-3 mr-auto">댓글 {replyList.length}</span>
+            <span className="ml-3 mr-auto">댓글 {review.comments_count}</span>
           </div>
         </div>
         <div className="flex justify-between items-center px-16 border-y py-2">
@@ -378,13 +413,13 @@ const CommentPage = () => {
           {replyList.length === 0 && loggedInReplyList.length === 0 ? (
             <div className="py-2 text-sm">댓글이 없습니다.</div>
           ) : (
-            (accessToken === null ? replyList : loggedInReplyList).map(
-              (reply) => (
+            (accessToken === null ? replyList : loggedInReplyList)
+              .filter((reply) => !blockedUserList.includes(reply.user_id)) // 차단되지 않은 유저만 남김
+              .map((reply) => (
                 <div key={reply.id}>
                   <ReplyFragment reply={reply} />
                 </div>
-              ),
-            )
+              ))
           )}
         </div>
       </div>

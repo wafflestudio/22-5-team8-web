@@ -10,7 +10,7 @@ import recommend from '../assets/recommend.svg';
 import trash from '../assets/trash.svg';
 import NeedLoginPopup from '../pages/movie/NeedLoginPopup';
 import { deleteReview, newReview } from '../utils/Functions';
-import type { Reply, Review } from '../utils/Types';
+import type { Review } from '../utils/Types';
 import { useAuth } from './AuthContext';
 import { Modal } from './Modal';
 
@@ -29,7 +29,6 @@ const CommnetFragment = ({
   const [isNeedLoginPopupOpen, setIsNeedLoginPopupOpen] =
     useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [replyList, setReplyList] = useState<Reply[] | null>(null);
   const [showContent, setShowContent] = useState<boolean>(true);
   const [liked, setLiked] = useState<boolean>(false);
   const { isLoggedIn, accessToken } = useAuth();
@@ -50,26 +49,11 @@ const CommnetFragment = ({
   }, [initialReview]);
 
   useEffect(() => {
-    const fetchReplyList = async () => {
-      if (review === null) {
-        return;
-      }
+    if (review === null) {
+      return;
+    }
 
-      if (review.spoiler) setShowContent(false);
-
-      try {
-        const response = await fetch(`/api/comments/review/${review.id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch reply list');
-        }
-        const data = (await response.json()) as Reply[];
-        setReplyList(data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    void fetchReplyList();
+    if (review.spoiler) setShowContent(false);
   }, [review]);
 
   useEffect(() => {
@@ -283,9 +267,7 @@ const CommnetFragment = ({
           <img src={recommend} alt="추천" className="w-4 h-4" />
           <div className="ml-1">{review.likes_count}</div>
           <img src={comment} alt="댓글" className="w-4 h-4 ml-2" />
-          <div className="ml-1">
-            {replyList === null ? 0 : replyList.length}
-          </div>
+          <div className="ml-1">{review.comments_count}</div>
         </div>
         <hr className="my-1 bg-gray-300" />
         <button

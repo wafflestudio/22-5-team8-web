@@ -53,6 +53,33 @@ const CollectionCommentFragment = ({
     void getIsLike();
   }, [accessToken, comment]);
 
+  useEffect(() => {
+    const updateInitialComment = async () => {
+      try {
+        const response = await fetch(
+          `/api/collection_comments/${initialComment.id}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch comment');
+        }
+
+        const data = (await response.json()) as CollectionComment;
+        setComment(data);
+      } catch (err) {
+        console.error('Failed to fetch comment:', err);
+      }
+    };
+
+    void updateInitialComment();
+  }, [initialComment, isLike]);
+
   const handleRecommend = () => {
     if (accessToken === null) {
       setIsNeedLoginPopupOpen(true);

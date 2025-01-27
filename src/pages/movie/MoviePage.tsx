@@ -50,10 +50,6 @@ export const MoviePage = () => {
   */
 
   const [movieData, setMovieData] = useState<Movie | null>(null);
-  const [reviewList, setReviewList] = useState<Review[] | null>(null);
-  const [validContentReviewList, setValidContentReviewList] = useState<
-    Review[] | null
-  >(null);
   const [firstReview, setFirstReview] = useState<Review | null>(null);
   const [loggedInFirstReview, setLoggedInFirstReview] = useState<Review | null>(
     null,
@@ -67,32 +63,53 @@ export const MoviePage = () => {
     const fetchMovieData = async () => {
       try {
         setIsLoaded(false);
-        const [movieResponse, reviewResponse] = await Promise.all([
-          fetch(`/api/movies/${id}`),
-          fetch(`/api/reviews/movie/${id}`),
-        ]);
+
+        // Fetch movie data
+        const movieResponse = await fetch(`/api/movies/${id}`);
         if (!movieResponse.ok) {
           throw new Error('Failed to fetch movie data');
         }
-        const data = (await movieResponse.json()) as Movie;
-        setMovieData(data);
-        //console.log(data);
+        const movieReponseData = (await movieResponse.json()) as Movie;
+        setMovieData(movieReponseData);
 
-        if (!reviewResponse.ok) {
-          throw new Error('Failed to fetch reviews');
-        }
-        const reviewData = (await reviewResponse.json()) as Review[];
-        const validContentReviewData = reviewData.filter(
-          (review) => review.content !== '',
-        );
+        // Fetch paginated reviews
+        const fetchFirstValidReview = async (): Promise<Review | null> => {
+          const count = 10;
 
-        setReviewList(reviewData);
-        setValidContentReviewList(validContentReviewData);
+          for (let begin = 0; ; begin += count) {
+            const reviewResponse = await fetch(
+              `/api/reviews/movie/${id}?begin=${begin}&end=${begin + count}`,
+            );
 
-        const firstReviewData = validContentReviewData.find(
-          (review) => review.content !== '',
-        );
-        setFirstReview(firstReviewData === undefined ? null : firstReviewData);
+            if (!reviewResponse.ok) {
+              throw new Error('Failed to fetch reviews');
+            }
+
+            const reviewData = (await reviewResponse.json()) as Review[];
+            const validContentReviewData = reviewData.filter(
+              (review) => review.content !== '',
+            );
+
+            // If valid review found, return it
+            if (
+              validContentReviewData.length > 0 &&
+              validContentReviewData[0] !== undefined
+            ) {
+              return validContentReviewData[0];
+            }
+
+            // If no more reviews, break the loop
+            if (reviewData.length < count) {
+              break;
+            }
+          }
+
+          // No valid review found
+          return null;
+        };
+
+        const firstReviewData = await fetchFirstValidReview();
+        setFirstReview(firstReviewData);
       } catch (err) {
         console.error(err);
       } finally {
@@ -127,21 +144,51 @@ export const MoviePage = () => {
       }
 
       try {
-        const response = await fetch(`/api/reviews/list/${id}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        if (!response.ok) {
-          throw new Error('Failed to fetch first review');
-        }
-        const data = (await response.json()) as Review[];
-        const firstReviewData = data.find((review) => review.content !== '');
-        setLoggedInFirstReview(
-          firstReviewData === undefined ? null : firstReviewData,
-        );
+        const fetchLoggedInFirstValidReview =
+          async (): Promise<Review | null> => {
+            const count = 10;
+
+            for (let begin = 0; ; begin += count) {
+              const reviewResponse = await fetch(
+                `/api/reviews/list/${id}?begin=${begin}&end=${begin + count}`,
+                {
+                  method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`,
+                  },
+                },
+              );
+
+              if (!reviewResponse.ok) {
+                throw new Error('Failed to fetch reviews');
+              }
+
+              const reviewData = (await reviewResponse.json()) as Review[];
+              const validContentReviewData = reviewData.filter(
+                (review) => review.content !== '',
+              );
+
+              // If valid review found, return it
+              if (
+                validContentReviewData.length > 0 &&
+                validContentReviewData[0] !== undefined
+              ) {
+                return validContentReviewData[0];
+              }
+
+              // If no more reviews, break the loop
+              if (reviewData.length < count) {
+                break;
+              }
+            }
+
+            // No valid review found
+            return null;
+          };
+
+        const loggedInFirstReviewData = await fetchLoggedInFirstValidReview();
+        setLoggedInFirstReview(loggedInFirstReviewData);
       } catch (err) {
         console.error(err);
       }
@@ -151,7 +198,7 @@ export const MoviePage = () => {
   }, [isLoggedIn, accessToken, id]);
 
   if (movieData == null || !isLoaded) {
-    console.debug(reviewList);
+    //console.debug(reviewList);
     return (
       <div className="flex flex-col min-h-screen relative">
         <div className="flex-none fixed z-10 top-0 w-full">
@@ -279,11 +326,7 @@ export const MoviePage = () => {
           <div className="flex flex-col justify-start w-11/12 mb-10">
             <div className="flex items-center px-4">
               <h2 className="text-lg font-semibold">코멘트</h2>
-              <h2 className="ml-2 text-hotPink">
-                {validContentReviewList === null
-                  ? 0
-                  : validContentReviewList.length}
-              </h2>
+              <h2 className="ml-2 text-hotPink">{movieData.reviews_count}</h2>
               <Link
                 to={`/movies/${id}/comments`}
                 className="ml-auto text-hotPink"
