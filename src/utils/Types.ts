@@ -49,6 +49,17 @@ export type Reply = {
   like: boolean;
 };
 
+export type CollectionComment = {
+  id: number;
+  user_id: number;
+  user_name: string;
+  profile_url: string | null;
+  collection_id: number;
+  content: string;
+  likes_count: number;
+  created_at: string;
+};
+
 export type People = {
   id: number;
   name: string;

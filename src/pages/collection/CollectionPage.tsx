@@ -11,7 +11,13 @@ import { AuthContext } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
 import { Modal } from '../../components/Modal';
 import { fetchCollection, fetchUser } from '../../utils/Functions';
-import type { Collection, UserProfile } from '../../utils/Types';
+import type {
+  Collection,
+  CollectionComment,
+  UserProfile,
+} from '../../utils/Types';
+import NeedLoginPopup from '../movie/NeedLoginPopup';
+import CollectionCommentFragment from './CollectionCommentFragment';
 
 const CollectionPage = () => {
   const { accessToken, user_id } = useContext(AuthContext);
@@ -24,6 +30,87 @@ const CollectionPage = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isNeedLoginPopupOpen, setIsNeedLoginPopupOpen] =
+    useState<boolean>(false);
+  const [isLike, setIsLike] = useState<boolean>(false);
+  const [comment, setComment] = useState<string>('');
+  const [isNewComment, setIsNewComment] = useState<boolean>(false);
+  const [commentList, setCommentList] = useState<CollectionComment[]>([]);
+
+  const commentRef = useRef<HTMLDivElement>(null);
+
+  const scrollToComment = () => {
+    if (commentRef.current != null) {
+      const headerHeight = 48; // 헤더의 높이(px 단위)
+      const elementPosition = commentRef.current.getBoundingClientRect().top;
+      const offsetPosition = window.scrollY + elementPosition - headerHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  useEffect(() => {
+    const getIsLike = async () => {
+      try {
+        if (collectionId != null && accessToken != null) {
+          const response = await fetch(
+            `/api/collections/like/${collectionId}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`,
+              },
+            },
+          );
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch like status');
+          }
+
+          const data = (await response.json()) as boolean;
+          setIsLike(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch like status:', err);
+      }
+    };
+
+    void getIsLike();
+  }, [accessToken, collectionId]);
+
+  useEffect(() => {
+    const getCommentList = async () => {
+      try {
+        if (collectionId != null) {
+          const response = await fetch(
+            `/api/collection_comments/${collectionId}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            },
+          );
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch comment list');
+          }
+
+          const data = (await response.json()) as CollectionComment[];
+          setCommentList(data);
+          //console.log(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch comment list:', err);
+      }
+    };
+
+    void getCommentList();
+  }, [collectionId, isNewComment]);
 
   useEffect(() => {
     const getCollection = async () => {
@@ -43,10 +130,11 @@ const CollectionPage = () => {
         setError((err as Error).message);
       } finally {
         setIsLoading(false);
+        setIsNewComment(false);
       }
     };
     void getCollection();
-  }, [collectionId]);
+  }, [collectionId, isNewComment, isLike]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -63,6 +151,38 @@ const CollectionPage = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  const handleRecommend = () => {
+    if (accessToken === null) {
+      setIsNeedLoginPopupOpen(true);
+      return;
+    }
+
+    if (collectionId == null) {
+      return;
+    }
+
+    const updateLike = async () => {
+      try {
+        const response = await fetch(`/api/collections/like/${collectionId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update like');
+        }
+        setIsLike(!isLike);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    void updateLike();
+  };
 
   const handleDelete = async () => {
     setError(null);
@@ -90,6 +210,52 @@ const CollectionPage = () => {
       setError((err as Error).message);
       console.error('Collection deletion error:', err);
       setIsLoading(false);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      alert('링크가 클립보드에 복사되었습니다.');
+    } catch (err) {
+      console.error('링크 복사 실패:', err);
+      alert('링크 복사에 실패했습니다.');
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (accessToken === null) {
+      setIsNeedLoginPopupOpen(true);
+      return;
+    }
+
+    if (collectionId == null || comment === '') {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/collection_comments/${collectionId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          content: comment,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to post comment');
+      }
+
+      //console.log(response);
+    } catch (err) {
+      console.error('Failed to post comment:', err);
+      alert('댓글 등록에 실패했습니다.');
+    } finally {
+      setComment('');
+      setIsNewComment(true);
     }
   };
 
@@ -192,16 +358,26 @@ const CollectionPage = () => {
           </div>
 
           <div className="flex justify-between items-center px-16 border-y py-2">
-            <button className="flex items-center text-gray-600">
-              <img src={notRecommend} alt="좋아요" className="w-5 h-5 mr-1" />
+            <button
+              onClick={handleRecommend}
+              className="flex items-center text-gray-600"
+            >
+              {isLike ? (
+                <Recommend className="w-5 h-5 mr-1" />
+              ) : (
+                <img src={notRecommend} alt="좋아요" className="w-5 h-5 mr-1" />
+              )}
             </button>
             <button
-              onClick={() => {}}
+              onClick={scrollToComment}
               className="flex items-center text-gray-600"
             >
               <img src={replyIcon} alt="댓글" className="w-5 h-5 mr-1" />
             </button>
-            <button className="flex items-center text-gray-600">
+            <button
+              className="flex items-center text-gray-600"
+              onClick={() => void handleShare()}
+            >
               <img src={share} alt="공유" className="w-5 h-5 mr-1" />
             </button>
           </div>
@@ -225,6 +401,43 @@ const CollectionPage = () => {
               ))}
             </div>
           </div>
+
+          <hr className="w-11/12 my-5 bg-gray-300" />
+
+          <div ref={commentRef} className="mt-4">
+            <h2 className="text-xl font-semibold mb-2 text-left">댓글</h2>
+            <div className="flex items-center">
+              <input
+                type="text"
+                value={comment}
+                onChange={(e) => {
+                  setComment(e.target.value);
+                }}
+                placeholder="컬렉션에 댓글을 남겨보세요."
+                className="flex-grow mr-2 px-2 py-2 border-none bg-gray-100 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-hotPink"
+              />
+
+              <button
+                onClick={() => void handleSubmit()}
+                className={`${comment === '' ? '' : 'text-hotPink'} flex items-center gap-1 px-2 py-2 bg-white text-gray-700 rounded-md`}
+              >
+                {comment === '' ? (
+                  <img src={replyIcon} alt="댓글" className="w-5 h-5" />
+                ) : (
+                  <Reply className="w-5 h-5" />
+                )}
+                등록
+              </button>
+            </div>
+            <div className="gap-4">
+              {commentList.map((initialComment) => (
+                <CollectionCommentFragment
+                  initialComment={initialComment}
+                  key={initialComment.id}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="flex-none fixed bottom-0 w-full z-10">
@@ -243,7 +456,52 @@ const CollectionPage = () => {
           setShowDeleteModal(false);
         }}
       />
+
+      <NeedLoginPopup
+        isOpen={isNeedLoginPopupOpen}
+        onClose={() => {
+          setIsNeedLoginPopupOpen(false);
+        }}
+      />
     </>
+  );
+};
+
+const Recommend = (props: React.SVGProps<SVGSVGElement>) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      fill="#FF2F6E"
+      viewBox="0 0 24 24"
+      className={props.className}
+    >
+      <rect width="4" height="11" x="2" y="10" fill="#FF2F6E" rx="0.75"></rect>
+      <path
+        fill="#FF2F6E"
+        d="M7.5 9.31a.75.75 0 0 1 .22-.53l5.75-5.75a.75.75 0 0 1 1.06 0l.679.679a.75.75 0 0 1 .202.693L14.5 8.5h6.75a.75.75 0 0 1 .75.75v3.018a6 6 0 0 1-.485 2.364l-2.32 5.413a.75.75 0 0 1-.69.455H8.25a.75.75 0 0 1-.75-.75z"
+      ></path>
+    </svg>
+  );
+};
+
+const Reply = (props: React.SVGProps<SVGSVGElement>) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={props.className}
+    >
+      <path
+        fill="#FF2F6E"
+        d="M12 2C6.47 2 2 5.83 2 10.56a8.19 8.19 0 0 0 4 6.84v3.4a.5.5 0 0 0 .84.36l2.23-2.11.25-.25c.878.206 1.778.31 2.68.31 5.52 0 10-3.83 10-8.55S17.52 2 12 2m0 15.61a10 10 0 0 1-2.66-.35L7.2 19.17v-2.79a6.86 6.86 0 0 1-3.71-5.82c0-3.69 3.58-7.06 8.5-7.06s8.5 3.37 8.5 7.06-3.61 7.05-8.49 7.05"
+      ></path>
+    </svg>
   );
 };
 
