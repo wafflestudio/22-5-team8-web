@@ -13,12 +13,14 @@ import { Login } from './pages/Login';
 import CommentList from './pages/movie/CommentList';
 import { MoviePage } from './pages/movie/MoviePage';
 import { Movies } from './pages/Movies';
+import { MonthlyMovies } from './pages/mypage/MonthlyMovies';
 import { MyPage } from './pages/mypage/MyPage';
 import { Profile } from './pages/mypage/Profile';
 import { Settings } from './pages/mypage/Settings';
 import { News } from './pages/News';
 import PeoplePage from './pages/PeoplePage';
 import { Rating } from './pages/Rating';
+import { Recommend } from './pages/Recommend';
 import ReplyPage from './pages/replypage/ReplyPage';
 import { Search } from './pages/Search';
 import { Signup } from './pages/Signup';
@@ -47,6 +49,7 @@ export const App = () => {
             />
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/mypage/settings" element={<Settings />} />
+            <Route path="/monthly/:date" element={<MonthlyMovies />} />
             <Route path="/movies/:movieId/comments" element={<CommentList />} />
             <Route path="/people/:peopleId" element={<PeoplePage />} />
             <Route
@@ -62,6 +65,7 @@ export const App = () => {
               path="/collections/:collectionId/edit"
               element={<EditCollection />}
             />
+            <Route path="/recommend" element={<Recommend />} />
           </Routes>
         </AuthProvider>
       </ReturnPathProvider>

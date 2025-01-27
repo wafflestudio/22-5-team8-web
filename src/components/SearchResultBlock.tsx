@@ -1,16 +1,15 @@
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import noProfile from '../assets/no_profile.svg';
 import NoResultSvg from '../assets/no_result.svg';
-import type { SearchResult } from '../utils/Types';
+import type { SearchCategory, SearchResult } from '../utils/Types';
 import CollectionBlock from './CollectionBlock';
-
-type Category = 'movie' | 'person' | 'collection' | 'user';
 
 type SearchResultBlockProps = {
   searchResults: SearchResult;
-  selectedCategory: Category;
-  setSelectedCategory: (category: Category) => void;
+  selectedCategory: SearchCategory;
+  setSelectedCategory: (category: SearchCategory) => void;
 };
 
 export const SearchResultBlock = ({
@@ -19,10 +18,29 @@ export const SearchResultBlock = ({
   setSelectedCategory,
 }: SearchResultBlockProps) => {
   const [, setSearchParams] = useSearchParams();
+  const [selectedGenre, setSelectedGenre] = useState<string>('all');
 
-  const categories: Category[] = ['movie', 'person', 'collection', 'user'];
+  const categories: SearchCategory[] = [
+    'movie',
+    'genre',
+    'person',
+    'collection',
+    'user',
+  ];
 
-  const handleCategoryClick = (category: Category) => {
+  useEffect(() => {
+    if (
+      selectedCategory === 'genre' &&
+      Object.keys(searchResults.genres).length > 0
+    ) {
+      const firstGenre = Object.keys(searchResults.genres)[0] ?? 'all';
+      setSelectedGenre(firstGenre);
+    } else if (selectedCategory === 'movie') {
+      setSelectedGenre('all');
+    }
+  }, [selectedCategory, searchResults.genres]);
+
+  const handleCategoryClick = (category: SearchCategory) => {
     setSelectedCategory(category);
     setSearchParams((params) => {
       params.set('category', category);
@@ -33,7 +51,7 @@ export const SearchResultBlock = ({
   const getCategoryContent = () => {
     if (selectedCategory === 'movie' && searchResults.movies.length > 0) {
       return (
-        <ul className="mt-4">
+        <ul>
           {searchResults.movies.map((movie) => (
             <li
               key={movie.id}
@@ -55,6 +73,60 @@ export const SearchResultBlock = ({
             </li>
           ))}
         </ul>
+      );
+    }
+    if (
+      selectedCategory === 'genre' &&
+      Object.keys(searchResults.genres).length > 0
+    ) {
+      return (
+        <>
+          <div className="flex space-x-2 mt-4 mb-4 overflow-x-auto scrollbar-hide">
+            {Object.keys(searchResults.genres).map((genre) => (
+              <button
+                key={genre}
+                onClick={() => {
+                  setSelectedGenre(genre);
+                }}
+                className={`px-3 py-1 rounded-full text-sm whitespace-nowrap
+                  ${
+                    selectedGenre === genre
+                      ? 'bg-black text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+              >
+                {genre}
+              </button>
+            ))}
+          </div>
+          {selectedGenre.length > 0 &&
+            searchResults.genres[selectedGenre] != null && (
+              <ul>
+                {searchResults.genres[selectedGenre].map((movie) => (
+                  <li
+                    key={movie.id}
+                    className="border-b border-gray-200 last:border-b-0"
+                  >
+                    <a
+                      href={`/movies/${movie.id}`}
+                      className="flex py-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
+                      <img
+                        src={movie.poster_url}
+                        className="w-16 h-24 object-cover rounded"
+                      />
+                      <div className="ml-4 flex flex-col justify-center">
+                        <h3 className="text-sm">{movie.title}</h3>
+                        <p className="text-gray-500 text-sm mt-1">
+                          {movie.year}
+                        </p>
+                      </div>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+        </>
       );
     }
     if (selectedCategory === 'person' && searchResults.people.length > 0) {
@@ -141,9 +213,10 @@ export const SearchResultBlock = ({
     );
   };
 
-  const getCategoryLabel = (category: Category): string => {
-    const labels: Record<Category, string> = {
+  const getCategoryLabel = (category: SearchCategory): string => {
+    const labels: Record<SearchCategory, string> = {
       movie: '영화',
+      genre: '장르',
       person: '인물',
       collection: '컬렉션',
       user: '유저',
@@ -153,14 +226,14 @@ export const SearchResultBlock = ({
 
   return (
     <>
-      <div className="flex space-x-2 border-b">
+      <div className="flex flex-wrap border-b">
         {categories.map((category) => (
           <button
             key={category}
             onClick={() => {
               handleCategoryClick(category);
             }}
-            className={`py-3 px-4 text-center whitespace-nowrap ${
+            className={`py-2 px-3 text-center whitespace-nowrap ${
               selectedCategory === category
                 ? 'border-b-2 border-black text-black'
                 : 'text-gray-500 hover:text-gray-700'

@@ -39,7 +39,7 @@ export const Search = () => {
   useEffect(() => {
     if (
       category.length > 0 &&
-      ['movie', 'person', 'collection', 'user'].includes(category)
+      ['movie', 'genre', 'person', 'collection', 'user'].includes(category)
     ) {
       setSelectedCategory(category as SearchCategory);
     }
@@ -88,11 +88,24 @@ export const Search = () => {
       const _userDetails = (await Promise.all(
         data.user_list.map((id) => fetchUser(id)),
       )) as UserProfile[];
+
+      const _genreDetails: Record<string, Movie[]> = {};
+      await Promise.all(
+        Object.entries(data.movie_dict_by_genre).map(
+          async ([genre, movieIds]) => {
+            _genreDetails[genre] = (await Promise.all(
+              movieIds.map((id) => fetchMovie(id)),
+            )) as Movie[];
+          },
+        ),
+      );
+
       setSearchResults({
         movies: movieDetails,
         users: _userDetails,
         people: peopleDetails,
         collections: _collectionDetails,
+        genres: _genreDetails,
       });
     } catch (err) {
       setError((err as Error).message);

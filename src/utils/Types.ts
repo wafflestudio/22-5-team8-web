@@ -87,6 +87,7 @@ export type SearchResultRaw = {
   user_list: Array<number>;
   participant_list: Array<number>;
   collection_list: Array<number>;
+  movie_dict_by_genre: Record<string, number[]>;
 };
 
 export type SearchResult = {
@@ -94,6 +95,7 @@ export type SearchResult = {
   users: UserProfile[];
   people: People[];
   collections: Collection[];
+  genres: Record<string, Movie[]>;
 };
 
 export type Collection = {
@@ -120,4 +122,15 @@ export type UserProfile = {
   collection_count: number;
 };
 
-export type SearchCategory = 'movie' | 'person' | 'collection' | 'user';
+export type SearchCategory =
+  | 'movie'
+  | 'genre'
+  | 'person'
+  | 'collection'
+  | 'user';
+
+export type Recommendation = {
+  movie_id: number;
+  movie: Movie;
+  expected_rating: number;
+};

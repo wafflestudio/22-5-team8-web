@@ -65,7 +65,7 @@ export const Signup = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 items-center justify-center">
       <div className="flex-1 bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center mb-8 text-pink-600">
+        <h1 className="text-3xl font-bold text-center mb-8 text-hotPink">
           WATCHA<span className="text-gray-800">PEDIA</span>
         </h1>
         <h2 className="text-xl font-semibold text-center mb-6">회원가입</h2>
@@ -125,7 +125,7 @@ export const Signup = () => {
                 console.error('Error during signup:', err);
               });
           }}
-          className="w-full bg-pink-500 text-white p-3 rounded-md font-semibold mt-6 mb-6"
+          className="w-full bg-hotPink text-white p-3 rounded-md font-semibold mt-6 mb-6"
         >
           회원가입
         </button>
@@ -137,7 +137,7 @@ export const Signup = () => {
         <div className="text-center mt-2">
           <span className="text-sm">이미 가입하셨나요? </span>
           <Link to="/login">
-            <a href="#" className="text-pink-500 text-sm font-semibold">
+            <a href="#" className="text-hotPink text-sm font-semibold">
               로그인
             </a>
           </Link>
