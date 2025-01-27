@@ -8,7 +8,7 @@ import star from '../assets/star.svg';
 import { useAuth } from './AuthContext';
 
 export const Footerbar = () => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user_id } = useAuth();
 
   return (
     <div className="bg-white">
@@ -50,8 +50,8 @@ export const Footerbar = () => {
               </div>
             </Link>
           )}
-          {isLoggedIn && (
-            <Link to="/mypage">
+          {isLoggedIn && user_id !== null && (
+            <Link to={`/profile/${user_id}`}>
               <div className="flex flex-col items-center">
                 <img src={login} className="w-6 h-6 mb-1" />
                 <div className="text-xs">나의 왓챠</div>
