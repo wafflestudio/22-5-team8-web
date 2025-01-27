@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import back from '../../assets/back.svg';
@@ -10,7 +10,12 @@ import share from '../../assets/share.svg';
 import { AuthContext } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
 import { Modal } from '../../components/Modal';
-import { fetchCollection, fetchUser } from '../../utils/Functions';
+import {
+  fetchBlokedUserList,
+  fetchCollection,
+  fetchCollectionCommentList,
+  fetchUser,
+} from '../../utils/Functions';
 import type {
   Collection,
   CollectionComment,
@@ -36,8 +41,17 @@ const CollectionPage = () => {
   const [comment, setComment] = useState<string>('');
   const [isNewComment, setIsNewComment] = useState<boolean>(false);
   const [commentList, setCommentList] = useState<CollectionComment[]>([]);
+  const [blockedUserList, setBlockedUserList] = useState<number[]>([]);
+
+  const PAGE_SIZE = 10;
+
+  const [begin, setBegin] = useState(0);
+  const [end, setEnd] = useState(PAGE_SIZE); // 초기 로드 범위
+  const [isLoadingComments, setIsLoadingComments] = useState(false); // 로딩 상태
+  const [hasMore, setHasMore] = useState(true); // 추가 데이터 여부
 
   const commentRef = useRef<HTMLDivElement>(null);
+  const isInitialRender = useRef(true);
 
   const scrollToComment = () => {
     if (commentRef.current != null) {
@@ -51,6 +65,88 @@ const CollectionPage = () => {
       });
     }
   };
+
+  useEffect(() => {
+    isInitialRender.current = true;
+
+    if (user_id !== null) {
+      fetchBlokedUserList(user_id)
+        .then((data) => {
+          //console.log(data);
+          setBlockedUserList(data);
+        })
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+    }
+  }, [accessToken, user_id]);
+
+  const fetchComments = useCallback(() => {
+    if (isLoadingComments || !hasMore || collectionId === undefined) return;
+    setIsLoadingComments(true);
+
+    fetchCollectionCommentList(Number(collectionId), begin, end)
+      .then((data) => {
+        if (data === null) {
+          setCommentList([]);
+          setHasMore(false);
+        } else {
+          setCommentList((prev) => {
+            const uniqueComments = data.filter(
+              (newComment) =>
+                !prev.some((existing) => existing.id === newComment.id),
+            );
+            return [...prev, ...uniqueComments];
+          });
+          if (data.length < PAGE_SIZE) setHasMore(false);
+        }
+        //console.log(data);
+      })
+      .catch((err: unknown) => {
+        console.error(err);
+      })
+      .finally(() => {
+        setIsLoadingComments(false);
+        setBegin(end);
+        setEnd(end + PAGE_SIZE);
+      });
+  }, [begin, collectionId, end, hasMore, isLoadingComments]);
+
+  // 스크롤 이벤트 핸들러
+  const handleScroll = useCallback(() => {
+    if (
+      window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.offsetHeight - 100 &&
+      !isLoading &&
+      hasMore
+    ) {
+      //console.log('fetch');
+      fetchComments();
+    }
+  }, [fetchComments, hasMore, isLoading]);
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    if (isInitialRender.current) {
+      //console.log('initial fetch');
+      if (accessToken !== null) {
+        setBegin(0);
+        setEnd(PAGE_SIZE);
+        setIsLoadingComments(false);
+        //console.log('reset');
+      }
+      isInitialRender.current = false;
+      fetchComments();
+    }
+  }, [accessToken, fetchComments]);
+
+  // 스크롤 이벤트 등록
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [handleScroll]);
 
   useEffect(() => {
     const getIsLike = async () => {
@@ -81,36 +177,6 @@ const CollectionPage = () => {
 
     void getIsLike();
   }, [accessToken, collectionId]);
-
-  useEffect(() => {
-    const getCommentList = async () => {
-      try {
-        if (collectionId != null) {
-          const response = await fetch(
-            `/api/collection_comments/${collectionId}/list`,
-            {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            },
-          );
-
-          if (!response.ok) {
-            throw new Error('Failed to fetch comment list');
-          }
-
-          const data = (await response.json()) as CollectionComment[];
-          setCommentList(data);
-          //console.log(data);
-        }
-      } catch (err) {
-        console.error('Failed to fetch comment list:', err);
-      }
-    };
-
-    void getCommentList();
-  }, [collectionId, isNewComment]);
 
   useEffect(() => {
     const getCollection = async () => {
@@ -405,7 +471,10 @@ const CollectionPage = () => {
           <hr className="w-11/12 my-5 bg-gray-300" />
 
           <div ref={commentRef} className="mt-4">
-            <h2 className="text-xl font-semibold mb-2 text-left">댓글</h2>
+            <div className="flex items-center mb-2">
+              <h2 className="text-xl font-semibold text-left mr-2">댓글</h2>
+              <div className="text-gray-600">{collection.comments_count}</div>
+            </div>
             <div className="flex items-center">
               <input
                 type="text"
@@ -430,12 +499,14 @@ const CollectionPage = () => {
               </button>
             </div>
             <div className="gap-4">
-              {commentList.map((initialComment) => (
-                <CollectionCommentFragment
-                  initialComment={initialComment}
-                  key={initialComment.id}
-                />
-              ))}
+              {commentList
+                .filter((com) => !blockedUserList.includes(com.user_id))
+                .map((initialComment) => (
+                  <CollectionCommentFragment
+                    initialComment={initialComment}
+                    key={initialComment.id}
+                  />
+                ))}
             </div>
           </div>
         </div>

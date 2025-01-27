@@ -4,7 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../../components/AuthContext';
 import CommnetFragment from '../../components/CommentFragment';
 import { Footerbar } from '../../components/Footerbar';
-import { fetchUserReviews } from '../../utils/Functions';
+import { fetchBlokedUserList, fetchUserReviews } from '../../utils/Functions';
 import type { Movie, Review } from '../../utils/Types';
 import ButtonBar from './ButtonBar';
 import CastList from './CastList';
@@ -16,7 +16,7 @@ import StarRating from './StarRating';
 export const MoviePage = () => {
   const { movieId } = useParams();
   const id: number = parseInt(movieId == null ? '0' : movieId);
-  const { isLoggedIn, accessToken } = useAuth();
+  const { isLoggedIn, accessToken, user_id } = useAuth();
 
   // test cast data
   /*
@@ -58,6 +58,20 @@ export const MoviePage = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isCommentPopupOpen, setIsCommentPopupOpen] = useState(false);
   const [isMoreOptionsOpen, setIsMoreOptionsOpen] = useState(false);
+  const [blockedUserList, setBlockedUserList] = useState<number[]>([]);
+
+  useEffect(() => {
+    if (user_id !== null) {
+      fetchBlokedUserList(user_id)
+        .then((data) => {
+          //console.log(data);
+          setBlockedUserList(data);
+        })
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+    }
+  }, [accessToken, user_id]);
 
   useEffect(() => {
     const fetchMovieData = async () => {
@@ -166,7 +180,9 @@ export const MoviePage = () => {
 
               const reviewData = (await reviewResponse.json()) as Review[];
               const validContentReviewData = reviewData.filter(
-                (review) => review.content !== '',
+                (review) =>
+                  review.content !== '' &&
+                  !blockedUserList.includes(review.user_id),
               );
 
               // If valid review found, return it
@@ -195,7 +211,7 @@ export const MoviePage = () => {
     };
 
     void fetchLoggedInFirstReview();
-  }, [isLoggedIn, accessToken, id]);
+  }, [isLoggedIn, accessToken, id, blockedUserList]);
 
   if (movieData == null || !isLoaded) {
     //console.debug(reviewList);
