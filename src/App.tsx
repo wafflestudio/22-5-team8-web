@@ -6,6 +6,7 @@ import { AuthProvider } from './components/AuthContext';
 import { ReturnPathProvider } from './components/ReturnPathContext';
 import CollectionPage from './pages/collection/CollectionPage';
 import { Collections } from './pages/collection/Collections';
+import { EditCollection } from './pages/collection/EditCollection';
 import { NewCollection } from './pages/collection/NewCollection';
 import ReplyPage from './pages/CommentPage';
 import { Index } from './pages/Index';
@@ -56,6 +57,10 @@ export const App = () => {
             <Route
               path="collections/:collectionId"
               element={<CollectionPage />}
+            />
+            <Route
+              path="/collections/:collectionId/edit"
+              element={<EditCollection />}
             />
           </Routes>
         </AuthProvider>

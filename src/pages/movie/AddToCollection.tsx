@@ -109,7 +109,7 @@ const AddToCollection = ({
   return (
     <div className="fixed inset-0 bg-white z-50">
       <div className="flex items-center justify-between p-2 border-b">
-        <button onClick={onClose} className="text-gray-600 px-4">
+        <button onClick={onClose} className="text-hotPink px-4">
           취소
         </button>
         <h1 className="font-bold">컬렉션에 추가</h1>
@@ -163,6 +163,7 @@ const AddToCollection = ({
                       <input
                         type="checkbox"
                         checked={selectedCollections.includes(collection)}
+                        readOnly
                         className="w-full h-full rounded-full appearance-none border-2 border-gray-300 bg-white transition-colors checked:bg-hotPink checked:border-hotPink pointer-events-none"
                       />
                     )}
