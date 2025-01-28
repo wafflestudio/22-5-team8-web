@@ -7,6 +7,7 @@ import { useReturnPath } from '../components/ReturnPathContext';
 type LoginResponse = {
   access_token: string;
   refresh_token: string;
+  user_id: number;
 };
 
 export const Login = () => {
@@ -53,7 +54,7 @@ export const Login = () => {
       }
 
       const data = (await response.json()) as LoginResponse;
-      login(data.access_token, data.refresh_token);
+      login(data.access_token, data.refresh_token, data.user_id);
 
       console.debug('Login successful:', data);
       try {

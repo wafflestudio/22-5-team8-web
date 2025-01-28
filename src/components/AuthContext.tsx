@@ -17,7 +17,8 @@ interface AuthContextType {
   user: User | null;
   accessToken: string | null;
   refreshToken: string | null;
-  login: (accessToken: string, refreshToken: string) => void;
+  user_id: number | null;
+  login: (accessToken: string, refreshToken: string, user_id: number) => void;
   fetchUser: () => Promise<void>;
   logout: () => void;
 }
@@ -27,6 +28,7 @@ export const AuthContext = createContext<AuthContextType>({
   user: null,
   accessToken: null,
   refreshToken: null,
+  user_id: null,
   login: () => {},
   fetchUser: async () => {},
   logout: () => {},
@@ -37,6 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [user_id, setUserId] = useState<number | null>(null);
 
   // Logout function
   const logout = useCallback(() => {
@@ -45,19 +48,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setAccessToken(null);
     setRefreshToken(null);
+    setUserId(null);
     localStorage.removeItem('user');
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user_id');
   }, []);
 
   // Login function
-  const login = (loginAccessToken: string, loginRefreshToken: string) => {
+  const login = (
+    loginAccessToken: string,
+    loginRefreshToken: string,
+    loginUserId: number,
+  ) => {
     console.debug('Logging in...');
     setIsLoggedIn(true);
     setAccessToken(accessToken);
     setRefreshToken(refreshToken);
+    setUserId(user_id);
     localStorage.setItem('accessToken', loginAccessToken);
     localStorage.setItem('refreshToken', loginRefreshToken);
+    localStorage.setItem('user_id', loginUserId.toString());
   };
 
   const refreshAccessToken = useCallback(async () => {
@@ -155,6 +166,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     console.debug('Initializing auth context...');
     const storedAccessToken = localStorage.getItem('accessToken');
     const storedRefreshToken = localStorage.getItem('refreshToken');
+    const storedUserId = localStorage.getItem('user_id');
     const storedUser = localStorage.getItem('user');
 
     if (
@@ -166,6 +178,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setAccessToken(storedAccessToken);
       setRefreshToken(storedRefreshToken);
       setIsLoggedIn(true);
+    }
+
+    if (storedUserId !== null && storedUserId !== '') {
+      setUserId(Number(storedUserId));
     }
 
     if (storedUser !== null && storedUser !== '') {
@@ -180,6 +196,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         accessToken,
         refreshToken,
+        user_id,
         login,
         fetchUser,
         logout,
