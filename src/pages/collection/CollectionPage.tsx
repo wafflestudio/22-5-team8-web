@@ -112,8 +112,8 @@ const CollectionPage = () => {
   return (
     <>
       <div className="flex flex-col min-h-screen relative">
-        <div className="flex-1 px-4 py-2 pb-16 pt-4">
-          <div className="flex justify-between items-center mb-4">
+        <div className="fixed top-0 left-0 right-0 bg-white z-20 px-4 py-2">
+          <div className="flex justify-between items-center">
             <img
               src={back}
               className="w-5 h-5 fill-current"
@@ -159,6 +159,9 @@ const CollectionPage = () => {
               </div>
             )}
           </div>
+        </div>
+
+        <div className="flex-1 px-4 py-2 pb-16 pt-16">
           {user != null && (
             <Link
               to={`/profile/${user.user_id}`}

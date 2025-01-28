@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { AuthContext, useAuth } from '../../components/AuthContext';
+import { AuthContext } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
 import { fetchMovie } from '../../utils/Functions';
 import type { Collection, Movie } from '../../utils/Types';
@@ -9,27 +9,20 @@ import { SearchMovie } from './SearchMovie';
 
 export const NewCollection = () => {
   const navigate = useNavigate();
-  const { page_user_id } = useParams();
-  const { user_id } = useAuth();
+  const [searchParams] = useSearchParams();
   const { accessToken } = useContext(AuthContext);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [showSearch, setShowSearch] = useState(false);
-  const [selectedMovies, setSelectedMovies] = useState<number[]>([]);
+  const [selectedMovies, setSelectedMovies] = useState<number[]>(() => {
+    const movieId = searchParams.get('movie');
+    return movieId != null ? [parseInt(movieId, 10)] : [];
+  });
   const [tempMovies, setTempMovies] = useState<number[]>([]);
   const [movieDetails, setMovieDetails] = useState<Movie[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (page_user_id !== String(user_id)) {
-      setError(
-        'Unauthorized: You can only create collections for your own account',
-      );
-      return;
-    }
-  }, [page_user_id, user_id]);
 
   const handleMoviesSubmit = (movies: number[]) => {
     setSelectedMovies((prev) => {
