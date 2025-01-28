@@ -37,11 +37,11 @@ export const App = () => {
             <Route path="/news" element={<News />} />
             <Route path="/profile/:user_id" element={<Profile />} />
             <Route
-              path="/profile/:user_id/collections"
+              path="/profile/:page_user_id/collections"
               element={<Collections />}
             />
             <Route
-              path="/profile/:user_id/collections/new"
+              path="/profile/:page_user_id/collections/new"
               element={<NewCollection />}
             />
             <Route path="/mypage" element={<MyPage />} />

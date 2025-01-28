@@ -6,7 +6,7 @@ import type { Movie, SearchResultRaw } from '../../utils/Types';
 
 interface SearchMovieProps {
   onClose: () => void;
-  onSubmit?: (selectedMovies: number[]) => void; // optional로 변경
+  onSubmit?: (selectedMovies: number[]) => void;
 }
 
 export const SearchMovie = ({ onClose, onSubmit }: SearchMovieProps) => {

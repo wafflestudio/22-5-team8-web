@@ -14,7 +14,7 @@ import { fetchCollection, fetchUser } from '../../utils/Functions';
 import type { Collection, UserProfile } from '../../utils/Types';
 
 const CollectionPage = () => {
-  const { accessToken } = useContext(AuthContext);
+  const { accessToken, user_id } = useContext(AuthContext);
   const { collectionId } = useParams();
   const navigate = useNavigate();
   const [collection, setCollection] = useState<Collection | null>(null);
@@ -68,7 +68,7 @@ const CollectionPage = () => {
     setError(null);
     try {
       if (collectionId != null) {
-        setIsLoading(true); // 삭제 작업 시작 시 로딩 상태로 변경
+        setIsLoading(true);
         const response = await fetch(`/api/collections/${collectionId}`, {
           method: 'DELETE',
           headers: {
@@ -89,7 +89,7 @@ const CollectionPage = () => {
     } catch (err) {
       setError((err as Error).message);
       console.error('Collection deletion error:', err);
-      setIsLoading(false); // 에러 발생 시 로딩 상태 해제
+      setIsLoading(false);
     }
   };
 
@@ -121,44 +121,44 @@ const CollectionPage = () => {
                 void navigate(-1);
               }}
             />
-            <div className="relative" ref={dropdownRef}>
-              <img
-                src={etc}
-                className="cursor-pointer w-8 h-8"
-                onClick={() => {
-                  setShowDropdown(!showDropdown);
-                }}
-              />{' '}
-              {/* 현재 로그인한 유저가 이거 만든 사람일 때 표시되도록 해야 함 */}
-              {showDropdown && (
-                <div className="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg z-50 border">
-                  <div className="py-1">
-                    <button
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => {
-                        setShowDropdown(false);
-                        setShowDeleteModal(true);
-                      }}
-                    >
-                      삭제
-                    </button>
-                    <button
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => {
-                        setShowDropdown(false);
-                        if (collectionId != null) {
-                          void navigate(`/collections/${collectionId}/edit`);
-                        }
-                      }}
-                    >
-                      수정하기
-                    </button>
+            {user_id === collection.user_id && (
+              <div className="relative" ref={dropdownRef}>
+                <img
+                  src={etc}
+                  className="cursor-pointer w-8 h-8"
+                  onClick={() => {
+                    setShowDropdown(!showDropdown);
+                  }}
+                />
+                {showDropdown && (
+                  <div className="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg z-50 border">
+                    <div className="py-1">
+                      <button
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => {
+                          setShowDropdown(false);
+                          setShowDeleteModal(true);
+                        }}
+                      >
+                        삭제
+                      </button>
+                      <button
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => {
+                          setShowDropdown(false);
+                          if (collectionId != null) {
+                            void navigate(`/collections/${collectionId}/edit`);
+                          }
+                        }}
+                      >
+                        수정하기
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
-
           {user != null && (
             <Link
               to={`/profile/${user.user_id}`}

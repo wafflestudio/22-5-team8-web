@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import NoResultSvg from '../../assets/no_result.svg';
+import { useAuth } from '../../components/AuthContext';
 import CollectionBlock from '../../components/CollectionBlock';
 import { Footerbar } from '../../components/Footerbar';
 import type { Collection } from '../../utils/Types';
 
 export const Collections = () => {
-  const { user_id } = useParams();
+  const { user_id } = useAuth();
+  const { page_user_id } = useParams();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,10 +19,10 @@ export const Collections = () => {
       setError(null);
       setIsLoading(true);
       try {
-        if (user_id === undefined) {
+        if (page_user_id === undefined) {
           throw new Error('User ID is undefined');
         }
-        const response = await fetch(`/api/collections/list/${user_id}`, {
+        const response = await fetch(`/api/collections/list/${page_user_id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -41,17 +43,20 @@ export const Collections = () => {
       }
     };
     void fetchUserCollections();
-  }, [user_id]);
+  }, [page_user_id]);
 
   return (
     <>
       <div className="flex flex-col min-h-screen relative">
         <div className="flex-none fixed top-0 w-full z-10 flex justify-between items-center px-4 py-3 bg-white">
           <span className="text-2xl font-bold text-black">컬렉션</span>
-          <Link to={`/profile/${user_id ?? ''}/collections/new`}>
-            <span className="text-sm text-[hotpink]">새 컬렉션</span>{' '}
-            {/* 이것도 현재 로그인한 유저가 아니면 안 보여야 함 */}
-          </Link>
+          {page_user_id !== undefined &&
+            user_id !== null &&
+            page_user_id === user_id.toString() && (
+              <Link to={`/profile/${page_user_id}/collections/new`}>
+                <span className="text-sm text-[hotpink]">새 컬렉션</span>{' '}
+              </Link>
+            )}
         </div>
         <div className="flex-1 text-center px-4 py-2 pb-16 pt-16">
           {isLoading && <div>Loading...</div>}
