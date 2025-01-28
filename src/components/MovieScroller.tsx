@@ -31,8 +31,8 @@ export const MovieScroller = ({ chart_type }: MovieScrollerProps) => {
         }
 
         const data = (await response.json()) as Movie[];
-        const sortedMovies = data.sort((a, b) => a.id - b.id);
-        setMovies(sortedMovies);
+        data.reverse();
+        setMovies(data);
       } catch (err) {
         setError((err as Error).message);
       }
