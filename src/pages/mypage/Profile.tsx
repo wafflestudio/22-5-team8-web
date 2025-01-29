@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
-import { FaCog } from 'react-icons/fa'; //
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
+import { useAuth } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
 import { type UserProfile } from '../../utils/Types';
+import { MyPage } from './MyPage';
 
 export const Profile = () => {
-  const { user_id } = useParams();
+  const { view_user_id } = useParams();
+  const viewUserId = Number(view_user_id);
+  const { user_id } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [following, setFollowing] = useState(false);
@@ -14,10 +17,10 @@ export const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        if (user_id === undefined) {
+        if (isNaN(viewUserId)) {
           throw new Error('User ID is undefined');
         }
-        const response = await fetch(`/api/users/profile/${user_id}`);
+        const response = await fetch(`/api/users/profile/${viewUserId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch profile');
         }
@@ -29,16 +32,21 @@ export const Profile = () => {
     };
 
     void fetchProfile();
-  }, [user_id]);
+  }, [viewUserId]);
+
+  // Check if the user is viewing their own profile
+  if(user_id === viewUserId) {
+    return <MyPage />;
+  }
 
   // Handle follow/unfollow button click
   const toggleFollow = async () => {
     try {
-      if (user_id === undefined) {
+      if (isNaN(viewUserId)) {
         throw new Error('User ID is undefined');
       }
 
-      const endpoint = `/api/users/follow/${user_id}`;
+      const endpoint = `/api/users/follow/${viewUserId}`;
 
       const method = following ? 'DELETE' : 'POST';
 
@@ -81,11 +89,6 @@ export const Profile = () => {
               {<h1 className="text-xl font-bold">{profile?.status_message}</h1>}
             </div>
           </div>
-          <Link to="/mypage/settings">
-            <button className="absolute top-3 right-3 text-gray-600 hover:text-gray-800">
-              <FaCog className="w-6 h-6" />
-            </button>
-          </Link>
           {/* Follow Button */}
           <div className="w-full mt-3">
             <button
@@ -109,13 +112,13 @@ export const Profile = () => {
             <p className="text-gray-500">평가</p>
           </div>
           <div>
-            <p className="font-bold">{profile?.comment_count}</p>
+            <p className="font-bold">{profile?.review_count}</p>
             <p className="text-gray-500">코멘트</p>
           </div>
           <div
             onClick={() => {
-              if (user_id != null) {
-                void navigate(`/profile/${user_id}/collections`);
+              if (isNaN(viewUserId)) {
+                void navigate(`/profile/${viewUserId}/collections`);
               }
             }}
           >
