@@ -10,6 +10,7 @@ import ButtonBar from './ButtonBar';
 import CastList from './CastList';
 import CommentPopup from './CommentPopup';
 import { Header } from './Header';
+import MoreOptionsPopup from './MoreOptionsPopup';
 import StarRating from './StarRating';
 
 export const MoviePage = () => {
@@ -57,6 +58,7 @@ export const MoviePage = () => {
   const [myReview, setMyReview] = useState<Review | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isCommentPopupOpen, setIsCommentPopupOpen] = useState(false);
+  const [isMoreOptionsOpen, setIsMoreOptionsOpen] = useState(false);
 
   useEffect(() => {
     const fetchMovieData = async () => {
@@ -184,6 +186,9 @@ export const MoviePage = () => {
             movie={movieData}
             myReview={myReview}
             onReviewUpdate={handleMyReviewUpdate}
+            onMoreClick={() => {
+              setIsMoreOptionsOpen(true);
+            }}
           />
           <hr className="w-11/12 my-3 bg-gray-300" />
           {(() => {
@@ -269,6 +274,23 @@ export const MoviePage = () => {
         myReview={myReview}
         onReviewUpdate={handleMyReviewUpdate}
       />
+      {isMoreOptionsOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black bg-opacity-50"
+            onClick={() => {
+              setIsMoreOptionsOpen(false);
+            }}
+          />
+          <MoreOptionsPopup
+            isOpen={isMoreOptionsOpen}
+            onClose={() => {
+              setIsMoreOptionsOpen(false);
+            }}
+            movie={movieData}
+          />
+        </>
+      )}
     </>
   );
 };

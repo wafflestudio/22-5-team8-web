@@ -12,15 +12,19 @@ import type { Movie, Review } from '../../utils/Types';
 import CommentPopup from './CommentPopup';
 import NeedLoginPopup from './NeedLoginPopup';
 
+interface ButtonBarProps {
+  movie: Movie;
+  myReview: Review | null;
+  onReviewUpdate: (review: Review | null) => void;
+  onMoreClick?: () => void;
+}
+
 const ButtonBar = ({
   movie,
   myReview,
   onReviewUpdate,
-}: {
-  movie: Movie;
-  myReview: Review | null;
-  onReviewUpdate: (updatedReview: Review | null) => void;
-}) => {
+  onMoreClick,
+}: ButtonBarProps) => {
   const { isLoggedIn, accessToken } = useAuth();
 
   const [buttonState, setButtonState] = useState<'' | 'WatchList' | 'Watching'>(
@@ -104,11 +108,12 @@ const ButtonBar = ({
     setIsCommentPopupOpen(true);
   };
 
-  const onClickEtc = () => {
+  const handleMoreClick = () => {
     if (!isLoggedIn) {
       setIsNeedLoginPopupOpen(true);
       return;
     }
+    onMoreClick?.();
   };
 
   return (
@@ -146,11 +151,11 @@ const ButtonBar = ({
           </span>
         </button>
         <button
-          onClick={onClickEtc}
-          className="flex flex-col w-1/4 items-center gap-2"
+          onClick={handleMoreClick}
+          className="flex flex-col items-center justify-center"
         >
-          <img src={etc} alt="etc" />
-          <span>더보기</span>
+          <img src={etc} alt="more" />
+          <span className="text-xs mt-1 text-gray-600">더보기</span>
         </button>
       </div>
       <NeedLoginPopup
