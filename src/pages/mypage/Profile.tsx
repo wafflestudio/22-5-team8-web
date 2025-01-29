@@ -35,7 +35,7 @@ export const Profile = () => {
   }, [viewUserId]);
 
   // Check if the user is viewing their own profile
-  if(user_id === viewUserId) {
+  if (user_id === viewUserId) {
     return <MyPage />;
   }
 
