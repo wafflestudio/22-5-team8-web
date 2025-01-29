@@ -36,7 +36,7 @@ export const App = () => {
             <Route path="/signup" element={<Signup />} />\
             <Route path="/rating" element={<Rating />} />
             <Route path="/news" element={<News />} />
-            <Route path="/profile/:user_id" element={<Profile />} />
+            <Route path="/profile/:view_user_id" element={<Profile />} />
             <Route
               path="/profile/:page_user_id/collections"
               element={<Collections />}
