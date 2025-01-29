@@ -88,7 +88,7 @@ export const fetchUser = async (userId: number) => {
 
 export const fetchUserReviews = async (accessToken: string) => {
   try {
-    const response = await fetch(`/api/reviews/list`, {
+    const response = await fetch(`/api/reviews/user`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -106,9 +106,9 @@ export const fetchUserReviews = async (accessToken: string) => {
   }
 };
 
-export const fetchReviewWithId = async (movieId: number, reviewId: number) => {
+export const fetchReviewWithId = async (reviewId: number) => {
   try {
-    const response = await fetch(`/api/reviews/${movieId}`, {
+    const response = await fetch(`/api/reviews/${reviewId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -118,9 +118,9 @@ export const fetchReviewWithId = async (movieId: number, reviewId: number) => {
     if (!response.ok) {
       throw new Error('Failed to fetch review');
     }
-    const reviews = (await response.json()) as Review[];
+    const review = (await response.json()) as Review;
 
-    return reviews.find((r) => r.id === reviewId);
+    return review;
   } catch (err) {
     console.error('Review fetch error:', err);
     return null;
@@ -129,7 +129,7 @@ export const fetchReviewWithId = async (movieId: number, reviewId: number) => {
 
 export const fetchReplyList = async (reviewId: number) => {
   try {
-    const response = await fetch(`/api/comments/${reviewId}`, {
+    const response = await fetch(`/api/comments/review/${reviewId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

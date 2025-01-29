@@ -49,55 +49,25 @@ const CommentPopup = ({
   };
 
   const onSave = () => {
-    void (async () => {
-      if (accessToken === null) {
-        return;
-      }
+    if (accessToken === null) {
+      return;
+    }
 
-      if (myReview === null) {
-        void newReview(
-          movie.id,
-          accessToken,
-          text,
-          0,
-          isOn,
-          '',
-          onReviewUpdate,
-        );
-      } else {
-        void updateReview(
-          myReview.id,
-          accessToken,
-          text,
-          myReview.rating === null ? 0 : myReview.rating,
-          isOn,
-          myReview.status,
-          onReviewUpdate,
-        );
-      }
+    if (myReview === null) {
+      void newReview(movie.id, accessToken, text, 0, isOn, '', onReviewUpdate);
+    } else {
+      void updateReview(
+        myReview.id,
+        accessToken,
+        text,
+        myReview.rating === null ? 0 : myReview.rating,
+        isOn,
+        myReview.status,
+        onReviewUpdate,
+      );
+    }
 
-      try {
-        const response = await fetch(`/api/reviews/${movie.id}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({ content: text, spoiler: isOn, status: '' }),
-        });
-
-        //const data = (await response.json()) as Review;
-        //console.log(data);
-
-        if (!response.ok) {
-          throw new Error('Failed to save review');
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        onClose();
-      }
-    })();
+    onClose();
   };
 
   return (
@@ -137,7 +107,7 @@ const CommentPopup = ({
         value={text}
         onChange={handleChange}
         placeholder="이 작품에 대한 생각을 자유롭게 표현해주세요."
-        className="w-full h-full px-4 focus:outline-none text-sm text-start"
+        className="w-full h-full px-4 focus:outline-none focus:ring-0 border-none text-sm text-start"
       />
       <div className="px-4 py-2 text-sm text-gray-400">
         {text.length} / 10000

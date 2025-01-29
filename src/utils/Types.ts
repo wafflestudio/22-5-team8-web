@@ -34,6 +34,7 @@ export type Review = {
   created_at: string;
   spoiler: boolean;
   status: '' | 'WatchList' | 'Watching';
+  like: boolean;
 };
 
 export type Reply = {
@@ -45,6 +46,7 @@ export type Reply = {
   content: string;
   likes_count: number;
   created_at: string;
+  like: boolean;
 };
 
 export type People = {

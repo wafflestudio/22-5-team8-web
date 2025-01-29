@@ -3,12 +3,14 @@ import { isMobile } from 'react-device-detect';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import back from '../../assets/back.svg';
+import { useAuth } from '../../components/AuthContext';
 import CommnetFragment from '../../components/CommentFragment';
 import { Footerbar } from '../../components/Footerbar';
 import type { Review } from '../../utils/Types';
 
 const CommentList = () => {
   const navigate = useNavigate();
+  const { accessToken } = useAuth();
 
   const handleBack = () => {
     void navigate(-1);
@@ -16,26 +18,48 @@ const CommentList = () => {
 
   const { movieId } = useParams();
   const [commentList, setCommentList] = useState<Review[]>([]);
+  const [loggedInCommentList, setLoggedInCommentList] = useState<Review[]>([]);
   const id: number = parseInt(movieId == null ? '0' : movieId);
 
   useEffect(() => {
     const fetchCommentList = async () => {
-      try {
-        const response = await fetch(`/api/reviews/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch comment list');
+      if (accessToken === null) {
+        try {
+          const response = await fetch(`/api/reviews/movie/${id}`);
+          if (!response.ok) {
+            throw new Error('Failed to fetch comment list');
+          }
+          const data = (await response.json()) as Review[];
+          const validData = data.filter((review) => review.content !== '');
+          setCommentList(validData);
+          //console.log(data);
+        } catch (err) {
+          console.error(err);
         }
-        const data = (await response.json()) as Review[];
-        const validData = data.filter((review) => review.content !== '');
-        setCommentList(validData);
-        //console.log(data);
-      } catch (err) {
-        console.error(err);
+      } else {
+        try {
+          const response = await fetch(`/api/reviews/list/${id}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+          if (!response.ok) {
+            throw new Error('Failed to fetch comment list');
+          }
+          const data = (await response.json()) as Review[];
+          const validData = data.filter((review) => review.content !== '');
+          setLoggedInCommentList(validData);
+          //console.log(data);
+        } catch (err) {
+          console.error(err);
+        }
       }
     };
 
     void fetchCommentList();
-  }, [id]);
+  }, [accessToken, id]);
 
   return (
     <div className="flex flex-col">
@@ -49,14 +73,17 @@ const CommentList = () => {
         <h1 className="text-xl font-semibold">코멘트</h1>
       </div>
       <div className="flex flex-col pt-16 pb-20">
-        {commentList.map((comment) => (
-          <CommnetFragment
-            key={comment.id}
-            viewMode="commentPage"
-            initialReview={comment}
-          />
-        ))}
-        {commentList.length === 0 ? (
+        {(accessToken === null ? commentList : loggedInCommentList).map(
+          (comment) => (
+            <CommnetFragment
+              key={comment.id}
+              viewMode="commentPage"
+              initialReview={comment}
+            />
+          ),
+        )}
+        {(accessToken === null ? commentList : loggedInCommentList).length ===
+        0 ? (
           <p className="text-center">코멘트가 없습니다.</p>
         ) : (
           ''

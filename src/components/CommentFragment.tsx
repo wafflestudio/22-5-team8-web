@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import bookmark from '../assets/bookmark_gray.svg';
 import comment from '../assets/comment.svg';
 import edit from '../assets/edit.svg';
 import noProfile from '../assets/no_profile.svg';
+import watching from '../assets/not_watching.svg';
 import recommend from '../assets/recommend.svg';
 import trash from '../assets/trash.svg';
 import NeedLoginPopup from '../pages/movie/NeedLoginPopup';
 import { deleteReview, newReview } from '../utils/Functions';
 import type { Reply, Review } from '../utils/Types';
 import { useAuth } from './AuthContext';
+import { Modal } from './Modal';
 
 type CommnetFragmentProps = {
   viewMode: 'moviePage' | 'commentPage' | 'myComment';
@@ -25,6 +28,7 @@ const CommnetFragment = ({
   const [review, setReview] = useState<Review | null>(initialReview);
   const [isNeedLoginPopupOpen, setIsNeedLoginPopupOpen] =
     useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [replyList, setReplyList] = useState<Reply[] | null>(null);
   const [showContent, setShowContent] = useState<boolean>(true);
   const [liked, setLiked] = useState<boolean>(false);
@@ -36,6 +40,16 @@ const CommnetFragment = ({
   };
 
   useEffect(() => {
+    if (initialReview === null) {
+      return;
+    }
+
+    setReview(initialReview);
+    setLiked(initialReview.like);
+    //console.log(initialReview)
+  }, [initialReview]);
+
+  useEffect(() => {
     const fetchReplyList = async () => {
       if (review === null) {
         return;
@@ -44,7 +58,7 @@ const CommnetFragment = ({
       if (review.spoiler) setShowContent(false);
 
       try {
-        const response = await fetch(`/api/comments/${review.id}`);
+        const response = await fetch(`/api/comments/review/${review.id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch reply list');
         }
@@ -59,13 +73,15 @@ const CommnetFragment = ({
   }, [review]);
 
   useEffect(() => {
-    const updateReview = async () => {
+    const updateInitialReview = async () => {
       if (initialReview === null) {
         return;
       }
 
       try {
-        const response = await fetch(`/api/reviews/${initialReview.movie_id}`);
+        const response = await fetch(
+          `/api/reviews/movie/${initialReview.movie_id}`,
+        );
         if (!response.ok) {
           throw new Error('Failed to fetch review');
         }
@@ -78,7 +94,7 @@ const CommnetFragment = ({
       }
     };
 
-    void updateReview();
+    void updateInitialReview();
   }, [liked, initialReview]);
 
   if (review === null) {
@@ -117,6 +133,15 @@ const CommnetFragment = ({
     void updateLike();
   };
 
+  const onClickDelete = () => {
+    if (accessToken === null) {
+      setIsNeedLoginPopupOpen(true);
+      return;
+    }
+
+    setIsModalOpen(true);
+  };
+
   const handleDelete = async () => {
     if (accessToken === null) {
       setIsNeedLoginPopupOpen(true);
@@ -134,6 +159,7 @@ const CommnetFragment = ({
         review.status,
         () => {},
       );
+      setIsModalOpen(false);
       window.location.reload();
     } catch (err) {
       console.error(err);
@@ -149,11 +175,13 @@ const CommnetFragment = ({
       <>
         <div className="py-2 px-4 rounded-lg">
           <div className="border rounded-lg p-4 bg-white flex flex-col items-center">
-            <img
-              src={noProfile}
-              alt="프로필"
-              className="w-16 h-16 bg-gray-200 rounded-full mb-2 flex items-center justify-center"
-            />
+            <Link to={`/profile/${review.user_id}`}>
+              <img
+                src={noProfile}
+                alt="프로필"
+                className="w-16 h-16 bg-gray-200 rounded-full mb-2 flex items-center justify-center"
+              />
+            </Link>
             <Link
               to={`/comments/${review.movie_id}/${review.id}`}
               className={`mb-2 text-ellipsis overflow-hidden line-clamp-3 whitespace-pre-line`}
@@ -162,7 +190,7 @@ const CommnetFragment = ({
             </Link>
             <div className="flex items-center mb-1 space-x-4 scale-90">
               <button
-                onClick={void handleDelete}
+                onClick={onClickDelete}
                 className="flex items-center text-gray-600"
               >
                 <img src={trash} alt="삭제" className="w-5 h-5 mr-1" />
@@ -179,6 +207,17 @@ const CommnetFragment = ({
             </div>
           </div>
         </div>
+        <Modal
+          isOpen={isModalOpen}
+          title="알림"
+          message="댓글을 삭제하시겠어요?"
+          onConfirm={() => {
+            void handleDelete();
+          }}
+          onCancel={() => {
+            setIsModalOpen(false);
+          }}
+        />
       </>
     );
   }
@@ -187,17 +226,32 @@ const CommnetFragment = ({
     <>
       <div className={`flex flex-col rounded my-2 mx-4 p-2 bg-gray-100`}>
         <div className="flex items-center">
-          <img
-            src={noProfile}
-            alt="프로필"
-            className="w-10 h-10 rounded-full"
-          />
+          <Link to={`/profile/${review.user_id}`}>
+            <img
+              src={noProfile}
+              alt="프로필"
+              className="w-10 h-10 rounded-full"
+            />
+          </Link>
           <Link to={`/profile/${review.user_id}`} className="ml-2">
             {review.user_name}
           </Link>
           <div className="ml-auto mr-2 text-sm bg-white rounded-full px-2 text-center">
-            &#9733;{' '}
-            {review.rating !== null ? review.rating.toFixed(1) : '평가 전'}
+            {review.rating !== null && review.rating !== 0 ? (
+              `★ ${review.rating.toFixed(1)}`
+            ) : review.status === '' ? (
+              '평가 전'
+            ) : review.status === 'Watching' ? (
+              <div className="flex items-center justify-center">
+                <img className="w-4 h-4 mr-1" src={watching}></img>
+                {'보는 중'}
+              </div>
+            ) : (
+              <div className="flex items-center justify-center">
+                <img className="w-4 h-4 mr-1" src={bookmark}></img>
+                {'보고싶어요'}
+              </div>
+            )}
           </div>
         </div>
         <hr className="my-1 bg-gray-300" />
@@ -234,7 +288,10 @@ const CommnetFragment = ({
           </div>
         </div>
         <hr className="my-1 bg-gray-300" />
-        <button className="text-hotPink" onClick={onClick}>
+        <button
+          className={`w-20 rounded ${liked ? 'text-white bg-hotPink' : 'text-hotPink'}`}
+          onClick={onClick}
+        >
           좋아요
         </button>
       </div>

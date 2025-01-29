@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import back from '../assets/back.svg';
 import noProfile from '../assets/no_profile.svg';
+import { Footerbar } from '../components/Footerbar';
 import type {
   People,
   PeopleMovieCredit,
@@ -169,6 +170,9 @@ const PeoplePage = () => {
             ''
           )}
         </div>
+      </div>
+      <div className="flex-none fixed z-10 bottom-0 w-full">
+        <Footerbar />
       </div>
     </div>
   );
