@@ -73,6 +73,57 @@ export const Login = () => {
     }
   };
 
+  const handleKakaoLogin = async () => {
+    try {
+      const response = await fetch(`/api/auth/kakao`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error('Kakao login failed.');
+      }
+
+      const data = (await response.json()) as string;
+      console.debug('Login successful:', data);
+    } catch (err) {
+      console.error('Kakao login error:', err);
+    } 
+  };
+
+  const handleGoogleLogin = async () => {
+    const GOOGLE_REDIRECT_URI = 'http://localhost:5173/oauth/google';
+
+    const GOOGLE_AUTH_URL = 
+      'https://accounts.google.com/o/oauth2/v2/auth?' +
+      'client_id=YOUR_CLIENT_ID' +
+      '&redirect_uri=' + GOOGLE_REDIRECT_URI +
+      '&response_type=code' +
+      '&scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
+
+    window.location.href = GOOGLE_AUTH_URL;
+    const params = new URLSearchParams(window.location.search);
+    const AUTH_CODE = params.get('code') as string;
+
+    try {
+      const response = await fetch(`/api/auth/google`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(AUTH_CODE),
+      });
+
+      if (!response.ok) {
+        throw new Error('Kakao login failed.');
+      }
+
+      const data = (await response.json()) as string;
+      console.debug('Login successful:', data);
+    } catch (err) {
+      console.error('Kakao login error:', err);
+    } 
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 items-center justify-center">
       <div className="flex-1 bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
@@ -149,12 +200,16 @@ export const Login = () => {
         </div>
 
         <div className="flex justify-center space-x-6">
-          <CircleIcon bgColor="bg-yellow-400">
-            <KakaoIcon />
-          </CircleIcon>
-          <CircleIcon bgColor="bg-white border">
-            <GoogleIcon />
-          </CircleIcon>
+          <div onClick={() => { void handleKakaoLogin(); }}>
+           <CircleIcon bgColor="bg-yellow-400">
+              <KakaoIcon />
+           </CircleIcon>
+          </div>
+          <div onClick={() => { void handleGoogleLogin(); }}>
+            <CircleIcon bgColor="bg-white border">
+              <GoogleIcon />
+            </CircleIcon>
+          </div>
           <CircleIcon bgColor="bg-blue-400">
             <TwitterIcon />
           </CircleIcon>
