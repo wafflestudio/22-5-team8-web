@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { useAuth } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
+import MovieCalendar from '../../components/MovieCalendar';
 import { type UserProfile } from '../../utils/Types';
 import { MyPage } from './MyPage';
 
@@ -67,7 +68,7 @@ export const Profile = () => {
   return (
     <div className="flex flex-col h-screen">
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto bg-gray-100">
+      <div className="flex-1 overflow-y-auto bg-white">
         {/* Top Profile Section */}
         <div className="w-full bg-white p-6 relative">
           <div className="flex flex-col items-start space-y-4">
@@ -127,7 +128,7 @@ export const Profile = () => {
           </div>
         </div>
         {/* Saved Items Section */}
-        <div className="bg-gray-100 p-4">
+        <div className="bg-white p-4">
           <h2 className="text-lg font-semibold mb-2">보관함</h2>
           <div className="grid grid-cols-4 gap-4">
             <div className="text-center">
@@ -150,27 +151,7 @@ export const Profile = () => {
         </div>
 
         {/* Calendar Section */}
-        <div className="p-4">
-          <h2 className="text-lg font-semibold">캘린더</h2>
-          <div className="text-center py-4">
-            <p className="text-xl font-bold">2025.1</p>
-          </div>
-          <div className="grid grid-cols-7 text-sm">
-            {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
-              <div key={day} className="py-2">
-                {day}
-              </div>
-            ))}
-            {Array.from({ length: 31 }).map((_, i) => (
-              <div
-                key={i}
-                className={`py-4 ${i + 1 === 6 ? 'text-pink-500' : ''}`}
-              >
-                {i + 1}
-              </div>
-            ))}
-          </div>
-        </div>
+        <MovieCalendar />
       </div>
 
       {/* Footer Section */}
