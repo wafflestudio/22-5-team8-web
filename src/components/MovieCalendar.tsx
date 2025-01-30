@@ -104,7 +104,7 @@ const MovieCalendar = () => {
           setSelectedDate(date as Date);
         }}
         formatDay={() => ''}
-        formatMonthYear={(locale, date) => moment(date).format('YYYY.M')}
+        formatMonthYear={(_, date) => moment(date).format('YYYY.M')}
         calendarType="gregory"
         prev2Label={null}
         next2Label={null}
