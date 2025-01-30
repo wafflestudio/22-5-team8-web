@@ -1,33 +1,99 @@
 import 'react-calendar/dist/Calendar.css';
 
 import moment from 'moment';
+import { useState } from 'react';
 import Calendar from 'react-calendar';
 import { useNavigate } from 'react-router-dom';
 
-//import testPoster from '../assets/test-poster.png';
-
-
+interface Movie {
+  id: number;
+  title: string;
+  poster: string; // URL to poster image
+}
 
 const MovieCalendar = () => {
   const navigate = useNavigate();
+  const [activeStartDate, setActiveStartDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
-  const handleDayClick = (date: Date) => {
-    void navigate(`/monthly/${moment(date).format('DD')}`);
-  }
+  const moviesWatchedByDate: Record<string, Movie[]> = {
+    '2025-01-21': [
+      { id: 1, title: 'Movie A', poster: 'https://placehold.co/20x20?text=MA' },
+      { id: 2, title: 'Movie B', poster: 'https://placehold.co/20x20?text=MB' },
+    ],
+    '2025-01-23': [
+      { id: 3, title: 'Movie C', poster: 'https://placehold.co/20x20?text=MC' },
+    ],
+  };
+
+  const handleDayClick = (clickedDate: Date) => {
+    const dateKey = moment(clickedDate).format('YYYY-MM-DD');
+    if ((moviesWatchedByDate[dateKey] ?? []).length > 0) {
+      setSelectedDate(clickedDate);
+      void navigate(`/monthly/${moment(clickedDate).format('DD')}`);
+    }
+  };
+
+  const handleCurrentMonth = () => {
+    const today = new Date();
+    setActiveStartDate(today);
+    setSelectedDate(today);
+  };
+
+  // Return a custom day cell if there is at least one movie on that date
+  const tileContent = ({ date, view }: { date: Date; view: string }) => {
+    if (view === 'month') {
+      const dateKey = moment(date).format('YYYY-MM-DD');
+      const movies = moviesWatchedByDate[dateKey];
+      if (movies !== undefined && movies.length > 0) {
+        // Show only the first movie poster
+        return (
+          <img
+            src={movies[0]?.poster}
+            alt={`Poster`}
+            style={{ width: '20px', height: '20px', marginTop: '4px' }}
+          />
+        );
+      }
+    }
+    return null;
+  };
 
   return (
-    <div className="bg-white p-4 w-full justify-center relative flex flex-col">
-      <h2 className="text-lg font-semibold mb-2">캘린더</h2>
+    <div className="bg-white p-4 w-full justify-center relative">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-lg font-semibold">캘린더</h2>
+        <button
+          onClick={handleCurrentMonth}
+          className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+        >
+          오늘
+        </button>
+      </div>
+
       <Calendar
-        formatDay={(locale, date) => moment(date).format("D")}
-        formatMonthYear={(locale, date) => moment(date).format("YYYY.M")}
+        className="border rounded-md"
+        activeStartDate={activeStartDate}
+        onActiveStartDateChange={({ activeStartDate: newStartDate }) => {
+          if (newStartDate !== null) {
+            setActiveStartDate(newStartDate);
+          }
+        }}
+        view="month"
+        value={selectedDate}
+        onChange={(date) => {
+          setSelectedDate(date as Date);
+        }}
+        formatDay={(locale, date) => moment(date).format('D')}
+        formatMonthYear={(locale, date) => moment(date).format('YYYY.M')}
         calendarType="gregory"
         prev2Label={null}
         next2Label={null}
         showNeighboringMonth={false}
-        minDetail='month'
-        maxDetail='month'
+        minDetail="month"
+        maxDetail="month"
         onClickDay={handleDayClick}
+        tileContent={tileContent}
       />
     </div>
   );
