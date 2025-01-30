@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.react-calendar {
+  border: none !important;
+}
+
+.react-calendar__tile {
+  border: none !important;
+  padding: 0 !important;
+}
+
+.react-calendar__navigation__label {
+  @apply font-bold text-2xl bg-white !important;
+}
+
+.react-calendar__month-view__weekdays__weekday abbr {
+  @apply text-gray-400;
+}
+
+.react-calendar__navigation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px; /* Reduce spacing between elements */
+}
