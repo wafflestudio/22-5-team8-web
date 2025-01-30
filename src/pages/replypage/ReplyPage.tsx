@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
@@ -12,6 +12,7 @@ import share from '../../assets/share.svg';
 import { useAuth } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
 import {
+  fetchLoggedInReplyList,
   fetchMovie,
   fetchReplyList,
   fetchReviewWithId,
@@ -24,23 +25,127 @@ import ReplyPopup from './ReplyPopup';
 const CommentPage = () => {
   const { movieId: movieIdString, commentId: reviewIdString } = useParams();
   const navigate = useNavigate();
+  const isInitialRender = useRef(true);
   const movieId: number = parseInt(movieIdString == null ? '0' : movieIdString);
   const reviewId: number = parseInt(
     reviewIdString == null ? '0' : reviewIdString,
   );
   const { accessToken } = useAuth();
 
+  const PAGE_SIZE = 10;
+
   const [movie, setMovie] = useState<Movie | null>(null);
   const [review, setReview] = useState<Review | null>(null);
-  const [replyList, setReplyList] = useState<Reply[] | null>(null);
-  const [loggedInReplyList, setLoggedInReplyList] = useState<Reply[] | null>(
-    null,
-  );
+  const [replyList, setReplyList] = useState<Reply[]>([]);
+  const [begin, setBegin] = useState(0);
+  const [end, setEnd] = useState(PAGE_SIZE); // 초기 로드 범위
+  const [isLoading, setIsLoading] = useState(false); // 로딩 상태
+  const [hasMore, setHasMore] = useState(true); // 추가 데이터 여부
+  const [loggedInReplyList, setLoggedInReplyList] = useState<Reply[]>([]);
   const [showContent, setShowContent] = useState<boolean>(true);
   const [isNeedLoginPopupOpen, setIsNeedLoginPopupOpen] =
     useState<boolean>(false);
   const [isReplyPopupOpen, setIsReplyPopupOpen] = useState<boolean>(false);
   const [isLike, setIsLike] = useState<boolean>(false);
+
+  const fetchReplies = useCallback(() => {
+    if (isLoading || !hasMore) return;
+    setIsLoading(true);
+
+    if (accessToken === null) {
+      fetchReplyList(reviewId, begin, end)
+        .then((data) => {
+          if (data === null) {
+            setReplyList([]);
+            setHasMore(false);
+          } else {
+            setReplyList((prev) => {
+              const uniqueReplies = data.filter(
+                (newReply) =>
+                  !prev.some((existing) => existing.id === newReply.id),
+              );
+              return [...prev, ...uniqueReplies];
+            });
+            if (data.length < PAGE_SIZE) setHasMore(false);
+          }
+          //console.log(data);
+        })
+        .catch((err: unknown) => {
+          console.error(err);
+        })
+        .finally(() => {
+          setIsLoading(false);
+          setBegin(end);
+          setEnd(end + PAGE_SIZE);
+        });
+    } else {
+      fetchLoggedInReplyList(reviewId, accessToken, begin, end)
+        .then((data) => {
+          if (data === null) {
+            setLoggedInReplyList([]);
+            setHasMore(false);
+          } else {
+            setLoggedInReplyList((prev) => {
+              const uniqueReplies = data.filter(
+                (newReply) =>
+                  !prev.some((existing) => existing.id === newReply.id),
+              );
+              return [...prev, ...uniqueReplies];
+            });
+            if (data.length < PAGE_SIZE) setHasMore(false);
+          }
+          //console.log(data);
+        })
+        .catch((err: unknown) => {
+          console.error(err);
+        })
+        .finally(() => {
+          setIsLoading(false);
+          setBegin(end);
+          setEnd(end + PAGE_SIZE);
+        });
+    }
+  }, [accessToken, begin, end, hasMore, isLoading, reviewId]);
+
+  // 스크롤 이벤트 핸들러
+  const handleScroll = useCallback(() => {
+    if (
+      window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.offsetHeight - 100 &&
+      !isLoading &&
+      hasMore
+    ) {
+      //console.log('fetch');
+      fetchReplies();
+    }
+  }, [fetchReplies, hasMore, isLoading]);
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    if (isInitialRender.current) {
+      //console.log('initial fetch');
+      if (accessToken !== null) {
+        setBegin(0);
+        setEnd(PAGE_SIZE);
+        setIsLoading(false);
+        //console.log('reset');
+      }
+      isInitialRender.current = false;
+      fetchReplies();
+    }
+  }, [accessToken, fetchReplies]);
+
+  useEffect(() => {
+    isInitialRender.current = true;
+  }, [accessToken]);
+
+  // 스크롤 이벤트 등록
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [handleScroll]);
 
   const handleBack = () => {
     void navigate(-1);
@@ -117,28 +222,7 @@ const CommentPage = () => {
         console.error(err);
       }
     };
-
-    const fetchLoggedInReplyList = async () => {
-      try {
-        const response = await fetch(`/api/comments/list/${reviewId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        if (!response.ok) {
-          throw new Error('Failed to fetch reply list');
-        }
-        const data = (await response.json()) as Reply[];
-        setLoggedInReplyList(data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
     void fetchLoggedInReview();
-    void fetchLoggedInReplyList();
   }, [accessToken, reviewId, movieId]);
 
   useEffect(() => {
@@ -157,15 +241,6 @@ const CommentPage = () => {
         if (data !== null) {
           setShowContent(!data.spoiler);
         }
-        //console.log(data);
-      })
-      .catch((err: unknown) => {
-        console.error(err);
-      });
-
-    fetchReplyList(reviewId)
-      .then((data) => {
-        setReplyList(data);
         //console.log(data);
       })
       .catch((err: unknown) => {
@@ -268,7 +343,7 @@ const CommentPage = () => {
           </div>
           <div className="flex justify-between items-center text-sm text-gray-600 py-2">
             <span>좋아요 {review.likes_count}</span>
-            <span className="ml-3 mr-auto">댓글 {replyList?.length}</span>
+            <span className="ml-3 mr-auto">댓글 {replyList.length}</span>
           </div>
         </div>
         <div className="flex justify-between items-center px-16 border-y py-2">
@@ -300,17 +375,16 @@ const CommentPage = () => {
           </button>
         </div>
         <div>
-          {replyList === null || replyList.length === 0 ? (
+          {replyList.length === 0 && loggedInReplyList.length === 0 ? (
             <div className="py-2 text-sm">댓글이 없습니다.</div>
           ) : (
-            (accessToken === null || loggedInReplyList === null
-              ? replyList
-              : loggedInReplyList
-            ).map((reply) => (
-              <div key={reply.id}>
-                <ReplyFragment reply={reply} />
-              </div>
-            ))
+            (accessToken === null ? replyList : loggedInReplyList).map(
+              (reply) => (
+                <div key={reply.id}>
+                  <ReplyFragment reply={reply} />
+                </div>
+              ),
+            )
           )}
         </div>
       </div>
