@@ -5,7 +5,6 @@ import { useAuth } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
 import MovieCalendar from '../../components/MovieCalendar';
 import { type UserProfile } from '../../utils/Types';
-import { MyPage } from './MyPage';
 
 export const Profile = () => {
   const { view_user_id } = useParams();
@@ -37,7 +36,7 @@ export const Profile = () => {
 
   // Check if the user is viewing their own profile
   if (user_id === viewUserId) {
-    return <MyPage />;
+    void navigate('/mypage');
   }
 
   // Handle follow/unfollow button click
