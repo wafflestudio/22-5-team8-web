@@ -16,6 +16,10 @@ const MovieCalendar = () => {
   const [activeStartDate, setActiveStartDate] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
+  const today = new Date();
+  const todayMonth = today.getMonth();
+  const todayYear = today.getFullYear();
+
   const moviesWatchedByDate: Record<string, Movie[]> = {
     '2025-01-21': [
       { id: 1, title: 'Movie A', poster: 'https://placehold.co/20x20?text=MA' },
@@ -24,6 +28,13 @@ const MovieCalendar = () => {
     '2025-01-23': [
       { id: 3, title: 'Movie C', poster: 'https://placehold.co/20x20?text=MC' },
     ],
+  };
+
+  const isCurrentMonth = () => {
+    return (
+      activeStartDate.getMonth() === todayMonth &&
+      activeStartDate.getFullYear() === todayYear
+    );
   };
 
   const handleDayClick = (clickedDate: Date) => {
@@ -35,24 +46,31 @@ const MovieCalendar = () => {
   };
 
   const handleCurrentMonth = () => {
-    const today = new Date();
     setActiveStartDate(today);
     setSelectedDate(today);
   };
 
-  // Return a custom day cell if there is at least one movie on that date
   const tileContent = ({ date, view }: { date: Date; view: string }) => {
+    // Show either the first movie poster or the day number
     if (view === 'month') {
       const dateKey = moment(date).format('YYYY-MM-DD');
       const movies = moviesWatchedByDate[dateKey];
       if (movies !== undefined && movies.length > 0) {
-        // Show only the first movie poster
         return (
-          <img
-            src={movies[0]?.poster}
-            alt={`Poster`}
-            style={{ width: '20px', height: '20px', marginTop: '4px' }}
-          />
+          <div className="flex justify-center mt-1">
+            <img
+              src={movies[0]?.poster}
+              alt={`Poster`}
+              className="w-10 h-15 object-cover"
+            />
+          </div>
+        );
+      } else {
+        // For days without movies, show the numeric date
+        return (
+          <span style={{ display: 'inline-block', marginTop: '4px' }}>
+            {moment(date).format('D')}
+          </span>
         );
       }
     }
@@ -65,14 +83,15 @@ const MovieCalendar = () => {
         <h2 className="text-lg font-semibold">캘린더</h2>
         <button
           onClick={handleCurrentMonth}
-          className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          className={`p-2 bg-white text-gray-400 rounded-md border-2
+            ${!isCurrentMonth() ? 'border-black' : 'border-white'}`}
         >
           오늘
         </button>
       </div>
 
       <Calendar
-        className="border rounded-md"
+        className="border-0 rounded-md"
         activeStartDate={activeStartDate}
         onActiveStartDateChange={({ activeStartDate: newStartDate }) => {
           if (newStartDate !== null) {
@@ -84,7 +103,7 @@ const MovieCalendar = () => {
         onChange={(date) => {
           setSelectedDate(date as Date);
         }}
-        formatDay={(locale, date) => moment(date).format('D')}
+        formatDay={() => ''}
         formatMonthYear={(locale, date) => moment(date).format('YYYY.M')}
         calendarType="gregory"
         prev2Label={null}
