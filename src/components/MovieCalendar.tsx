@@ -22,11 +22,11 @@ const MovieCalendar = () => {
 
   const moviesWatchedByDate: Record<string, Movie[]> = {
     '2025-01-21': [
-      { id: 1, title: 'Movie A', poster: 'https://placehold.co/20x20?text=MA' },
-      { id: 2, title: 'Movie B', poster: 'https://placehold.co/20x20?text=MB' },
+      { id: 1, title: 'Movie A', poster: 'https://placehold.co/120x160?text=MA' },
+      { id: 2, title: 'Movie B', poster: 'https://placehold.co/120x160?text=MB' },
     ],
     '2025-01-23': [
-      { id: 3, title: 'Movie C', poster: 'https://placehold.co/20x20?text=MC' },
+      { id: 3, title: 'Movie C', poster: 'https://placehold.co/120x160?text=MC' },
     ],
   };
 
@@ -57,20 +57,20 @@ const MovieCalendar = () => {
       const movies = moviesWatchedByDate[dateKey];
       if (movies !== undefined && movies.length > 0) {
         return (
-          <div className="flex justify-center mt-1">
+          <div className="absolute inset-0">
             <img
               src={movies[0]?.poster}
               alt={`Poster`}
-              className="w-10 h-15 object-cover"
+              className="w-full h-full object-cover"
             />
           </div>
         );
       } else {
         // For days without movies, show the numeric date
         return (
-          <span style={{ display: 'inline-block', marginTop: '4px' }}>
+          <div className='absolute inset-0 flex items-center justify-center'>
             {moment(date).format('D')}
-          </span>
+          </div>
         );
       }
     }
@@ -78,7 +78,7 @@ const MovieCalendar = () => {
   };
 
   return (
-    <div className="bg-white p-4 w-full justify-center relative">
+    <div className="bg-white p-4 w-full mx-auto max-w-xl">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-lg font-semibold">캘린더</h2>
         <button
@@ -91,7 +91,9 @@ const MovieCalendar = () => {
       </div>
 
       <Calendar
-        className="border-0 rounded-md"
+        className="react-calendar border-0 shadow-none"
+        tileClassName={() => 'relative p-0 border-0 aspect-[2/3] overflow-hidden'}
+        tileContent={tileContent}
         activeStartDate={activeStartDate}
         onActiveStartDateChange={({ activeStartDate: newStartDate }) => {
           if (newStartDate !== null) {
@@ -112,7 +114,6 @@ const MovieCalendar = () => {
         minDetail="month"
         maxDetail="month"
         onClickDay={handleDayClick}
-        tileContent={tileContent}
       />
     </div>
   );
