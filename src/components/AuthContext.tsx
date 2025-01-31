@@ -66,6 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setAccessToken(loginAccessToken);
     setRefreshToken(loginRefreshToken);
     setUserId(loginUserId);
+    void fetchUser();
     localStorage.setItem('accessToken', loginAccessToken);
     localStorage.setItem('refreshToken', loginRefreshToken);
     localStorage.setItem('user_id', loginUserId.toString());

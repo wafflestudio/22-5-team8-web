@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../components/AuthContext';
 import { Footerbar } from '../components/Footerbar';
@@ -7,6 +8,7 @@ import type { Recommendation } from '../utils/Types';
 
 export const Recommend = () => {
   const { accessToken, user } = useAuth();
+  const navigate = useNavigate();
   const [expectedRecommendations, setExpectedRecommendations] = useState<
     Recommendation[]
   >([]);
@@ -123,7 +125,10 @@ export const Recommend = () => {
         {recommendations.map((recommendation) => (
           <div
             key={recommendation.movie_id}
-            className="flex-none w-[90vw] snap-center first:ml-4 last:mr-4"
+            className="flex-none w-[90vw] snap-center first:ml-4 last:mr-4 cursor-pointer"
+            onClick={() => {
+              void navigate(`/movies/${recommendation.movie_id}`);
+            }}
           >
             <div className="mr-4">
               <div className="relative">

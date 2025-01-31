@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import calendar_img from '../assets/calendar_img.png';
@@ -15,14 +15,24 @@ export const Index = () => {
   const navigate = useNavigate();
   const { accessToken } = useAuth();
   const [showLoginPopup, setShowLoginPopup] = useState(false);
+  const [isLoading, setIsLoading] = useState({
+    watcha10: true,
+    watcha_buying: true,
+    box_office: true,
+    netflix: true,
+  });
 
-  const handleRecommendClick = () => {
+  const handleRecommendClick = useCallback(() => {
     if (accessToken == null) {
       setShowLoginPopup(true);
     } else {
       void navigate('/recommend');
     }
-  };
+  }, [accessToken, navigate]);
+
+  const handleLoadComplete = useCallback((type: string) => {
+    setIsLoading((prev) => ({ ...prev, [type]: false }));
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen relative">
@@ -70,19 +80,28 @@ export const Index = () => {
         </div>
         <div className="mt-2 mb-2">
           <h1 className="text-xl font-bold">왓챠피디아 HOT 랭킹</h1>
-          <MovieScroller chart_type="watcha10" />
+          {isLoading.watcha10 && (
+            <div className="h-[200px] flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            </div>
+          )}
+          <MovieScroller
+            chart_type="watcha10"
+            onLoadComplete={handleLoadComplete}
+          />
         </div>
-        <div className="mt-2 mb-2">
-          <h1 className="text-xl font-bold">왓챠피디아 구매 순위</h1>
-          <MovieScroller chart_type="watcha_buying" />
-        </div>
+
         <div className="mt-2 mb-2">
           <h1 className="text-xl font-bold">박스오피스 순위</h1>
-          <MovieScroller chart_type="box_office" />
-        </div>
-        <div className="mt-2 mb-2">
-          <h1 className="text-xl font-bold">넷플릭스 순위</h1>
-          <MovieScroller chart_type="netflix" />
+          {isLoading.box_office && (
+            <div className="h-[200px] flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            </div>
+          )}
+          <MovieScroller
+            chart_type="box_office"
+            onLoadComplete={handleLoadComplete}
+          />
         </div>
       </div>
       <div className="flex-none fixed bottom-0 w-full z-10">
