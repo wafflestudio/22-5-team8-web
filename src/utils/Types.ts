@@ -110,3 +110,9 @@ export type UserProfile = {
 };
 
 export type SearchCategory = 'movie' | 'person' | 'collection' | 'user';
+
+export type Recommendation = {
+  movie_id: number;
+  movie: Movie;
+  expected_rating: number;
+};

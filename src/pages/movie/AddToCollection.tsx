@@ -136,7 +136,7 @@ const AddToCollection = ({
                     ? `/profile/${user_id}/collections/new/?movie=${movieId}`
                     : '#'
                 }
-                className="block w-full p-3 flex items-start gap-3 hover:bg-gray-50"
+                className="block w-full p-3 items-start gap-3 hover:bg-gray-50"
               >
                 <div className="w-5 h-5 mt-1">
                   <img src={add} alt="add" className="w-5 h-5" />
