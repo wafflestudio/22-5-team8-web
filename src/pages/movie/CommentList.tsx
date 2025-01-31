@@ -6,11 +6,12 @@ import back from '../../assets/back.svg';
 import { useAuth } from '../../components/AuthContext';
 import CommnetFragment from '../../components/CommentFragment';
 import { Footerbar } from '../../components/Footerbar';
+import { fetchBlokedUserList } from '../../utils/Functions';
 import type { Review } from '../../utils/Types';
 
 const CommentList = () => {
   const navigate = useNavigate();
-  const { accessToken } = useAuth();
+  const { accessToken, user_id } = useAuth();
   const isInitialRender = useRef(true);
 
   const PAGE_SIZE = 10;
@@ -22,11 +23,25 @@ const CommentList = () => {
   const [end, setEnd] = useState(PAGE_SIZE); // 초기 로드 범위
   const [isLoading, setIsLoading] = useState(false); // 로딩 상태
   const [hasMore, setHasMore] = useState(true); // 추가 데이터 여부
+  const [blockedUserList, setBlockedUserList] = useState<number[]>([]);
   const id: number = parseInt(movieId == null ? '0' : movieId);
 
   const handleBack = () => {
-    void navigate(`/movies/${id}`);
+    void navigate(-1);
   };
+
+  useEffect(() => {
+    if (user_id !== null) {
+      fetchBlokedUserList(user_id)
+        .then((data) => {
+          //console.log(data);
+          setBlockedUserList(data);
+        })
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+    }
+  }, [accessToken, user_id]);
 
   // 코멘트 데이터 가져오기
   const fetchCommentList = useCallback(async () => {
@@ -143,15 +158,15 @@ const CommentList = () => {
         <h1 className="text-xl font-semibold">코멘트</h1>
       </div>
       <div className="flex flex-col pt-16 pb-20">
-        {(accessToken === null ? commentList : loggedInCommentList).map(
-          (comment) => (
+        {(accessToken === null ? commentList : loggedInCommentList)
+          .filter((comment) => !blockedUserList.includes(comment.user_id))
+          .map((comment) => (
             <CommnetFragment
               key={comment.id}
               viewMode="commentPage"
               initialReview={comment}
             />
-          ),
-        )}
+          ))}
         {isLoading && <p className="text-center">Loading...</p>}
         {!isLoading &&
           (accessToken === null ? commentList : loggedInCommentList).length ===

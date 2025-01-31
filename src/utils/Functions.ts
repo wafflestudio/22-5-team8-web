@@ -318,3 +318,24 @@ export const patchCollection = async (
     return null;
   }
 };
+
+export const fetchBlokedUserList = async (user_id: number) => {
+  try {
+    const response = await fetch(`/api/users/blocked_users/${user_id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch blocked user list');
+    }
+
+    const blockedUserList = (await response.json()) as { id: number[] };
+    return blockedUserList.id;
+  } catch (err) {
+    console.error('Blocked user list fetch error:', err);
+    return [];
+  }
+};
