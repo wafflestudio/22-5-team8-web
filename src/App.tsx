@@ -20,6 +20,7 @@ import { Settings } from './pages/mypage/Settings';
 import { News } from './pages/News';
 import PeoplePage from './pages/PeoplePage';
 import { Rating } from './pages/Rating';
+import { Recommend } from './pages/Recommend';
 import ReplyPage from './pages/replypage/ReplyPage';
 import { Search } from './pages/Search';
 import { Signup } from './pages/Signup';
@@ -64,6 +65,7 @@ export const App = () => {
               path="/collections/:collectionId/edit"
               element={<EditCollection />}
             />
+            <Route path="/recommend" element={<Recommend />} />
           </Routes>
         </AuthProvider>
       </ReturnPathProvider>

@@ -5,20 +5,25 @@ import type { Movie } from '../utils/Types';
 
 type MovieScrollerProps = {
   chart_type?: string;
+  onLoadComplete?: (type: string) => void;
 };
 
-export const MovieScroller = ({ chart_type }: MovieScrollerProps) => {
+export const MovieScroller = ({
+  chart_type,
+  onLoadComplete,
+}: MovieScrollerProps) => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    void (async () => {
+    const fetchMovies = async () => {
+      console.debug('Fetching movies...');
       setError(null);
-      const fetchUrl =
-        chart_type !== undefined && chart_type !== ''
-          ? `/api/movies?chart_type=${chart_type}`
-          : '/api/movies';
       try {
+        const fetchUrl =
+          chart_type != null
+            ? `/api/movies?chart_type=${chart_type}`
+            : '/api/movies';
         const response = await fetch(fetchUrl, {
           method: 'GET',
           headers: {
@@ -33,11 +38,15 @@ export const MovieScroller = ({ chart_type }: MovieScrollerProps) => {
         const data = (await response.json()) as Movie[];
         data.reverse();
         setMovies(data);
+        onLoadComplete?.(chart_type ?? '');
       } catch (err) {
         setError((err as Error).message);
+        onLoadComplete?.(chart_type ?? '');
       }
-    })();
-  }, [chart_type]);
+    };
+
+    void fetchMovies();
+  }, [chart_type, onLoadComplete]);
 
   return (
     <div className="relative z-0">

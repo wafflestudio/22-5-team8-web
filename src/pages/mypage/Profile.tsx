@@ -14,6 +14,13 @@ export const Profile = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [following, setFollowing] = useState(false);
 
+  // Add new effect for profile redirect
+  useEffect(() => {
+    if (user_id === viewUserId) {
+      void navigate('/mypage');
+    }
+  }, [user_id, viewUserId, navigate]);
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -33,11 +40,6 @@ export const Profile = () => {
 
     void fetchProfile();
   }, [viewUserId]);
-
-  // Check if the user is viewing their own profile
-  if (user_id === viewUserId) {
-    void navigate('/mypage');
-  }
 
   // Handle follow/unfollow button click
   const toggleFollow = async () => {
