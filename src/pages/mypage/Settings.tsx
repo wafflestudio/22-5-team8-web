@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../components/AuthContext';
 
 export const Settings = () => {
-  const { logout } = useAuth();
+  const { logout, user_id } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -17,7 +17,8 @@ export const Settings = () => {
       {/* X Icon to Go Back */}
       <button
         onClick={() => {
-          void navigate('/mypage'); // Explicitly ignore the promise
+          if (user_id === null) return;
+          void navigate(`/profile/${user_id}`); // Explicitly ignore the promise
         }}
         className="absolute top-4 left-4 text-gray-500 hover:text-gray-700"
       >

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { FaCog } from 'react-icons/fa';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { useAuth } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
@@ -13,13 +14,6 @@ export const Profile = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [following, setFollowing] = useState(false);
-
-  // Add new effect for profile redirect
-  useEffect(() => {
-    if (user_id === viewUserId) {
-      void navigate('/mypage');
-    }
-  }, [user_id, viewUserId, navigate]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -92,20 +86,30 @@ export const Profile = () => {
             </div>
           </div>
           {/* Follow Button */}
-          <div className="w-full mt-3">
-            <button
-              onClick={() => {
-                void toggleFollow();
-              }}
-              className={`w-full py-2 px-4 rounded-md font-semibold ${
-                following
-                  ? 'bg-white border border-gray-300 text-black'
-                  : 'bg-black text-white'
-              }`}
-            >
-              {following ? '팔로잉' : '팔로우'}
-            </button>
-          </div>
+          {user_id !== viewUserId && (
+            <div className="w-full mt-3">
+              <button
+                onClick={() => {
+                  void toggleFollow();
+                }}
+                className={`w-full py-2 px-4 rounded-md font-semibold ${
+                  following
+                    ? 'bg-white border border-gray-300 text-black'
+                    : 'bg-black text-white'
+                }`}
+              >
+                {following ? '팔로잉' : '팔로우'}
+              </button>
+            </div>
+          )}
+          {/* Cogwheel Icon */}
+          {user_id === viewUserId && (
+            <Link to="/mypage/settings">
+              <button className="absolute top-3 right-3 text-gray-600 hover:text-gray-800">
+                <FaCog className="w-6 h-6" />
+              </button>
+            </Link>
+          )}
         </div>
         {/* Stats Section */}
         <div className="grid grid-cols-3 text-center pb-4 bg-white">
@@ -153,6 +157,27 @@ export const Profile = () => {
 
         {/* Calendar Section */}
         <MovieCalendar />
+
+        {/* Likes Section */}
+        {user_id === viewUserId && (
+          <div className="p-4 bg-gray-50">
+            <h2 className="text-lg font-semibold">좋아요</h2>
+            <div className="mt-4 space-y-2">
+              <div className="flex justify-between">
+                <span>좋아한 인물</span>
+                <span className="text-gray-500">0</span>
+              </div>
+              <div className="flex justify-between">
+                <span>좋아한 컬렉션</span>
+                <span className="text-gray-500">0</span>
+              </div>
+              <div className="flex justify-between">
+                <span>좋아한 코멘트</span>
+                <span className="text-gray-500">0</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Footer Section */}
