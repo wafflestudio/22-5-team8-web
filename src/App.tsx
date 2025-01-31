@@ -14,7 +14,6 @@ import CommentList from './pages/movie/CommentList';
 import { MoviePage } from './pages/movie/MoviePage';
 import { Movies } from './pages/Movies';
 import { MonthlyMovies } from './pages/mypage/MonthlyMovies';
-import { MyPage } from './pages/mypage/MyPage';
 import { Profile } from './pages/mypage/Profile';
 import { Settings } from './pages/mypage/Settings';
 import { News } from './pages/News';
@@ -47,7 +46,6 @@ export const App = () => {
               path="/profile/:page_user_id/collections/new"
               element={<NewCollection />}
             />
-            <Route path="/mypage" element={<MyPage />} />
             <Route path="/mypage/settings" element={<Settings />} />
             <Route path="/monthly/:date" element={<MonthlyMovies />} />
             <Route path="/movies/:movieId/comments" element={<CommentList />} />
