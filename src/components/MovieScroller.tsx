@@ -17,7 +17,6 @@ export const MovieScroller = ({
 
   useEffect(() => {
     const fetchMovies = async () => {
-      console.debug('Fetching movies...');
       setError(null);
       try {
         const fetchUrl =

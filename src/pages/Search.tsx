@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import search from '../assets/search.svg';
@@ -20,6 +20,8 @@ import type {
   UserProfile,
 } from '../utils/Types';
 
+const ITEMS_PER_PAGE = 10;
+
 export const Search = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -29,6 +31,23 @@ export const Search = () => {
     useState<SearchCategory>('movie');
   const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const observer = useRef<IntersectionObserver>();
+  const lastElementRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (isLoading) return;
+      if (observer.current != null) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if ((entries[0]?.isIntersecting ?? false) && hasMore) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      });
+      if (node != null) observer.current.observe(node);
+    },
+    [isLoading, hasMore],
+  );
 
   const query = useMemo(() => searchParams.get('query'), [searchParams]);
   const category = useMemo(
@@ -45,74 +64,135 @@ export const Search = () => {
     }
   }, [category]);
 
+  const performSearch = useCallback(
+    async (searchQuery: string, pageNum = 0) => {
+      setError(null);
+      if (pageNum === 0) {
+        setInitialLoading(true);
+      }
+      setIsLoading(true);
+      try {
+        const begin = pageNum * ITEMS_PER_PAGE;
+        const end = begin + ITEMS_PER_PAGE;
+        const response = await fetch(
+          `/api/search?search_q=${encodeURIComponent(
+            searchQuery,
+          )}&begin=${begin}&end=${end}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch search results');
+        }
+
+        const data = (await response.json()) as SearchResultRaw;
+        const movieDetails = (await Promise.all(
+          data.movie_list.map((id) => fetchMovie(id)),
+        )) as Movie[];
+        const peopleDetails = (await Promise.all(
+          data.participant_list.map((id) => fetchPeople(id)),
+        )) as People[];
+        const _collectionDetails = (await Promise.all(
+          data.collection_list.map((id) => fetchCollection(id)),
+        )) as Collection[];
+        const _userDetails = (await Promise.all(
+          data.user_list.map((id) => fetchUser(id)),
+        )) as UserProfile[];
+
+        const _genreDetails: Record<string, Movie[]> = {};
+        await Promise.all(
+          Object.entries(data.movie_dict_by_genre).map(
+            async ([genre, movieIds]) => {
+              _genreDetails[genre] = (await Promise.all(
+                movieIds.map((id) => fetchMovie(id)),
+              )) as Movie[];
+            },
+          ),
+        );
+
+        const newResults = {
+          movies: movieDetails,
+          users: _userDetails,
+          people: peopleDetails,
+          collections: _collectionDetails,
+          genres: _genreDetails,
+        };
+
+        setHasMore(() => {
+          switch (selectedCategory) {
+            case 'movie':
+              return movieDetails.length === ITEMS_PER_PAGE;
+            case 'person':
+              return peopleDetails.length === ITEMS_PER_PAGE;
+            case 'collection':
+              return _collectionDetails.length === ITEMS_PER_PAGE;
+            case 'user':
+              return _userDetails.length === ITEMS_PER_PAGE;
+            case 'genre':
+              return pageNum === 0;
+            default:
+              return false;
+          }
+        });
+
+        setSearchResults((prev) =>
+          pageNum === 0
+            ? newResults
+            : {
+                movies:
+                  selectedCategory === 'movie'
+                    ? [...(prev?.movies ?? []), ...newResults.movies]
+                    : (prev?.movies ?? []),
+                users:
+                  selectedCategory === 'user'
+                    ? [...(prev?.users ?? []), ...newResults.users]
+                    : (prev?.users ?? []),
+                people:
+                  selectedCategory === 'person'
+                    ? [...(prev?.people ?? []), ...newResults.people]
+                    : (prev?.people ?? []),
+                collections:
+                  selectedCategory === 'collection'
+                    ? [...(prev?.collections ?? []), ...newResults.collections]
+                    : (prev?.collections ?? []),
+                genres: prev?.genres ?? {},
+              },
+        );
+      } catch (err) {
+        setError((err as Error).message);
+        console.error('Search error:', err);
+      } finally {
+        setIsLoading(false);
+        if (pageNum === 0) {
+          setInitialLoading(false);
+        }
+      }
+    },
+    [selectedCategory],
+  );
+
   useEffect(() => {
     if (query != null) {
       setSearchText(query);
-      void performSearch(query);
+      setPage(0);
+      void performSearch(query, 0);
     }
-  }, [query]);
+  }, [performSearch, query]);
+
+  useEffect(() => {
+    if (page > 0 && query != null) {
+      void performSearch(query, page);
+    }
+  }, [page, performSearch, query]);
 
   const handleClear = () => {
     setSearchText('');
     setSearchResults(null);
-  };
-
-  const performSearch = async (searchQuery: string) => {
-    setError(null);
-    setIsLoading(true);
-    try {
-      const response = await fetch(
-        `/api/search?search_q=${encodeURIComponent(searchQuery)}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch search results');
-      }
-
-      const data = (await response.json()) as SearchResultRaw;
-      const movieDetails = (await Promise.all(
-        data.movie_list.map((id) => fetchMovie(id)),
-      )) as Movie[];
-      const peopleDetails = (await Promise.all(
-        data.participant_list.map((id) => fetchPeople(id)),
-      )) as People[];
-      const _collectionDetails = (await Promise.all(
-        data.collection_list.map((id) => fetchCollection(id)),
-      )) as Collection[];
-      const _userDetails = (await Promise.all(
-        data.user_list.map((id) => fetchUser(id)),
-      )) as UserProfile[];
-
-      const _genreDetails: Record<string, Movie[]> = {};
-      await Promise.all(
-        Object.entries(data.movie_dict_by_genre).map(
-          async ([genre, movieIds]) => {
-            _genreDetails[genre] = (await Promise.all(
-              movieIds.map((id) => fetchMovie(id)),
-            )) as Movie[];
-          },
-        ),
-      );
-
-      setSearchResults({
-        movies: movieDetails,
-        users: _userDetails,
-        people: peopleDetails,
-        collections: _collectionDetails,
-        genres: _genreDetails,
-      });
-    } catch (err) {
-      setError((err as Error).message);
-      console.error('Search error:', err);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleSearch = () => {
@@ -162,16 +242,16 @@ export const Search = () => {
         )}
       </div>
       <div className="flex-1 text-left px-4 py-2 pb-16 pt-16">
-        {isLoading ? (
-          <div className="text-center mt-8">검색 중...</div>
-        ) : (
-          searchResults != null && (
-            <SearchResultBlock
-              searchResults={searchResults}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-            />
-          )
+        {searchResults != null && (
+          <SearchResultBlock
+            searchResults={searchResults}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            lastElementRef={lastElementRef}
+            isLoading={isLoading}
+            hasMore={hasMore}
+            initialLoading={initialLoading}
+          />
         )}
       </div>
 
