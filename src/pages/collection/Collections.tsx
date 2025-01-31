@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import NoResultSvg from '../../assets/no_result.svg';
@@ -7,12 +7,40 @@ import CollectionBlock from '../../components/CollectionBlock';
 import { Footerbar } from '../../components/Footerbar';
 import type { Collection } from '../../utils/Types';
 
+const PAGE_SIZE = 5;
+
+const LoadingSpinner = () => (
+  <div className="flex justify-center items-center py-4">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[hotpink]"></div>
+  </div>
+);
+
 export const Collections = () => {
   const { user_id } = useAuth();
   const { page_user_id } = useParams();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const observer = useRef<IntersectionObserver>();
+  const lastCollectionRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (isLoading || node == null) return;
+      if (observer.current != null) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (
+          entries.length > 0 &&
+          (entries[0]?.isIntersecting ?? false) &&
+          hasMore
+        ) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      });
+      observer.current.observe(node);
+    },
+    [isLoading, hasMore],
+  );
 
   useEffect(() => {
     const fetchUserCollections = async () => {
@@ -22,19 +50,26 @@ export const Collections = () => {
         if (page_user_id === undefined) {
           throw new Error('User ID is undefined');
         }
-        const response = await fetch(`/api/collections/list/${page_user_id}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
+        const begin = page * PAGE_SIZE;
+        const response = await fetch(
+          `/api/collections/list/${page_user_id}?begin=${begin}&end=${begin + PAGE_SIZE}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
           },
-        });
+        );
 
         if (!response.ok) {
           throw new Error('Failed to fetch collections');
         }
 
         const data = (await response.json()) as Collection[];
-        setCollections(data);
+        if (data.length < PAGE_SIZE) {
+          setHasMore(false);
+        }
+        setCollections((prev) => [...prev, ...data]);
       } catch (err) {
         setError((err as Error).message);
         console.error('Collections fetch error:', err);
@@ -43,7 +78,7 @@ export const Collections = () => {
       }
     };
     void fetchUserCollections();
-  }, [page_user_id]);
+  }, [page_user_id, page]);
 
   return (
     <>
@@ -59,8 +94,18 @@ export const Collections = () => {
             )}
         </div>
         <div className="flex-1 text-center px-4 py-2 pb-16 pt-16">
-          {isLoading && <div>Loading...</div>}
           {error != null && <div className="text-red-500">Error: {error}</div>}
+          {collections.map((collection, index) => (
+            <div
+              ref={
+                index === collections.length - 1 ? lastCollectionRef : undefined
+              }
+              key={`${collection.id}-${index}`}
+            >
+              <CollectionBlock collection={collection} />
+            </div>
+          ))}
+          {isLoading && <LoadingSpinner />}
           {!isLoading && error == null && collections.length === 0 && (
             <div className="flex flex-col items-center h-[400px]">
               <img
@@ -70,9 +115,6 @@ export const Collections = () => {
               <div className="text-gray-500 text-sm">결과가 없어요.</div>
             </div>
           )}
-          {collections.map((collection) => (
-            <CollectionBlock key={collection.id} collection={collection} />
-          ))}
         </div>
       </div>
       <div className="flex-none fixed bottom-0 w-full z-10">
