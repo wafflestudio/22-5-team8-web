@@ -80,10 +80,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const response = await fetch('/api/token/refresh', {
-        method: 'POST',
+      const response = await fetch('/api/users/refresh', {
+        method: 'GET',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -93,6 +93,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const data = (await response.json()) as {
         access_token: string;
         refresh_token: string;
+        user_id: number;
       };
       setAccessToken(data.access_token);
       setRefreshToken(data.refresh_token);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -11,62 +11,132 @@ import type { Review } from '../../utils/Types';
 const CommentList = () => {
   const navigate = useNavigate();
   const { accessToken } = useAuth();
+  const isInitialRender = useRef(true);
 
-  const handleBack = () => {
-    void navigate(-1);
-  };
+  const PAGE_SIZE = 10;
 
   const { movieId } = useParams();
   const [commentList, setCommentList] = useState<Review[]>([]);
   const [loggedInCommentList, setLoggedInCommentList] = useState<Review[]>([]);
+  const [begin, setBegin] = useState(0);
+  const [end, setEnd] = useState(PAGE_SIZE); // 초기 로드 범위
+  const [isLoading, setIsLoading] = useState(false); // 로딩 상태
+  const [hasMore, setHasMore] = useState(true); // 추가 데이터 여부
   const id: number = parseInt(movieId == null ? '0' : movieId);
 
-  useEffect(() => {
-    const fetchCommentList = async () => {
+  const handleBack = () => {
+    void navigate(`/movies/${id}`);
+  };
+
+  // 코멘트 데이터 가져오기
+  const fetchCommentList = useCallback(async () => {
+    if (isLoading || !hasMore) return; // 이미 로딩 중이거나 더 가져올 데이터가 없으면 중단
+    setIsLoading(true);
+
+    //console.log(begin, end, accessToken);
+
+    try {
       if (accessToken === null) {
-        try {
-          const response = await fetch(`/api/reviews/movie/${id}`);
-          if (!response.ok) {
-            throw new Error('Failed to fetch comment list');
-          }
-          const data = (await response.json()) as Review[];
-          const validData = data.filter((review) => review.content !== '');
-          setCommentList(validData);
-          //console.log(data);
-        } catch (err) {
-          console.error(err);
+        const response = await fetch(
+          `/api/reviews/movie/${id}?begin=${begin}&end=${end}`,
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch comment list');
         }
+        const data = (await response.json()) as Review[];
+        const validData = data.filter((review) => review.content !== '');
+        setCommentList((prev) => {
+          // 중복 데이터 제거
+          const uniqueComments = validData.filter(
+            (newComment) =>
+              !prev.some((existing) => existing.id === newComment.id),
+          );
+          return [...prev, ...uniqueComments];
+        });
+        if (data.length < end - begin - 1) setHasMore(false); // 가져온 데이터가 요청한 범위보다 적으면 더 이상 데이터 없음
       } else {
-        try {
-          const response = await fetch(`/api/reviews/list/${id}`, {
+        const response = await fetch(
+          `/api/reviews/list/${id}?begin=${begin}&end=${end}`,
+          {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${accessToken}`,
             },
-          });
-          if (!response.ok) {
-            throw new Error('Failed to fetch comment list');
-          }
-          const data = (await response.json()) as Review[];
-          const validData = data.filter((review) => review.content !== '');
-          setLoggedInCommentList(validData);
-          //console.log(data);
-        } catch (err) {
-          console.error(err);
+          },
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch comment list');
         }
+        const data = (await response.json()) as Review[];
+        const validData = data.filter((review) => review.content !== '');
+        setLoggedInCommentList((prev) => {
+          // 중복 데이터 제거
+          const uniqueComments = validData.filter(
+            (newComment) =>
+              !prev.some((existing) => existing.id === newComment.id),
+          );
+          return [...prev, ...uniqueComments];
+        });
+        if (data.length < end - begin - 1) setHasMore(false);
       }
-    };
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+      setBegin(end); // 다음 요청 범위 설정
+      setEnd(end + PAGE_SIZE);
+    }
+  }, [accessToken, id, begin, end, isLoading, hasMore]);
 
-    void fetchCommentList();
-  }, [accessToken, id]);
+  // 스크롤 이벤트 핸들러
+  const handleScroll = useCallback(() => {
+    if (
+      window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.offsetHeight - 100 &&
+      !isLoading &&
+      hasMore
+    ) {
+      //console.log('fetch');
+      void fetchCommentList();
+    }
+  }, [fetchCommentList, hasMore, isLoading]);
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    if (isInitialRender.current) {
+      //console.log('initial fetch');
+      if (accessToken !== null) {
+        setBegin(0);
+        setEnd(PAGE_SIZE);
+        setIsLoading(false);
+        //console.log('reset');
+      }
+      isInitialRender.current = false;
+      void fetchCommentList();
+    }
+  }, [accessToken, fetchCommentList]);
+
+  useEffect(() => {
+    isInitialRender.current = true;
+  }, [accessToken]);
+
+  // 스크롤 이벤트 등록
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [handleScroll]);
 
   return (
     <div className="flex flex-col">
       <div className="flex drop-shadow items-center fixed z-10 top-0 w-full bg-white">
         <button
           onClick={handleBack}
-          className={`flex items-center space-x-2 p-4 rounded ${isMobile ? '' : 'hover:bg-gray-100'}`}
+          className={`flex items-center space-x-2 p-4 rounded ${
+            isMobile ? '' : 'hover:bg-gray-100'
+          }`}
         >
           <img src={back} alt="뒤로가기" className="w-6 h-6" />
         </button>
@@ -82,12 +152,11 @@ const CommentList = () => {
             />
           ),
         )}
-        {(accessToken === null ? commentList : loggedInCommentList).length ===
-        0 ? (
-          <p className="text-center">코멘트가 없습니다.</p>
-        ) : (
-          ''
-        )}
+        {isLoading && <p className="text-center">Loading...</p>}
+        {!isLoading &&
+          (accessToken === null ? commentList : loggedInCommentList).length ===
+            0 && <p className="text-center">코멘트가 없습니다.</p>}
+        {!hasMore && <p className="text-center"></p>}
       </div>
       <div className="flex-none fixed z-10 bottom-0 w-full">
         <Footerbar />

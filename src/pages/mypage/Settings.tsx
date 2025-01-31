@@ -33,7 +33,7 @@ export const Settings = () => {
             console.error('Logout failed:', err);
           });
         }}
-        className="mt-auto bg-red-500 text-white py-3 px-6 rounded-md font-semibold hover:bg-red-600"
+        className="mt-auto bg-pink-400 text-white py-3 px-6 rounded-md font-semibold hover:bg-pink-500"
       >
         로그아웃
       </button>
