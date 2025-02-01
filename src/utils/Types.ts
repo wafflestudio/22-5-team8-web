@@ -137,3 +137,10 @@ export type Recommendation = {
   movie: Movie;
   expected_rating: number;
 };
+
+export type FollowUser = {
+  id: number;
+  username: string;
+  login_id: string;
+  profile_url: string | null;
+};

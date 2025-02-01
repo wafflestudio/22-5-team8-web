@@ -1,6 +1,7 @@
 import type {
   Collection,
   CollectionComment,
+  FollowUser,
   Movie,
   People,
   Reply,
@@ -317,6 +318,48 @@ export const patchCollection = async (
   } catch (err) {
     console.error('Collection update error:', err);
     return null;
+  }
+};
+
+export const fetchFollowingUserList = async (user_id: number) => {
+  try {
+    const response = await fetch(`/api/users/followings/${user_id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch following user list');
+    }
+
+    const followingUserList = (await response.json()) as FollowUser[];
+    return followingUserList;
+  } catch (err) {
+    console.error('Following user list fetch error:', err);
+    return [];
+  }
+};
+
+export const fetchFollowerUserList = async (user_id: number) => {
+  try {
+    const response = await fetch(`/api/users/followers/${user_id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch follower user list');
+    }
+
+    const followerUserList = (await response.json()) as FollowUser[];
+    return followerUserList;
+  } catch (err) {
+    console.error('Follower user list fetch error:', err);
+    return [];
   }
 };
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import back from '../../assets/back.svg';
@@ -19,8 +19,8 @@ export const Reviews = () => {
   const [hasMore, setHasMore] = useState(true);
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const fetchReviews = async (pageNum: number) => {
+  const fetchReviews = useCallback(
+    async (pageNum: number) => {
       if (page_user_id == null) return;
       try {
         setIsLoading(true);
@@ -45,7 +45,11 @@ export const Reviews = () => {
         if (reviewsWithMovies.length < ITEMS_PER_PAGE) {
           setHasMore(false);
         }
-        setReviews((prev) => [...prev, ...reviewsWithMovies]);
+        if (pageNum === 0) {
+          setReviews(reviewsWithMovies);
+        } else {
+          setReviews((prev) => [...prev, ...reviewsWithMovies]);
+        }
       } catch (err) {
         console.error(err);
         setError(
@@ -54,52 +58,25 @@ export const Reviews = () => {
       } finally {
         setIsLoading(false);
       }
-    };
+    },
+    [page_user_id],
+  );
+
+  // 페이지 유저 ID가 변경될 때 초기화
+  useEffect(() => {
+    setPage(0);
+    setHasMore(true);
+    setReviews([]);
     void fetchReviews(0);
-  }, [setReviews, page_user_id]);
+  }, [page_user_id, fetchReviews]);
 
   useEffect(() => {
-    const fetchReviews = async (pageNum: number) => {
-      if (page_user_id == null) return;
-      try {
-        setIsLoading(true);
-        setError(null);
-        const begin = pageNum * ITEMS_PER_PAGE;
-        const end = begin + ITEMS_PER_PAGE;
-        const response = await fetch(
-          `/api/reviews/user/${page_user_id}?begin=${begin}&end=${end}`,
-        );
-        if (!response.ok) {
-          throw new Error('Failed to fetch reviews');
-        }
-        const data = (await response.json()) as Review[];
-
-        const reviewsWithMovies = (await Promise.all(
-          data.map(async (review) => {
-            const movie = await fetchMovie(review.movie_id);
-            return { ...review, movie };
-          }),
-        )) as Review[];
-
-        if (reviewsWithMovies.length < ITEMS_PER_PAGE) {
-          setHasMore(false);
-        }
-        setReviews((prev) => [...prev, ...reviewsWithMovies]);
-      } catch (err) {
-        console.error(err);
-        setError(
-          err instanceof Error ? err.message : 'Failed to fetch reviews',
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     const observer = new IntersectionObserver(
       (entries) => {
         if ((entries[0]?.isIntersecting ?? false) && hasMore && !isLoading) {
-          setPage((prev) => prev + 1);
-          void fetchReviews(page + 1);
+          const nextPage = page + 1;
+          setPage(nextPage);
+          void fetchReviews(nextPage);
         }
       },
       { threshold: 1.0 },
@@ -112,7 +89,7 @@ export const Reviews = () => {
     return () => {
       observer.disconnect();
     };
-  }, [hasMore, isLoading, page, page_user_id]);
+  }, [hasMore, isLoading, page, fetchReviews]);
 
   return (
     <>
@@ -148,7 +125,9 @@ export const Reviews = () => {
                 {review.movie.title}
               </h3>
               <div className="text-sm text-gray-600">
-                평가함 ★ {review.rating}
+                {review.rating === 0 || review.rating == null
+                  ? ''
+                  : `평가함 ★ ${review.rating}`}
               </div>
             </div>
           ))}
