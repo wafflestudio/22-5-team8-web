@@ -1,14 +1,139 @@
+import { useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { useNavigate } from 'react-router-dom';
 
 import back from '../../assets/back.svg';
+import { useAuth } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
+import type {
+  UserAnalysisPreference,
+  UserAnalysisRating,
+} from '../../utils/Types';
 import Histogram from './Histogram';
 import WordCloud from './WordCloud';
 
-const Analysis = () => {
+const Analysis = ({ mode }: { mode: 'default' | 'short' }) => {
   const navigate = useNavigate();
-  const { countries, genres, watchTime } = mockApiResponse;
+  //const { countries, genres, watchTime } = mockApiResponse;
+  const { user_id } = useAuth();
+  const [analysisRating, setAnalysisRating] =
+    useState<UserAnalysisRating | null>(null);
+  const [analysisPreference, setAnalysisPreference] =
+    useState<UserAnalysisPreference | null>(null);
+
+  const [countries, setCountries] = useState<
+    { name: string; score: number; count: number }[]
+  >([]);
+  const [genres, setGenres] = useState<
+    { name: string; score: number; count: number }[]
+  >([]);
+  const [actors, setActors] = useState<
+    { name: string; score: number; count: number }[]
+  >([]);
+  const [directors, setDirectors] = useState<
+    { name: string; score: number; count: number }[]
+  >([]);
+
+  useEffect(() => {
+    if (user_id === null) {
+      return;
+    }
+
+    const fetchAnalysisRating = async () => {
+      try {
+        const response = await fetch(
+          `/api/analysis/${user_id}?search_q=rating`,
+        );
+        if (!response.ok) {
+          throw new Error('fetch failed');
+        }
+
+        const data = (await response.json()) as UserAnalysisRating;
+        setAnalysisRating(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const fetchAnalysisPreference = async () => {
+      try {
+        const response = await fetch(
+          `/api/analysis/${user_id}?search_q=preference`,
+        );
+        if (!response.ok) {
+          throw new Error('fetch failed');
+        }
+
+        const data = (await response.json()) as UserAnalysisPreference;
+        setAnalysisPreference(data);
+
+        setCountries(
+          Object.entries(data.country_dict)
+            .map(([name, value]) => ({
+              name,
+              score: Math.trunc(value[0]),
+              count: value[1],
+            }))
+            .sort((a, b) => b.score - a.score),
+        );
+
+        setGenres(
+          Object.entries(data.genre_dict)
+            .map(([name, value]) => ({
+              name,
+              score: Math.trunc(value[0]),
+              count: value[1],
+            }))
+            .sort((a, b) => b.score - a.score),
+        );
+
+        setActors(
+          Object.entries(data.actor_dict)
+            .map(([name, value]) => ({
+              name,
+              score: Math.trunc(value[0]),
+              count: value[1],
+            }))
+            .sort((a, b) => b.score - a.score),
+        );
+
+        setDirectors(
+          Object.entries(data.director_dict)
+            .map(([name, value]) => ({
+              name,
+              score: Math.trunc(value[0]),
+              count: value[1],
+            }))
+            .sort((a, b) => b.score - a.score),
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    void fetchAnalysisRating();
+    void fetchAnalysisPreference();
+  }, [navigate, user_id]);
+
+  if (analysisRating == null || analysisPreference == null) {
+    return <div>Loading...</div>;
+  }
+
+  if (mode === 'short') {
+    return (
+      <div className="flex flex-col p-4">
+        <h2 className="text-2xl font-bold">별점 분포</h2>
+        <Histogram analysisRating={analysisRating} />
+        <button
+          className="flex rounded bg-gray-200 mx-2 mt-4 px-1 py-2 text-"
+          onClick={() => void navigate('/analysis')}
+        >
+          <div className="ml-2 mr-auto">모든 분석 보기</div>
+          <div className="mr-2 font-bold">{'>'}</div>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -23,11 +148,11 @@ const Analysis = () => {
       </div>
       <div className="flex flex-col p-4 pt-20">
         <h2 className="text-2xl font-bold">별점 분포</h2>
-        <Histogram />
+        <Histogram analysisRating={analysisRating} />
         <hr className="my-8" />
 
         <h2 className="text-2xl font-bold">영화 선호 태그</h2>
-        <WordCloud />
+        <WordCloud analysisPreference={analysisPreference} />
         <hr className="my-8" />
 
         <h2 className="text-2xl font-bold mb-4">영화 선호국가</h2>
@@ -84,40 +209,74 @@ const Analysis = () => {
         </div>
         <hr className="my-8" />
 
-        <h2 className="text-2xl font-bold mb-4">영화 감상 시간</h2>
-        <div className="flex flex-col text-hotPink items-center justify-center">
-          <p className="text-2xl font-bold">{watchTime} 시간</p>
-          <p className="text-sm mt-1">에이 설마 이것만 본 건 아닐 거예요.</p>
+        <h2 className="text-2xl font-bold mb-4">선호 배우</h2>
+        <div className="flex flex-wrap gap-4 items-center justify-center">
+          {actors.slice(0, 3).map((actor) => (
+            <div key={actor.name} className="text-center w-24">
+              <p className="text-lg font-semibold">{actor.name}</p>
+              <p className="text-sm text-gray-600">
+                {actor.score}점 · {actor.count}편
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 mx-4">
+          {actors.slice(3).map((actor) => (
+            <div
+              key={actor.name}
+              className="flex justify-between items-center py-1 text-gray-500"
+            >
+              <p>{actor.name}</p>
+              <p className="text-sm">
+                {actor.score}점 · {actor.count}편
+              </p>
+            </div>
+          ))}
         </div>
         <hr className="my-8" />
+
+        <h2 className="text-2xl font-bold mb-4">선호 감독</h2>
+        <div className="flex flex-wrap gap-4 items-center justify-center">
+          {directors.slice(0, 3).map((director) => (
+            <div key={director.name} className="text-center w-24">
+              <p className="text-lg font-semibold">{director.name}</p>
+              <p className="text-sm text-gray-600">
+                {director.score}점 · {director.count}편
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 mx-4">
+          {directors.slice(3).map((director) => (
+            <div
+              key={director.name}
+              className="flex justify-between items-center py-1 text-gray-500"
+            >
+              <p>{director.name}</p>
+              <p className="text-sm">
+                {director.score}점 · {director.count}편
+              </p>
+            </div>
+          ))}
+        </div>
+        <hr className="my-8" />
+
+        <h2 className="text-2xl font-bold mb-4">영화 감상 시간</h2>
+        <div className="flex flex-col text-hotPink items-center justify-center">
+          <p className="text-2xl font-bold">
+            {analysisRating.viewing_time} 시간
+          </p>
+          <p className="text-sm mt-1">{analysisRating.viewing_message}</p>
+        </div>
+        <hr className="my-10" />
       </div>
       <div className="fixed bottom-0 w-full">
         <Footerbar />
       </div>
     </>
   );
-};
-
-const mockApiResponse = {
-  countries: [
-    { name: '한국', score: 97, count: 12 },
-    { name: '미국', score: 91, count: 4 },
-    { name: '영국', score: 88, count: 2 },
-    { name: '캐나다', score: 68, count: 1 },
-  ],
-  genres: [
-    { name: '드라마', score: 93, count: 11 },
-    { name: '액션', score: 91, count: 7 },
-    { name: '코미디', score: 89, count: 4 },
-    { name: '미스터리', score: 88, count: 3 },
-    { name: '로맨스', score: 87, count: 5 },
-    { name: '범죄', score: 84, count: 2 },
-    { name: '공연실황', score: 82, count: 1 },
-    { name: '판타지', score: 81, count: 2 },
-    { name: 'SF', score: 79, count: 3 },
-    { name: '음악', score: 76, count: 3 },
-  ],
-  watchTime: 35,
 };
 
 export default Analysis;

@@ -6,7 +6,11 @@ import back from '../../assets/back.svg';
 import { useAuth } from '../../components/AuthContext';
 import CommnetFragment from '../../components/CommentFragment';
 import { Footerbar } from '../../components/Footerbar';
-import { fetchBlokedUserList } from '../../utils/Functions';
+import ToggleButton from '../../components/ToggleButton';
+import {
+  fetchBlokedUserList,
+  fetchFollowingUsers,
+} from '../../utils/Functions';
 import type { Review } from '../../utils/Types';
 
 const CommentList = () => {
@@ -24,7 +28,9 @@ const CommentList = () => {
   const [isLoading, setIsLoading] = useState(false); // 로딩 상태
   const [hasMore, setHasMore] = useState(true); // 추가 데이터 여부
   const [blockedUserList, setBlockedUserList] = useState<number[]>([]);
+  const [followingUserList, setFollowingUserList] = useState<number[]>([]);
   const id: number = parseInt(movieId == null ? '0' : movieId);
+  const [isOn, setIsOn] = useState(false);
 
   const handleBack = () => {
     void navigate(-1);
@@ -36,6 +42,15 @@ const CommentList = () => {
         .then((data) => {
           //console.log(data);
           setBlockedUserList(data);
+        })
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+
+      fetchFollowingUsers(user_id)
+        .then((data) => {
+          //console.log(data);
+          setFollowingUserList(data);
         })
         .catch((err: unknown) => {
           console.error(err);
@@ -156,10 +171,23 @@ const CommentList = () => {
           <img src={back} alt="뒤로가기" className="w-6 h-6" />
         </button>
         <h1 className="text-xl font-semibold">코멘트</h1>
+        <div className="flex items-center ml-auto mr-4 text-center">
+          <h2 className="text-sm font-bold">친구</h2>
+          <ToggleButton
+            initialState={isOn}
+            onToggle={() => {
+              setIsOn(!isOn);
+            }}
+          />
+        </div>
       </div>
       <div className="flex flex-col pt-16 pb-20">
         {(accessToken === null ? commentList : loggedInCommentList)
-          .filter((comment) => !blockedUserList.includes(comment.user_id))
+          .filter(
+            (comment) =>
+              !blockedUserList.includes(comment.user_id) &&
+              (isOn ? followingUserList.includes(comment.user_id) : true),
+          )
           .map((comment) => (
             <CommnetFragment
               key={comment.id}

@@ -6,6 +6,7 @@ import { useAuth } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
 import MovieCalendar from '../../components/MovieCalendar';
 import { type UserProfile } from '../../utils/Types';
+import Analysis from '../analysis/Analysis';
 
 export const Profile = () => {
   const { view_user_id } = useParams();
@@ -157,6 +158,8 @@ export const Profile = () => {
 
         {/* Calendar Section */}
         <MovieCalendar />
+
+        {user_id === viewUserId && <Analysis mode="short" />}
 
         {/* Likes Section */}
         {user_id === viewUserId && (

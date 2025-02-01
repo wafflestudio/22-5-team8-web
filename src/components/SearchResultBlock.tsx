@@ -14,6 +14,7 @@ type SearchResultBlockProps = {
   isLoading: boolean;
   hasMore: boolean;
   initialLoading: boolean;
+  blockedUserList: number[];
 };
 
 export const SearchResultBlock = ({
@@ -24,6 +25,7 @@ export const SearchResultBlock = ({
   isLoading,
   hasMore,
   initialLoading,
+  blockedUserList,
 }: SearchResultBlockProps) => {
   const [, setSearchParams] = useSearchParams();
   const [selectedGenre, setSelectedGenre] = useState<string>('all');
@@ -58,6 +60,10 @@ export const SearchResultBlock = ({
 
   const getCategoryContent = () => {
     const content = () => {
+      const nonBlockedUsers = searchResults.users.filter(
+        (user) => !blockedUserList.includes(user.user_id),
+      );
+
       if (selectedCategory === 'movie' && searchResults.movies.length > 0) {
         return (
           <ul>
@@ -182,10 +188,10 @@ export const SearchResultBlock = ({
           </ul>
         );
       }
-      if (selectedCategory === 'user' && searchResults.users.length > 0) {
+      if (selectedCategory === 'user' && nonBlockedUsers.length > 0) {
         return (
           <ul className="mt-4">
-            {searchResults.users.map((user, index) => (
+            {nonBlockedUsers.map((user, index) => (
               <li
                 key={index}
                 className="border-b border-gray-200 last:border-b-0"

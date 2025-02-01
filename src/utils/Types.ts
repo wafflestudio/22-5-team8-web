@@ -142,3 +142,32 @@ export type LoginResponse = {
   refresh_token: string;
   user_id: number;
 };
+
+export type RatingDistribution = {
+  [key: string]: number;
+};
+
+export type UserAnalysisRating = {
+  id: number; // 분석 ID
+  user_id: number; // 사용자 ID
+  rating_num: number; // 평가 개수
+  rating_avg: number; // 평균 평점
+  rating_dist: RatingDistribution; // 평점 분포
+  rating_mode: number; // 가장 많이 나온 평점
+  rating_message: string; // 평점 관련 메시지
+  viewing_time: number; // 총 시청 시간
+  viewing_message: string; // 시청 시간 관련 메시지
+};
+
+export type Dictionary = {
+  [key: string]: [number, number]; // [비율, 개수]
+};
+
+export type UserAnalysisPreference = {
+  id: number; // 분석 ID
+  user_id: number; // 사용자 ID
+  actor_dict: Dictionary; // 배우 관련 딕셔너리
+  director_dict: Dictionary; // 감독 관련 딕셔너리
+  country_dict: Dictionary; // 국가 관련 딕셔너리
+  genre_dict: Dictionary; // 장르 관련 딕셔너리
+};

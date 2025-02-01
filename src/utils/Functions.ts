@@ -367,3 +367,29 @@ export const fetchCollectionCommentList = async (
     return null;
   }
 };
+
+export const fetchFollowingUsers = async (user_id: number) => {
+  try {
+    const response = await fetch(`/api/users/followings/${user_id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch following users');
+    }
+
+    const data = (await response.json()) as {
+      id: number;
+      username: string;
+      login_id: string;
+      profile_url: string | null;
+    }[];
+    return data.map((user) => user.id);
+  } catch (err) {
+    console.error('Following users fetch error:', err);
+    return [];
+  }
+};

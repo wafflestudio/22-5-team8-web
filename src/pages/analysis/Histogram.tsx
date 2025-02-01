@@ -1,17 +1,17 @@
-const scoreData = [
-  { score: 0.5, count: 2 },
-  { score: 1, count: 3 },
-  { score: 1.5, count: 1 },
-  { score: 2, count: 5 },
-  { score: 2.5, count: 6 },
-  { score: 3, count: 8 },
-  { score: 3.5, count: 10 },
-  { score: 4, count: 12 },
-  { score: 4.5, count: 0 },
-  { score: 5, count: 4 },
-];
+import type { UserAnalysisRating } from '../../utils/Types';
 
-export default function Histogram() {
+export default function Histogram({
+  analysisRating,
+}: {
+  analysisRating: UserAnalysisRating;
+}) {
+  const scoreData = Object.entries(analysisRating.rating_dist).map(
+    ([key, value]) => ({
+      score: parseFloat(key),
+      count: value,
+    }),
+  );
+
   const maxCount = Math.max(...scoreData.map((d) => d.count)); // 최대 개수
   const allCount = scoreData.reduce((acc, cur) => acc + cur.count, 0); // 전체 개수
   const average_rating =
@@ -21,7 +21,10 @@ export default function Histogram() {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="flex items-end justify-center gap-1 mt-6">
+      <div className="text-sm font-bold mt-4 text-hotPink">
+        {analysisRating.rating_message}
+      </div>
+      <div className="flex items-end justify-center gap-1 mt-4">
         {scoreData.map((data, index) => (
           <div key={index} className="flex flex-col items-center">
             <div
