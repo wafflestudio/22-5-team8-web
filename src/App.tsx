@@ -9,7 +9,7 @@ import CollectionPage from './pages/collection/CollectionPage';
 import { Collections } from './pages/collection/Collections';
 import { EditCollection } from './pages/collection/EditCollection';
 import { NewCollection } from './pages/collection/NewCollection';
-import {GoogleCallback} from './pages/GoogleCallback';
+import { GoogleCallback } from './pages/GoogleCallback';
 import { Index } from './pages/Index';
 import { KakaoCallback } from './pages/KakaoCallback';
 import { Login } from './pages/Login';

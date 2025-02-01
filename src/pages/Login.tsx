@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import google from '../assets/google.svg';
+import kakao from '../assets/kakao.svg';
 import { useAuth } from '../components/AuthContext';
 import { useReturnPath } from '../components/ReturnPathContext';
 import type { LoginResponse } from '../utils/Types';
@@ -145,14 +147,14 @@ export const Login = () => {
 
         <div className="flex justify-center space-x-6">
           <a href="/api/auth/kakao">
-            <CircleIcon bgColor="bg-yellow-400">
-              <KakaoIcon />
+            <CircleIcon bgColor="bg-[#F7E317]">
+              <img src={kakao} alt="Kakao" className="w-6 h-6" />
             </CircleIcon>
           </a>
           <a href="api/auth/google">
-          <CircleIcon bgColor="bg-white border">
-            <GoogleIcon />
-          </CircleIcon>
+            <CircleIcon bgColor="bg-white border">
+              <img src={google} alt="Google" className="w-6 h-6" />
+            </CircleIcon>
           </a>
           <CircleIcon bgColor="bg-blue-400">
             <TwitterIcon />
@@ -186,34 +188,6 @@ function CircleIcon({
     >
       {children}
     </div>
-  );
-}
-
-function KakaoIcon() {
-  return (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle cx="12" cy="12" r="12" fill="yellow" />
-    </svg>
-  );
-}
-
-function GoogleIcon() {
-  return (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle cx="12" cy="12" r="12" stroke="gray" strokeWidth="2" />
-    </svg>
   );
 }
 

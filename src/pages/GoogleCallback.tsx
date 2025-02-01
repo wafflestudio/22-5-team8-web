@@ -11,7 +11,7 @@ export const GoogleCallback = () => {
   useEffect(() => {
     const processGoogleCallback = async () => {
       const code = new URLSearchParams(window.location.search).get('code');
-      console.debug('Google code:', code);   
+      console.debug('Google code:', code);
       if (code == null) {
         console.debug('No code found in URL');
         return;
@@ -43,22 +43,26 @@ export const GoogleCallback = () => {
   }, [login, navigate]);
 
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100vh',
-      fontSize: '1.2rem',
-      fontWeight: 'bold',
-      color: '#333'
-    }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '1.2rem',
+        fontWeight: 'bold',
+        color: '#333',
+      }}
+    >
       <div>
         구글 로그인 처리중...
-        <div style={{
-          marginTop: '10px',
-          fontSize: '0.9rem',
-          color: '#666'
-        }}>
+        <div
+          style={{
+            marginTop: '10px',
+            fontSize: '0.9rem',
+            color: '#666',
+          }}
+        >
           잠시만 기다려주세요
         </div>
       </div>
