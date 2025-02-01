@@ -14,6 +14,7 @@ import { Login } from './pages/Login';
 import CommentList from './pages/movie/CommentList';
 import { MoviePage } from './pages/movie/MoviePage';
 import { Movies } from './pages/Movies';
+import { Block } from './pages/mypage/Block';
 import { Followers } from './pages/mypage/Followers';
 import { Followings } from './pages/mypage/Followings';
 import { Likes } from './pages/mypage/Likes';
@@ -65,6 +66,7 @@ export const App = () => {
             />
             <Route path="/profile/:view_user_id/likes" element={<Likes />} />
             <Route path="/mypage/settings" element={<Settings />} />
+            <Route path="/mypage/settings/block" element={<Block />} />
             <Route path="/monthly/:date" element={<MonthlyMovies />} />
             <Route path="/movies/:movieId/comments" element={<CommentList />} />
             <Route path="/people/:peopleId" element={<PeoplePage />} />

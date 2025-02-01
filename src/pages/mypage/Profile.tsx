@@ -6,7 +6,10 @@ import no_profile from '../../assets/no_profile.svg';
 import { useAuth } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
 import MovieCalendar from '../../components/MovieCalendar';
-import { fetchFollowingUserList } from '../../utils/Functions';
+import {
+  fetchBlokedUserList,
+  fetchFollowingUserList,
+} from '../../utils/Functions';
 import {
   fetchLikesCollection,
   fetchLikesParticipant,
@@ -26,6 +29,7 @@ export const Profile = () => {
   const [likesCollection, setLikesCollection] = useState<number>(0);
   const [likesReview, setLikesReview] = useState<number>(0);
   const [showLoginPopup, setShowLoginPopup] = useState(false);
+  const [isBanned, setIsBanned] = useState(false);
 
   useEffect(() => {
     const checkFollowingStatus = async () => {
@@ -86,6 +90,24 @@ export const Profile = () => {
     }
   }, [accessToken, user_id, viewUserId]);
 
+  useEffect(() => {
+    const checkBlockStatus = async () => {
+      try {
+        if (user_id == null) {
+          throw new Error('User ID is not available');
+        }
+        const blockedList = await fetchBlokedUserList(user_id);
+        setIsBanned(blockedList.some((user) => user === viewUserId));
+      } catch (err) {
+        console.error('Error checking block status:', err);
+      }
+    };
+
+    if (user_id != null && viewUserId !== 0) {
+      void checkBlockStatus();
+    }
+  }, [user_id, viewUserId]);
+
   // Handle follow/unfollow button click
   const toggleFollow = async () => {
     if (accessToken == null) {
@@ -116,6 +138,36 @@ export const Profile = () => {
       setFollowing(!following);
     } catch (err) {
       console.error('Error toggling follow status:', err);
+    }
+  };
+
+  const toggleBan = async () => {
+    if (accessToken == null) {
+      setShowLoginPopup(true);
+      return;
+    }
+
+    try {
+      if (isNaN(viewUserId)) {
+        throw new Error('User ID is undefined');
+      }
+
+      const endpoint = `/api/users/block/${viewUserId}`;
+      const method = isBanned ? 'DELETE' : 'POST';
+
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${isBanned ? 'unblock' : 'block'} the user`);
+      }
+      setIsBanned(!isBanned);
+    } catch (err) {
+      console.error('Error toggling block status:', err);
     }
   };
 
@@ -165,21 +217,37 @@ export const Profile = () => {
               {<h1 className="text-xl font-bold">{profile?.status_message}</h1>}
             </div>
           </div>
-          {/* Follow Button */}
+          {/* Follow and Ban Buttons */}
           {user_id !== viewUserId && (
-            <div className="w-full mt-3">
-              <button
-                onClick={() => {
-                  void toggleFollow();
-                }}
-                className={`w-full py-2 px-4 rounded-md font-semibold ${
-                  following
-                    ? 'bg-white border border-gray-300 text-black'
-                    : 'bg-black text-white'
-                }`}
-              >
-                {following ? '팔로잉' : '팔로우'}
-              </button>
+            <div className="w-full mt-3 space-y-2">
+              {!isBanned && (
+                <button
+                  onClick={() => {
+                    void toggleFollow();
+                  }}
+                  className={`w-full py-2 px-4 rounded-md font-semibold ${
+                    following
+                      ? 'bg-white border border-gray-300 text-black'
+                      : 'bg-black text-white'
+                  }`}
+                >
+                  {following ? '팔로잉' : '팔로우'}
+                </button>
+              )}
+              {!following && (
+                <button
+                  onClick={() => {
+                    void toggleBan();
+                  }}
+                  className={`w-full py-2 px-4 rounded-md font-semibold ${
+                    isBanned
+                      ? 'bg-red-500 text-white'
+                      : 'bg-white border border-red-500 text-red-500'
+                  }`}
+                >
+                  {isBanned ? '차단 해제' : '차단'}
+                </button>
+              )}
             </div>
           )}
           {/* Cogwheel Icon */}
