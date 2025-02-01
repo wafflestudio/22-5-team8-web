@@ -29,6 +29,7 @@ export type Review = {
   user_name: string;
   profile_url: string | null;
   movie_id: number;
+  movie: Movie;
   content: string;
   rating: number | null;
   likes_count: number;
@@ -136,9 +137,15 @@ export type Recommendation = {
   movie: Movie;
   expected_rating: number;
 };
-
 export type LoginResponse = {
   access_token: string;
   refresh_token: string;
   user_id: number;
+};
+
+export type FollowUser = {
+  id: number;
+  username: string;
+  login_id: string;
+  profile_url: string | null;
 };

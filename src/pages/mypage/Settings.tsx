@@ -27,17 +27,27 @@ export const Settings = () => {
 
       <h1 className="text-2xl font-bold mb-4 text-center">설정</h1>
 
-      {/* Logout Button */}
-      <button
-        onClick={() => {
-          handleLogout().catch((err: unknown) => {
-            console.error('Logout failed:', err);
-          });
-        }}
-        className="mt-auto bg-hotPink text-white py-3 px-6 rounded-md font-semibold"
-      >
-        로그아웃
-      </button>
+      <div className="mt-auto">
+        {/* Manage Blocked Users Button */}
+        <button
+          onClick={() => void navigate('/mypage/settings/block')}
+          className="w-full mb-4 bg-gray-200 text-gray-800 py-3 px-6 rounded-md font-semibold"
+        >
+          차단 유저 관리
+        </button>
+
+        {/* Logout Button */}
+        <button
+          onClick={() => {
+            handleLogout().catch((err: unknown) => {
+              console.error('Logout failed:', err);
+            });
+          }}
+          className="w-full bg-hotPink text-white py-3 px-6 rounded-md font-semibold"
+        >
+          로그아웃
+        </button>
+      </div>
     </div>
   );
 };

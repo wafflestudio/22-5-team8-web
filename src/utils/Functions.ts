@@ -1,7 +1,9 @@
 import type {
   Collection,
   CollectionComment,
+  FollowUser,
   Movie,
+  Participant,
   People,
   Reply,
   Review,
@@ -320,6 +322,48 @@ export const patchCollection = async (
   }
 };
 
+export const fetchFollowingUserList = async (user_id: number) => {
+  try {
+    const response = await fetch(`/api/users/followings/${user_id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch following user list');
+    }
+
+    const followingUserList = (await response.json()) as FollowUser[];
+    return followingUserList;
+  } catch (err) {
+    console.error('Following user list fetch error:', err);
+    return [];
+  }
+};
+
+export const fetchFollowerUserList = async (user_id: number) => {
+  try {
+    const response = await fetch(`/api/users/followers/${user_id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch follower user list');
+    }
+
+    const followerUserList = (await response.json()) as FollowUser[];
+    return followerUserList;
+  } catch (err) {
+    console.error('Follower user list fetch error:', err);
+    return [];
+  }
+};
+
 export const fetchBlokedUserList = async (user_id: number) => {
   try {
     const response = await fetch(`/api/users/blocked_users/${user_id}`, {
@@ -362,6 +406,66 @@ export const fetchCollectionCommentList = async (
       throw new Error('Failed to fetch reply list');
     }
     return (await response.json()) as CollectionComment[];
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+};
+
+export const fetchLikesParticipant = async (accessToken: string) => {
+  try {
+    const response = await fetch(`/api/users/likes_participant`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch reply list');
+    }
+    return (await response.json()) as Participant[];
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+};
+
+export const fetchLikesCollection = async (accessToken: string) => {
+  try {
+    const response = await fetch(`/api/users/likes_collection`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch reply list');
+    }
+    return (await response.json()) as Collection[];
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+};
+
+export const fetchLikesReview = async (accessToken: string) => {
+  try {
+    const response = await fetch(`/api/users/likes_review`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch reply list');
+    }
+    return (await response.json()) as Review[];
   } catch (err) {
     console.error(err);
     return null;

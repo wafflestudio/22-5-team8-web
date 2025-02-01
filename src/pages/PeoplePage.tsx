@@ -4,7 +4,11 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import back from '../assets/back.svg';
 import noProfile from '../assets/no_profile.svg';
+import not_recommend from '../assets/not_recommend.svg';
+import recommend from '../assets/recommend.svg';
+import { useAuth } from '../components/AuthContext';
 import { Footerbar } from '../components/Footerbar';
+import NeedLoginPopup from '../pages/movie/NeedLoginPopup';
 import type {
   People,
   PeopleMovieCredit,
@@ -12,6 +16,7 @@ import type {
 } from '../utils/Types';
 
 const PeoplePage = () => {
+  const { accessToken } = useAuth();
   const [role, setRole] = useState<string>('감독');
   const [people, setPeople] = useState<People | null>(null);
   const [movieCredits, setMovieCredits] = useState<PeopleMovieCreditResponse[]>(
@@ -20,12 +25,37 @@ const PeoplePage = () => {
   const [currentRoleMovies, setCurrentRoleMovies] = useState<
     PeopleMovieCredit[]
   >([]);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
+  const [showLoginPopup, setShowLoginPopup] = useState<boolean>(false);
   const { peopleId } = useParams();
   const id: number = parseInt(peopleId == null ? '0' : peopleId);
   const navigate = useNavigate();
 
   const handleBack = () => {
     void navigate(-1);
+  };
+
+  const handleToggleLike = async () => {
+    if (accessToken == null) {
+      setShowLoginPopup(true);
+      return;
+    }
+    try {
+      const response = await fetch(`/api/participants/like/${id}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to toggle like');
+      }
+
+      setIsLiked(!isLiked);
+    } catch (err) {
+      console.error('Failed to toggle like:', err);
+    }
   };
 
   useEffect(() => {
@@ -45,15 +75,27 @@ const PeoplePage = () => {
           throw new Error('Failed to fetch movies');
         }
         const data2 = (await response2.json()) as PeopleMovieCreditResponse[];
-        //console.log(data2);
         setMovieCredits(data2);
+
+        if (accessToken != null) {
+          const likeResponse = await fetch(`/api/participants/like/${id}`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+          if (!likeResponse.ok) {
+            throw new Error('Failed to fetch like status');
+          }
+          const likeData = (await likeResponse.json()) as boolean;
+          setIsLiked(likeData);
+        }
       } catch (err) {
         console.error(err);
       }
     };
 
     void fetchPeople();
-  }, [id]);
+  }, [id, accessToken]);
 
   useEffect(() => {
     if (movieCredits.length === 0) {
@@ -109,6 +151,23 @@ const PeoplePage = () => {
           </p>
         </div>
       </div>
+
+      <div className="w-full mt-6 border-y border-gray-200">
+        <button
+          onClick={() => {
+            void handleToggleLike();
+          }}
+          className="w-full bg-white py-2 px-4 flex items-center justify-center space-x-2"
+        >
+          <img
+            src={isLiked ? recommend : not_recommend}
+            alt="좋아요"
+            className={'w-5 h-5'}
+          />
+          <span>좋아요</span>
+        </button>
+      </div>
+
       <h1 className="text-xl font-semibold px-4 pt-8">영화</h1>
       <div className="flex pt-2 px-2">
         <button
@@ -171,6 +230,14 @@ const PeoplePage = () => {
           )}
         </div>
       </div>
+      {showLoginPopup && (
+        <NeedLoginPopup
+          onClose={() => {
+            setShowLoginPopup(false);
+          }}
+          isOpen={true}
+        />
+      )}
       <div className="flex-none fixed z-10 bottom-0 w-full">
         <Footerbar />
       </div>
