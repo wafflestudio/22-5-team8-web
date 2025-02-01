@@ -16,6 +16,7 @@ import { MoviePage } from './pages/movie/MoviePage';
 import { Movies } from './pages/Movies';
 import { Followers } from './pages/mypage/Followers';
 import { Followings } from './pages/mypage/Followings';
+import { Likes } from './pages/mypage/Likes';
 import { MonthlyMovies } from './pages/mypage/MonthlyMovies';
 import { Profile } from './pages/mypage/Profile';
 import { Reviews } from './pages/mypage/Reviews';
@@ -62,6 +63,7 @@ export const App = () => {
               path="/profile/:view_user_id/followings"
               element={<Followings />}
             />
+            <Route path="/profile/:view_user_id/likes" element={<Likes />} />
             <Route path="/mypage/settings" element={<Settings />} />
             <Route path="/monthly/:date" element={<MonthlyMovies />} />
             <Route path="/movies/:movieId/comments" element={<CommentList />} />

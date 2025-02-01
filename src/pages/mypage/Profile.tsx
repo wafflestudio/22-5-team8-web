@@ -7,7 +7,13 @@ import { useAuth } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
 import MovieCalendar from '../../components/MovieCalendar';
 import { fetchFollowingUserList } from '../../utils/Functions';
+import {
+  fetchLikesCollection,
+  fetchLikesParticipant,
+  fetchLikesReview,
+} from '../../utils/Functions';
 import { type UserProfile } from '../../utils/Types';
+import NeedLoginPopup from '../movie/NeedLoginPopup';
 
 export const Profile = () => {
   const { view_user_id } = useParams();
@@ -16,6 +22,10 @@ export const Profile = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [following, setFollowing] = useState(false);
+  const [likesParticipant, setLikesParticipant] = useState<number>(0);
+  const [likesCollection, setLikesCollection] = useState<number>(0);
+  const [likesReview, setLikesReview] = useState<number>(0);
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
 
   useEffect(() => {
     const checkFollowingStatus = async () => {
@@ -55,10 +65,36 @@ export const Profile = () => {
     void fetchProfile();
   }, [viewUserId]);
 
+  useEffect(() => {
+    const fetchLikes = async () => {
+      try {
+        if (accessToken == null) return;
+        const participantLikes = await fetchLikesParticipant(accessToken);
+        const collectionLikes = await fetchLikesCollection(accessToken);
+        const reviewLikes = await fetchLikesReview(accessToken);
+
+        setLikesParticipant(participantLikes?.length ?? 0);
+        setLikesCollection(collectionLikes?.length ?? 0);
+        setLikesReview(reviewLikes?.length ?? 0);
+      } catch (err) {
+        console.error('Error fetching likes:', err);
+      }
+    };
+
+    if (user_id === viewUserId) {
+      void fetchLikes();
+    }
+  }, [accessToken, user_id, viewUserId]);
+
   // Handle follow/unfollow button click
   const toggleFollow = async () => {
+    if (accessToken == null) {
+      setShowLoginPopup(true);
+      return;
+    }
+
     try {
-      if (isNaN(viewUserId) || accessToken == null) {
+      if (isNaN(viewUserId)) {
         throw new Error('User ID is undefined');
       }
 
@@ -203,17 +239,36 @@ export const Profile = () => {
           <div className="p-4 bg-gray-50">
             <h2 className="text-lg font-semibold">좋아요</h2>
             <div className="mt-4 space-y-2">
-              <div className="flex justify-between">
+              <div
+                className="flex justify-between"
+                onClick={() =>
+                  void navigate(
+                    `/profile/${viewUserId}/likes?selected=participants`,
+                  )
+                }
+              >
                 <span>좋아한 인물</span>
-                <span className="text-gray-500">0</span>
+                <span className="text-gray-500">{likesParticipant}</span>
               </div>
-              <div className="flex justify-between">
+              <div
+                className="flex justify-between"
+                onClick={() =>
+                  void navigate(
+                    `/profile/${viewUserId}/likes?selected=collections`,
+                  )
+                }
+              >
                 <span>좋아한 컬렉션</span>
-                <span className="text-gray-500">0</span>
+                <span className="text-gray-500">{likesCollection}</span>
               </div>
-              <div className="flex justify-between">
+              <div
+                className="flex justify-between"
+                onClick={() =>
+                  void navigate(`/profile/${viewUserId}/likes?selected=reviews`)
+                }
+              >
                 <span>좋아한 코멘트</span>
-                <span className="text-gray-500">0</span>
+                <span className="text-gray-500">{likesReview}</span>
               </div>
             </div>
           </div>
@@ -222,6 +277,14 @@ export const Profile = () => {
 
       {/* Footer Section */}
       <Footerbar />
+      {showLoginPopup && (
+        <NeedLoginPopup
+          onClose={() => {
+            setShowLoginPopup(false);
+          }}
+          isOpen={true}
+        />
+      )}
     </div>
   );
 };
