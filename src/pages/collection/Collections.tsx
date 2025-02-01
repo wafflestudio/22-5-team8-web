@@ -43,6 +43,10 @@ export const Collections = () => {
   );
 
   useEffect(() => {
+    setCollections([]); // 페이지 유저가 변경될 때 컬렉션 초기화
+  }, [page_user_id]);
+
+  useEffect(() => {
     const fetchUserCollections = async () => {
       setError(null);
       setIsLoading(true);
@@ -69,7 +73,7 @@ export const Collections = () => {
         if (data.length < PAGE_SIZE) {
           setHasMore(false);
         }
-        setCollections((prev) => [...prev, ...data]);
+        setCollections(data);
       } catch (err) {
         setError((err as Error).message);
         console.error('Collections fetch error:', err);
@@ -100,7 +104,7 @@ export const Collections = () => {
               ref={
                 index === collections.length - 1 ? lastCollectionRef : undefined
               }
-              key={`${collection.id}-${index}`}
+              key={collection.id}
             >
               <CollectionBlock collection={collection} />
             </div>
