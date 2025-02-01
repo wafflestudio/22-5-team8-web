@@ -155,7 +155,7 @@ const Analysis = ({ mode }: { mode: 'default' | 'short' }) => {
         <WordCloud analysisPreference={analysisPreference} />
         <hr className="my-8" />
 
-        <h2 className="text-2xl font-bold mb-4">영화 선호국가</h2>
+        <h2 className="text-2xl font-bold mb-4">영화 선호 국가</h2>
         <div className="flex flex-wrap gap-4 items-center justify-center">
           {countries.slice(0, 3).map((country) => (
             <div key={country.name} className="text-center w-24">
@@ -182,7 +182,7 @@ const Analysis = ({ mode }: { mode: 'default' | 'short' }) => {
         </div>
         <hr className="my-8" />
 
-        <h2 className="text-2xl font-bold mb-4">영화 선호장르</h2>
+        <h2 className="text-2xl font-bold mb-4">영화 선호 장르</h2>
         <div className="flex flex-wrap gap-4 items-center justify-center">
           {genres.slice(0, 3).map((genre) => (
             <div key={genre.name} className="text-center w-24">
