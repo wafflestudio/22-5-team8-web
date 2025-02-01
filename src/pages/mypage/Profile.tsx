@@ -16,6 +16,7 @@ import {
   fetchLikesReview,
 } from '../../utils/Functions';
 import { type UserProfile } from '../../utils/Types';
+import Analysis from '../analysis/Analysis';
 import NeedLoginPopup from '../movie/NeedLoginPopup';
 
 export const Profile = () => {
@@ -301,6 +302,8 @@ export const Profile = () => {
         */}
         {/* Calendar Section */}
         <MovieCalendar />
+
+        {user_id === viewUserId && <Analysis mode="short" />}
 
         {/* Likes Section */}
         {user_id === viewUserId && (

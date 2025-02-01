@@ -2,9 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import search from '../assets/search.svg';
+import { useAuth } from '../components/AuthContext';
 import { Footerbar } from '../components/Footerbar';
 import { SearchResultBlock } from '../components/SearchResultBlock';
 import {
+  fetchBlokedUserList,
   fetchCollection,
   fetchMovie,
   fetchPeople,
@@ -49,6 +51,9 @@ export const Search = () => {
     [isLoading, hasMore],
   );
 
+  const { accessToken, user_id } = useAuth();
+  const [blockedUserList, setBlockedUserList] = useState<number[]>([]);
+
   const query = useMemo(() => searchParams.get('query'), [searchParams]);
   const category = useMemo(
     () => searchParams.get('category') ?? 'movie',
@@ -63,6 +68,19 @@ export const Search = () => {
       setSelectedCategory(category as SearchCategory);
     }
   }, [category]);
+
+  useEffect(() => {
+    if (user_id !== null) {
+      fetchBlokedUserList(user_id)
+        .then((data) => {
+          //console.log(data);
+          setBlockedUserList(data);
+        })
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+    }
+  }, [accessToken, user_id]);
 
   const performSearch = useCallback(
     async (searchQuery: string, pageNum = 0) => {
@@ -251,6 +269,7 @@ export const Search = () => {
             isLoading={isLoading}
             hasMore={hasMore}
             initialLoading={initialLoading}
+            blockedUserList={blockedUserList}
           />
         )}
       </div>

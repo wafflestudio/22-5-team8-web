@@ -86,7 +86,7 @@ export const App = () => {
               element={<EditCollection />}
             />
             <Route path="/recommend" element={<Recommend />} />
-            <Route path="/analysis" element={<Analysis />} />
+            <Route path="/analysis" element={<Analysis mode="default" />} />
             <Route path="/oauth/kakao" element={<KakaoCallback />} />
             <Route path="/oauth/google" element={<GoogleCallback />} />
           </Routes>

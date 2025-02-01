@@ -1,20 +1,9 @@
+import type { UserAnalysisPreference } from '../../utils/Types';
+
 type Tag = {
   text: string;
   weight: number;
 };
-
-const tags: Tag[] = [
-  { text: '블록버스터', weight: 8 },
-  { text: '명작', weight: 6 },
-  { text: '연기력', weight: 5 },
-  { text: '스릴있는', weight: 4 },
-  { text: '영상미', weight: 4 },
-  { text: 'OST', weight: 3 },
-  { text: '완성도', weight: 2 },
-  { text: '강렬한', weight: 2 },
-  { text: '철학적인', weight: 1 },
-  { text: '워너 브라더스', weight: 1 },
-];
 
 const shuffleArray = (array: ReadonlyArray<Tag>): Tag[] => {
   const shuffled = [...array];
@@ -29,7 +18,18 @@ const shuffleArray = (array: ReadonlyArray<Tag>): Tag[] => {
   return shuffled;
 };
 
-export default function WordCloud() {
+const WordCloud = ({
+  analysisPreference,
+}: {
+  analysisPreference: UserAnalysisPreference;
+}) => {
+  const tags = Object.entries(analysisPreference.genre_dict).map(
+    ([name, value]) => ({
+      text: name,
+      weight: Math.trunc(value[0]) / 15,
+    }),
+  );
+
   return (
     <div
       className="flex flex-wrap justify-center items-center gap-2 mx-auto mt-4 text-center"
@@ -59,4 +59,6 @@ export default function WordCloud() {
       ))}
     </div>
   );
-}
+};
+
+export default WordCloud;
