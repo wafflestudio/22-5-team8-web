@@ -137,6 +137,11 @@ export type Recommendation = {
   movie: Movie;
   expected_rating: number;
 };
+export type LoginResponse = {
+  access_token: string;
+  refresh_token: string;
+  user_id: number;
+};
 
 export type FollowUser = {
   id: number;

@@ -10,7 +10,8 @@ export default defineConfig({
     host: '127.0.0.1',
     proxy: {
       '/api': {
-        target: 'https://d2vsqxcvld4zf7.cloudfront.net',
+        //target: 'https://d2vsqxcvld4zf7.cloudfront.net',
+        target: 'http://3.36.75.22',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '/api'),
