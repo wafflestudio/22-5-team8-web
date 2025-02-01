@@ -149,9 +149,11 @@ export const Login = () => {
               <KakaoIcon />
             </CircleIcon>
           </a>
+          <a href="api/auth/google">
           <CircleIcon bgColor="bg-white border">
             <GoogleIcon />
           </CircleIcon>
+          </a>
           <CircleIcon bgColor="bg-blue-400">
             <TwitterIcon />
           </CircleIcon>
