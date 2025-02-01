@@ -1,5 +1,6 @@
 import type {
   Collection,
+  CollectionComment,
   Movie,
   People,
   Reply,
@@ -337,5 +338,32 @@ export const fetchBlokedUserList = async (user_id: number) => {
   } catch (err) {
     console.error('Blocked user list fetch error:', err);
     return [];
+  }
+};
+
+export const fetchCollectionCommentList = async (
+  collectionId: number,
+  begin: number,
+  end: number,
+) => {
+  try {
+    const response = await fetch(
+      `/api/collection_comments/${collectionId}/list?begin=${begin}&end=${end}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    //console.log(await response.text());
+    if (!response.ok) {
+      throw new Error('Failed to fetch reply list');
+    }
+    return (await response.json()) as CollectionComment[];
+  } catch (err) {
+    console.error(err);
+    return null;
   }
 };

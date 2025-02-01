@@ -22,6 +22,14 @@ export const Index = () => {
     netflix: true,
   });
 
+  const handleAnalysisClick = useCallback(() => {
+    if (accessToken == null) {
+      setShowLoginPopup(true);
+    } else {
+      void navigate('/analysis');
+    }
+  }, [accessToken, navigate]);
+
   const handleRecommendClick = useCallback(() => {
     if (accessToken == null) {
       setShowLoginPopup(true);
@@ -58,7 +66,10 @@ export const Index = () => {
             <img src={calendar_img} alt="Calendar" className="w-12 h-12 mb-1" />
             <h2 className="text-md">캘린더</h2>
           </div>
-          <div className="flex flex-col items-center">
+          <div
+            className="flex flex-col items-center"
+            onClick={handleAnalysisClick}
+          >
             <img
               src={taste_analysis_img}
               alt="Taste Analysis"

@@ -4,6 +4,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import { AuthProvider } from './components/AuthContext';
 import { ReturnPathProvider } from './components/ReturnPathContext';
+import Analysis from './pages/analysis/Analysis';
 import CollectionPage from './pages/collection/CollectionPage';
 import { Collections } from './pages/collection/Collections';
 import { EditCollection } from './pages/collection/EditCollection';
@@ -64,6 +65,7 @@ export const App = () => {
               element={<EditCollection />}
             />
             <Route path="/recommend" element={<Recommend />} />
+            <Route path="/analysis" element={<Analysis />} />
           </Routes>
         </AuthProvider>
       </ReturnPathProvider>

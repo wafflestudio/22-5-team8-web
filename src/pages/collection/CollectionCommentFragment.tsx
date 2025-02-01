@@ -28,7 +28,7 @@ const CollectionCommentFragment = ({
       try {
         if (accessToken != null) {
           const response = await fetch(
-            `/api/collection_comments/like/${comment.id}`,
+            `/api/collection_comments/like/${initialComment.id}`,
             {
               method: 'GET',
               headers: {
@@ -51,7 +51,7 @@ const CollectionCommentFragment = ({
     };
 
     void getIsLike();
-  }, [accessToken, comment]);
+  }, [accessToken, initialComment]);
 
   useEffect(() => {
     const updateInitialComment = async () => {
