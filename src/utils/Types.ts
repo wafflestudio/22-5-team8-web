@@ -29,6 +29,7 @@ export type Review = {
   user_name: string;
   profile_url: string | null;
   movie_id: number;
+  movie: Movie;
   content: string;
   rating: number | null;
   likes_count: number;

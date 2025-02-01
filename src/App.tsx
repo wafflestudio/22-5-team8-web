@@ -16,6 +16,7 @@ import { MoviePage } from './pages/movie/MoviePage';
 import { Movies } from './pages/Movies';
 import { MonthlyMovies } from './pages/mypage/MonthlyMovies';
 import { Profile } from './pages/mypage/Profile';
+import { Reviews } from './pages/mypage/Reviews';
 import { Settings } from './pages/mypage/Settings';
 import { News } from './pages/News';
 import PeoplePage from './pages/PeoplePage';
@@ -42,6 +43,10 @@ export const App = () => {
             <Route
               path="/profile/:page_user_id/collections"
               element={<Collections />}
+            />
+            <Route
+              path="/profile/:page_user_id/reviews"
+              element={<Reviews />}
             />
             <Route
               path="/profile/:page_user_id/collections/new"

@@ -113,7 +113,7 @@ export const Profile = () => {
         </div>
         {/* Stats Section */}
         <div className="grid grid-cols-3 text-center pb-4 bg-white">
-          <div>
+          <div onClick={() => void navigate(`/profile/${viewUserId}/reviews`)}>
             <p className="font-bold">{profile?.review_count}</p>
             <p className="text-gray-500">평가</p>
           </div>
@@ -123,9 +123,7 @@ export const Profile = () => {
           </div>
           <div
             onClick={() => {
-              if (isNaN(viewUserId)) {
-                void navigate(`/profile/${viewUserId}/collections`);
-              }
+              void navigate(`/profile/${viewUserId}/collections`);
             }}
           >
             <p className="font-bold">{profile?.collection_count}</p>
