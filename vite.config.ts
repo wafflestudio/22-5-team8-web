@@ -8,8 +8,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        //target: 'https://d2vsqxcvld4zf7.cloudfront.net',
-        target: 'http://3.36.75.22',
+        target: 'https://d2vsqxcvld4zf7.cloudfront.net',
+        //target: 'http://3.36.75.22',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '/api'),

@@ -9,7 +9,9 @@ import CollectionPage from './pages/collection/CollectionPage';
 import { Collections } from './pages/collection/Collections';
 import { EditCollection } from './pages/collection/EditCollection';
 import { NewCollection } from './pages/collection/NewCollection';
+import { GoogleCallback } from './pages/GoogleCallback';
 import { Index } from './pages/Index';
+import { KakaoCallback } from './pages/KakaoCallback';
 import { Login } from './pages/Login';
 import CommentList from './pages/movie/CommentList';
 import { MoviePage } from './pages/movie/MoviePage';
@@ -66,6 +68,8 @@ export const App = () => {
             />
             <Route path="/recommend" element={<Recommend />} />
             <Route path="/analysis" element={<Analysis />} />
+            <Route path="/oauth/kakao" element={<KakaoCallback />} />
+            <Route path="/oauth/google" element={<GoogleCallback />} />
           </Routes>
         </AuthProvider>
       </ReturnPathProvider>
