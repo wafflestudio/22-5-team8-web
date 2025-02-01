@@ -437,7 +437,7 @@ export const fetchFollowingUsers = async (user_id: number) => {
     return [];
   }
 };
-        
+
 export const fetchLikesParticipant = async (accessToken: string) => {
   try {
     const response = await fetch(`/api/users/likes_participant`, {
