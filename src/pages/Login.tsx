@@ -3,12 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../components/AuthContext';
 import { useReturnPath } from '../components/ReturnPathContext';
-
-type LoginResponse = {
-  access_token: string;
-  refresh_token: string;
-  user_id: number;
-};
+import type { LoginResponse } from '../utils/Types';
 
 export const Login = () => {
   const [id, setId] = useState('');
@@ -149,9 +144,11 @@ export const Login = () => {
         </div>
 
         <div className="flex justify-center space-x-6">
-          <CircleIcon bgColor="bg-yellow-400">
-            <KakaoIcon />
-          </CircleIcon>
+          <a href="/api/auth/kakao">
+            <CircleIcon bgColor="bg-yellow-400">
+              <KakaoIcon />
+            </CircleIcon>
+          </a>
           <CircleIcon bgColor="bg-white border">
             <GoogleIcon />
           </CircleIcon>
