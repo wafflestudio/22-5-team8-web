@@ -5,7 +5,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import no_profile from '../../assets/no_profile.svg';
 import { useAuth } from '../../components/AuthContext';
 import { Footerbar } from '../../components/Footerbar';
-import MovieCalendar from '../../components/MovieCalendar';
+//import MovieCalendar from '../../components/MovieCalendar';
 import {
   fetchBlokedUserList,
   fetchFollowingUserList,
@@ -300,9 +300,9 @@ export const Profile = () => {
           </div>
         </div>
         */}
-        {/* Calendar Section */}
+        {/* Calendar Section 
         <MovieCalendar />
-
+        */}
         {user_id === viewUserId && <Analysis mode="short" />}
 
         {/* Likes Section */}

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import addCollection from '../../assets/add_collection.svg';
-import calendar from '../../assets/calendar.svg';
+//import calendar from '../../assets/calendar.svg';
 import type { Movie } from '../../utils/Types';
 import AddToCollection from './AddToCollection';
 
@@ -65,10 +65,12 @@ const MoreOptionsPopup = ({
               className="w-8 h-8"
             />
           </div>
+          {/*
           <div className="flex justify-between items-center py-3">
             <div>본 날짜 추가</div>
             <img src={calendar} alt="Add date" className="w-8 h-8" />
           </div>
+          */}
           <button
             onClick={onClose}
             className="w-full text-hotPink py-2 text-center"

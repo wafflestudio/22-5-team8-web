@@ -38,9 +38,6 @@ export const Likes = () => {
         const collectionsData = await fetchLikesCollection(accessToken);
         const participantsData = await fetchLikesParticipant(accessToken);
         const reviewsData = await fetchLikesReview(accessToken);
-        console.debug('collectionsData:', collectionsData);
-        console.debug('participantsData:', participantsData);
-        console.debug('reviewsData:', reviewsData);
 
         setCollections(collectionsData);
         setParticipants(participantsData);

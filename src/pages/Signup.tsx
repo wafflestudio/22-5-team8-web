@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import google from '../assets/google.svg';
+import kakao from '../assets/kakao.svg';
+
 export const Signup = () => {
   const [name, setName] = useState('');
   const [isNameValid, setIsNameValid] = useState(true);
@@ -150,12 +153,17 @@ export const Signup = () => {
         </div>
 
         <div className="flex justify-center space-x-6">
-          <CircleIcon bgColor="bg-yellow-400">
-            <KakaoIcon />
-          </CircleIcon>
-          <CircleIcon bgColor="bg-white border">
-            <GoogleIcon />
-          </CircleIcon>
+          <a href="/api/auth/kakao">
+            <CircleIcon bgColor="bg-[#F7E317]">
+              <img src={kakao} alt="Kakao" className="w-6 h-6" />
+            </CircleIcon>
+          </a>
+          <a href="api/auth/google">
+            <CircleIcon bgColor="bg-white border">
+              <img src={google} alt="Google" className="w-6 h-6" />
+            </CircleIcon>
+          </a>
+          {/*
           <CircleIcon bgColor="bg-blue-400">
             <TwitterIcon />
           </CircleIcon>
@@ -165,6 +173,7 @@ export const Signup = () => {
           <CircleIcon bgColor="bg-green-500">
             <LineIcon />
           </CircleIcon>
+          */}
         </div>
       </div>
     </div>
@@ -187,6 +196,7 @@ function CircleIcon({
   );
 }
 
+/*
 function KakaoIcon() {
   return (
     <svg
@@ -256,3 +266,4 @@ function LineIcon() {
     </svg>
   );
 }
+*/
