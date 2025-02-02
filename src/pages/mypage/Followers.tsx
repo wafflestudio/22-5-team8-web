@@ -16,11 +16,9 @@ export const Followers = () => {
 
   useEffect(() => {
     const fetchFollowers = async () => {
-      console.debug(view_user_id);
       try {
         if (view_user_id == null) return;
         const users = await fetchFollowerUserList(Number(view_user_id));
-        console.debug(users);
         setFollowers(users);
       } catch (error) {
         console.error('Error fetching followers:', error);

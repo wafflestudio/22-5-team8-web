@@ -11,7 +11,6 @@ export const GoogleCallback = () => {
   useEffect(() => {
     const processGoogleCallback = async () => {
       const code = new URLSearchParams(window.location.search).get('code');
-      console.debug('Google code:', code);
       if (code == null) {
         console.debug('No code found in URL');
         return;
@@ -30,7 +29,6 @@ export const GoogleCallback = () => {
         }
 
         const data = (await response.json()) as LoginResponse;
-        console.debug(data);
         login(data.access_token, data.refresh_token, data.user_id);
         void navigate('/');
       } catch (error) {

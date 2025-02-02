@@ -125,11 +125,13 @@ export const Login = () => {
           <div className="mt-4 text-red-500 text-center">{error}</div>
         )}
 
+        {/*
         <div className="text-center mt-4">
           <a href="#" className="text-hotPink text-sm">
             비밀번호를 잊어버리셨나요?
           </a>
         </div>
+        */}
         <div className="text-center mt-2">
           <span className="text-sm">계정이 없으신가요? </span>
           <Link to="/signup">
@@ -156,6 +158,7 @@ export const Login = () => {
               <img src={google} alt="Google" className="w-6 h-6" />
             </CircleIcon>
           </a>
+          {/*
           <CircleIcon bgColor="bg-blue-400">
             <TwitterIcon />
           </CircleIcon>
@@ -165,6 +168,7 @@ export const Login = () => {
           <CircleIcon bgColor="bg-green-500">
             <LineIcon />
           </CircleIcon>
+          */}
         </div>
 
         <div className="bg-gray-100 p-4 mt-6 rounded-md text-center text-sm text-gray-600">
@@ -190,7 +194,7 @@ function CircleIcon({
     </div>
   );
 }
-
+/*
 function TwitterIcon() {
   return (
     <svg
@@ -232,3 +236,4 @@ function LineIcon() {
     </svg>
   );
 }
+*/

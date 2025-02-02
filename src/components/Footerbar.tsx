@@ -2,9 +2,9 @@ import { Link } from 'react-router-dom';
 
 import home from '../assets/home.svg';
 import login from '../assets/login.svg';
-import news from '../assets/news.svg';
+//import news from '../assets/news.svg';
 import search from '../assets/search.svg';
-import star from '../assets/star.svg';
+//import star from '../assets/star.svg';
 import { useAuth } from './AuthContext';
 import { useReturnPath } from './ReturnPathContext';
 
@@ -41,6 +41,7 @@ export const Footerbar = () => {
               </div>
             </Link>
           )}
+          {/*
           {isLoggedIn && (
             <Link to="/rating">
               <div className="flex flex-col items-center">
@@ -57,6 +58,7 @@ export const Footerbar = () => {
               </div>
             </Link>
           )}
+          */}
           {isLoggedIn && user_id !== null && (
             <Link to={`/profile/${user_id}`}>
               <div className="flex flex-col items-center">

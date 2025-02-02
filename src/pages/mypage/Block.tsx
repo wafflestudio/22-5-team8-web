@@ -19,7 +19,6 @@ export const Block = () => {
 
   useEffect(() => {
     const fetchBlocked = async () => {
-      console.debug(user_id);
       try {
         if (user_id == null) return;
         const users = await fetchBlokedUserList(Number(user_id));
