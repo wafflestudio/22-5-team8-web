@@ -34,10 +34,14 @@ const Analysis = ({ mode }: { mode: 'default' | 'short' }) => {
     { name: string; score: number; count: number }[]
   >([]);
 
+  const [isNoRating, setIsNoRating] = useState(false);
+
   useEffect(() => {
     if (user_id === null) {
       return;
     }
+
+    let chk: boolean = false;
 
     const fetchAnalysisRating = async () => {
       try {
@@ -50,6 +54,11 @@ const Analysis = ({ mode }: { mode: 'default' | 'short' }) => {
 
         const data = (await response.json()) as UserAnalysisRating;
         setAnalysisRating(data);
+
+        if (data.rating_num === 0) {
+          setIsNoRating(true);
+          chk = true;
+        }
       } catch (error) {
         console.error(error);
       }
@@ -111,12 +120,35 @@ const Analysis = ({ mode }: { mode: 'default' | 'short' }) => {
       }
     };
 
+    if (isNoRating) {
+      chk = true;
+    }
+
     void fetchAnalysisRating();
-    void fetchAnalysisPreference();
-  }, [navigate, user_id]);
+    if (chk) void fetchAnalysisPreference();
+  }, [isNoRating, navigate, user_id]);
 
   if (analysisRating == null || analysisPreference == null) {
-    return <div>Loading...</div>;
+    if (isNoRating) {
+      if (mode === 'default')
+        return (
+          <>
+            <div className="flex drop-shadow items-center fixed z-10 top-0 w-full bg-white">
+              <button
+                onClick={() => void navigate(-1)}
+                className={`flex items-center space-x-2 p-4 rounded ${isMobile ? '' : 'hover:bg-gray-100'}`}
+              >
+                <img src={back} alt="뒤로가기" className="w-6 h-6" />
+              </button>
+              <h1 className="text-xl font-semibold">취향분석</h1>
+            </div>
+            <div className="flex flex-col items-center justify-center mt-20 text-hotPink">
+              아직 리뷰가 없어요! 리뷰 등록 후 확인해주세요!!
+            </div>
+          </>
+        );
+      else return null;
+    } else return <div>Loading...</div>;
   }
 
   if (mode === 'short') {
