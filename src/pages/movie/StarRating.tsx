@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 
 import { useAuth } from '../../components/AuthContext';
-import { newReview, updateReview } from '../../utils/Functions';
+import { deleteReview, newReview, updateReview } from '../../utils/Functions';
 import type { Review } from '../../utils/Types';
 import NeedLoginPopup from './NeedLoginPopup';
 
@@ -58,15 +58,31 @@ const StarRating = ({
     //console.log(myReview)
 
     if (myReview !== null) {
-      void updateReview(
-        myReview.id,
-        accessToken,
-        myReview.content,
-        myReview.rating === newRating ? 0 : newRating,
-        myReview.spoiler,
-        myReview.status,
-        onReviewUpdate,
-      );
+      if (myReview.rating === newRating) {
+        if (myReview.content === '') {
+          void deleteReview(myReview.id, accessToken, () => {});
+        } else {
+          void updateReview(
+            myReview.id,
+            accessToken,
+            myReview.content,
+            0,
+            myReview.spoiler,
+            myReview.status,
+            onReviewUpdate,
+          );
+        }
+      } else {
+        void updateReview(
+          myReview.id,
+          accessToken,
+          myReview.content,
+          newRating,
+          myReview.spoiler,
+          myReview.status,
+          onReviewUpdate,
+        );
+      }
 
       return;
     }

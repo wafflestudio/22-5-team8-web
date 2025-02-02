@@ -134,15 +134,17 @@ const CommnetFragment = ({
 
     try {
       await deleteReview(review.id, accessToken, () => {});
-      await newReview(
-        review.movie_id,
-        accessToken,
-        '',
-        review.rating === null ? 0 : review.rating,
-        false,
-        review.status,
-        () => {},
-      );
+      if (review.rating !== null && review.rating !== 0) {
+        await newReview(
+          review.movie_id,
+          accessToken,
+          '',
+          review.rating,
+          false,
+          review.status,
+          () => {},
+        );
+      }
       setIsModalOpen(false);
       window.location.reload();
     } catch (err) {
