@@ -44,71 +44,97 @@
 
 ## 주요 페이지 및 기능
 
+<div align="center">
 <img src="https://github.com/user-attachments/assets/cb4832a7-1e32-4574-81ff-a66d7133aaff" width="32%">
 <img src="https://github.com/user-attachments/assets/8954dd77-51c0-4804-9024-26bbb9fcc715" width="32%">
+</div>
 <br>
 <li> 메인 페이지: 왓챠피디아 HOT 랭킹, 박스오피스 순위, 왓챠피디아 구매 순위, 넷플릭스 순위 등의 영화 목록을 제공합니다.
-
+<br>
+<div align="center">
 <img src="https://github.com/user-attachments/assets/27469c0c-ca94-4f63-8bd5-3eb1ccaf2815" width="32%">
 <img src="https://github.com/user-attachments/assets/0b4d94e7-e0aa-4b9e-ac02-72ad16a74858" width="32%">
+</div>
 <br>
 <li> 로그인 및 회원가입: 카카오, 구글 소셜 로그인을 지원합니다.
-
+<br>
+<div align="center">
 <img src="https://github.com/user-attachments/assets/142e32a4-1a50-4a52-b33b-49547fc85bd3" width="32%">
 <img src="https://github.com/user-attachments/assets/8bd315d5-b641-4316-8e3a-3066fdedaff2" width="32%">
 <img src="https://github.com/user-attachments/assets/491a221a-5aa8-4bc0-a3ec-f9505a240ddd" width="32%">
+</div>
 <br>
 <li> 영화 페이지: 영화별로 영화에 대한 포스터, 줄거리, 출연/제작 등의 정보를 제공하고, 별점을 매기고 자신의 의견을 코멘트로 작성할 수 있습니다.
-
+<div align="center">
+<br>
 <img src="https://github.com/user-attachments/assets/e3e8c716-bf23-4ee0-86a8-b9010c87d14c" width="32%">
 <img src="https://github.com/user-attachments/assets/696c4eb2-cb8e-4a1e-8609-a33a2c3d0035" width="32%">
 <img src="https://github.com/user-attachments/assets/0209b920-361c-4c15-a1b5-dbff980945ce" width="32%">
+</div>
 <br>
 <li> 코멘트 페이지: 코멘트를 남기고, 코멘트 목록을 볼 수 있습니다. 팔로우하는 유저의 코멘트만 모아서 볼 수 있고, 코멘트 별로 코멘트 페이지에서 댓글을 남길 수 있습니다.
-
+<br>
+<div align="center">
 <img src="https://github.com/user-attachments/assets/48c29c99-55f1-4845-8150-4dbdbfb913f0" width="32%">
 <img src="https://github.com/user-attachments/assets/3b0c0fda-ff00-487f-90c4-e03741e8e140" width="32%">
+</div>
 <br>
 <li> 검색 페이지: 영화, 장르, 인물, 컬렉션, 유저에 대한 통합 검색이 가능합니다.
-
+<br>
+<div align="center">
 <img src="https://github.com/user-attachments/assets/25004481-773b-4dc3-9c44-c2de26b988bb" width="32%">
 <img src="https://github.com/user-attachments/assets/bd6a14ed-6f5d-4f42-aab9-9228462f9a87" width="32%">
+</div>
 <br>
+<div align="center">
 <img src="https://github.com/user-attachments/assets/2aeb7ba0-f998-4e8b-8ce3-db2dcb9765ec" width="32%">
 <img src="https://github.com/user-attachments/assets/25c30000-2fa2-48ec-a73d-f877685489ae" width="32%">
+</div>
 <br>
 <li> 유저 페이지: 사용자에 대한 기본 정보를 제공합니다. 팔로워/팔로잉 목록, 평가/컬렉션 목록을 확인할 수 있습니다. 로그인 시 별점 분포, 나의 좋아요 인물/컬렉션/코멘트 목록을 확인할 수 있습니다.
-
+<br>
+<div align="center">
 <img src="https://github.com/user-attachments/assets/856a827e-576c-4714-a614-82cf00efd0e6" width="32%">
 <img src="https://github.com/user-attachments/assets/cba1ba53-bafb-46cc-aa9a-3d4fd0f53356" width="32%">
 <img src="https://github.com/user-attachments/assets/94c82ab0-f161-46a2-bd98-9d86f24bc3da" width="32%">
+</div>
 <br>
+<div align="center">
 <img src="https://github.com/user-attachments/assets/e6a5ec2b-8ff0-4728-9ae0-80a4d6904204" width="32%">
 <img src="https://github.com/user-attachments/assets/f198a5e3-f10a-49f2-94e0-79d2e3e56b52" width="32%">
 <img src="https://github.com/user-attachments/assets/8e9a1f73-64b5-4a9c-a84c-9db54f40d9a6" width="32%">
+</div>
 <br>
 <li> 컬렉션 페이지: 영화를 선택하고 편집하여 컬렉션을 생성할 수 있습니다. 컬렉션 페이지에서는 좋아요을 누르고 댓글을 남길 수 있습니다.
-
+<br>
+<div align="center">
 <img src="https://github.com/user-attachments/assets/d0c0778d-dfa0-44ea-bd67-130beda12b9d" width="32%">
 <img src="https://github.com/user-attachments/assets/12869b34-f5ee-4551-9d1b-4d414c19e3a9" width="32%">
 <img src="https://github.com/user-attachments/assets/04893b4a-b091-48a7-a220-4aae5b7a7538" width="32%">
+</div>
 <br>
 <li> 영화 페이지에서 컬렉션 생성: 더보기를 눌러 이미 존재하는 컬렉션에 영화를 추가하거나, 이 영화를 포함하여 새로운 컬렉션을 생성할 수 있습니다.
-
+<br>
+<div align="center">
 <img src="https://github.com/user-attachments/assets/58c93740-eced-420c-9cb6-bc206ef1dcd6" width="32%">
 <img src="https://github.com/user-attachments/assets/ee05db27-ee9c-43c7-9da9-ef155746b81e" width="32%">
+</div>
 <br>
 <li> 취향 분석 페이지: 사용자가 남긴 평가를 바탕으로 별점 분포, 영화 선호 태그, 영화 선호 장르, 선호 배우, 선호 감독, 영화 감상 시간 등의 통계를 확인할 수 있습니다.
-
+<br>
+<div align="center">
 <img src="https://github.com/user-attachments/assets/6ab9a2e2-4bb7-4e53-aef5-b9a9a2ef02fa" width="32%">
 <img src="https://github.com/user-attachments/assets/e7da5916-917a-4854-974c-612c76f3fbde" width="32%">
+</div>
 <br>
 <li> 추천 페이지: 사용자가 남긴 평가를 분석하여 사용자에게 맞춤형 추천과 예상 별점을 제공합니다.
 
 ## 신기능
 
+<div align="center">
 <img src="https://github.com/user-attachments/assets/b4bb17a6-2294-4f18-8cef-7b69005cc6c2" width="32%">
 <img src="https://github.com/user-attachments/assets/50ef6b4b-9289-466a-b1da-6ccbb5287878" width="32%">
+</div>
 <br>
 <li> 장르 검색: 장르명을 검색하면 해당 장르의 영화를 검색할 수 있습니다. 여러 장르를 동시에 검색하는 것도 가능합니다.
 
