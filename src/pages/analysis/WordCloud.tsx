@@ -23,6 +23,10 @@ const WordCloud = ({
 }: {
   analysisPreference: UserAnalysisPreference;
 }) => {
+  if (analysisPreference.genre_dict == null) {
+    return null;
+  }
+
   const tags = Object.entries(analysisPreference.genre_dict).map(
     ([name, value]) => ({
       text: name,

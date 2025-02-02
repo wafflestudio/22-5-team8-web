@@ -58,6 +58,7 @@ const Analysis = ({ mode }: { mode: 'default' | 'short' }) => {
         if (data.rating_num === 0) {
           setIsNoRating(true);
           chk = true;
+          //console.log('No Rating', chk);
         }
       } catch (error) {
         console.error(error);
@@ -75,6 +76,22 @@ const Analysis = ({ mode }: { mode: 'default' | 'short' }) => {
 
         const data = (await response.json()) as UserAnalysisPreference;
         setAnalysisPreference(data);
+
+        //console.log('data', data);
+
+        if (
+          data.country_dict === null ||
+          data.genre_dict === null ||
+          data.actor_dict === null ||
+          data.director_dict === null
+        ) {
+          setIsNoRating(true);
+          setCountries([]);
+          setGenres([]);
+          setActors([]);
+          setDirectors([]);
+          return;
+        }
 
         setCountries(
           Object.entries(data.country_dict)
@@ -120,35 +137,40 @@ const Analysis = ({ mode }: { mode: 'default' | 'short' }) => {
       }
     };
 
-    if (isNoRating) {
-      chk = true;
-    }
-
-    void fetchAnalysisRating();
-    if (chk) void fetchAnalysisPreference();
+    fetchAnalysisRating()
+      .then(() => {
+        //console.log('chk', chk);
+        if (chk || !isNoRating) void fetchAnalysisPreference();
+        else return;
+      })
+      .catch((error: unknown) => {
+        console.error(error);
+      });
   }, [isNoRating, navigate, user_id]);
 
   if (analysisRating == null || analysisPreference == null) {
-    if (isNoRating) {
-      if (mode === 'default')
-        return (
-          <>
-            <div className="flex drop-shadow items-center fixed z-10 top-0 w-full bg-white">
-              <button
-                onClick={() => void navigate(-1)}
-                className={`flex items-center space-x-2 p-4 rounded ${isMobile ? '' : 'hover:bg-gray-100'}`}
-              >
-                <img src={back} alt="뒤로가기" className="w-6 h-6" />
-              </button>
-              <h1 className="text-xl font-semibold">취향분석</h1>
-            </div>
-            <div className="flex flex-col items-center justify-center mt-20 text-hotPink">
-              아직 리뷰가 없어요! 리뷰 등록 후 확인해주세요!!
-            </div>
-          </>
-        );
-      else return null;
-    } else return <div>Loading...</div>;
+    return <div>Loading...</div>;
+  }
+
+  if (isNoRating) {
+    if (mode === 'default')
+      return (
+        <>
+          <div className="flex drop-shadow items-center fixed z-10 top-0 w-full bg-white">
+            <button
+              onClick={() => void navigate(-1)}
+              className={`flex items-center space-x-2 p-4 rounded ${isMobile ? '' : 'hover:bg-gray-100'}`}
+            >
+              <img src={back} alt="뒤로가기" className="w-6 h-6" />
+            </button>
+            <h1 className="text-xl font-semibold">취향분석</h1>
+          </div>
+          <div className="flex flex-col items-center justify-center mt-20 text-hotPink">
+            아직 리뷰가 없어요! 리뷰 등록 후 확인해주세요!!
+          </div>
+        </>
+      );
+    else return null;
   }
 
   if (mode === 'short') {

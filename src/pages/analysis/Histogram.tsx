@@ -5,6 +5,10 @@ export default function Histogram({
 }: {
   analysisRating: UserAnalysisRating;
 }) {
+  if (analysisRating.rating_dist == null) {
+    return null;
+  }
+
   const scoreData = Object.entries(analysisRating.rating_dist).map(
     ([key, value]) => ({
       score: parseFloat(key),
