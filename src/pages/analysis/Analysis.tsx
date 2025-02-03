@@ -55,6 +55,8 @@ const Analysis = ({ mode }: { mode: 'default' | 'short' }) => {
         const data = (await response.json()) as UserAnalysisRating;
         setAnalysisRating(data);
 
+        //console.log('data', data);
+
         if (data.rating_num === 0) {
           setIsNoRating(true);
           chk = true;
@@ -79,59 +81,61 @@ const Analysis = ({ mode }: { mode: 'default' | 'short' }) => {
 
         //console.log('data', data);
 
-        if (
-          data.country_dict === null ||
-          data.genre_dict === null ||
-          data.actor_dict === null ||
-          data.director_dict === null
-        ) {
-          setIsNoRating(true);
+        if (data.country_dict === null) {
           setCountries([]);
-          setGenres([]);
-          setActors([]);
-          setDirectors([]);
-          return;
+        } else {
+          setCountries(
+            Object.entries(data.country_dict)
+              .map(([name, value]) => ({
+                name,
+                score: Math.trunc(value[0]),
+                count: value[1],
+              }))
+              .sort((a, b) => b.score - a.score),
+          );
         }
 
-        setCountries(
-          Object.entries(data.country_dict)
-            .map(([name, value]) => ({
-              name,
-              score: Math.trunc(value[0]),
-              count: value[1],
-            }))
-            .sort((a, b) => b.score - a.score),
-        );
+        if (data.actor_dict === null) {
+          setActors([]);
+        } else {
+          setActors(
+            Object.entries(data.actor_dict)
+              .map(([name, value]) => ({
+                name,
+                score: Math.trunc(value[0]),
+                count: value[1],
+              }))
+              .sort((a, b) => b.score - a.score),
+          );
+        }
 
-        setGenres(
-          Object.entries(data.genre_dict)
-            .map(([name, value]) => ({
-              name,
-              score: Math.trunc(value[0]),
-              count: value[1],
-            }))
-            .sort((a, b) => b.score - a.score),
-        );
+        if (data.genre_dict === null) {
+          setGenres([]);
+        } else {
+          setGenres(
+            Object.entries(data.genre_dict)
+              .map(([name, value]) => ({
+                name,
+                score: Math.trunc(value[0]),
+                count: value[1],
+              }))
+              .sort((a, b) => b.score - a.score),
+          );
+        }
 
-        setActors(
-          Object.entries(data.actor_dict)
-            .map(([name, value]) => ({
-              name,
-              score: Math.trunc(value[0]),
-              count: value[1],
-            }))
-            .sort((a, b) => b.score - a.score),
-        );
-
-        setDirectors(
-          Object.entries(data.director_dict)
-            .map(([name, value]) => ({
-              name,
-              score: Math.trunc(value[0]),
-              count: value[1],
-            }))
-            .sort((a, b) => b.score - a.score),
-        );
+        if (data.director_dict === null) {
+          setDirectors([]);
+        } else {
+          setDirectors(
+            Object.entries(data.director_dict)
+              .map(([name, value]) => ({
+                name,
+                score: Math.trunc(value[0]),
+                count: value[1],
+              }))
+              .sort((a, b) => b.score - a.score),
+          );
+        }
       } catch (error) {
         console.error(error);
       }
@@ -234,6 +238,12 @@ const Analysis = ({ mode }: { mode: 'default' | 'short' }) => {
             </div>
           ))}
         </div>
+
+        {countries.length === 0 && (
+          <div className="text-center text-gray-500">
+            선호하는 국가가 없습니다.
+          </div>
+        )}
         <hr className="my-8" />
 
         <h2 className="text-2xl font-bold mb-4">영화 선호 장르</h2>
@@ -261,6 +271,12 @@ const Analysis = ({ mode }: { mode: 'default' | 'short' }) => {
             </div>
           ))}
         </div>
+
+        {genres.length === 0 && (
+          <div className="text-center text-gray-500">
+            선호하는 장르가 없습니다.
+          </div>
+        )}
         <hr className="my-8" />
 
         <h2 className="text-2xl font-bold mb-4">선호 배우</h2>
@@ -288,6 +304,12 @@ const Analysis = ({ mode }: { mode: 'default' | 'short' }) => {
             </div>
           ))}
         </div>
+
+        {actors.length === 0 && (
+          <div className="text-center text-gray-500">
+            선호하는 배우가 없습니다.
+          </div>
+        )}
         <hr className="my-8" />
 
         <h2 className="text-2xl font-bold mb-4">선호 감독</h2>
@@ -315,6 +337,12 @@ const Analysis = ({ mode }: { mode: 'default' | 'short' }) => {
             </div>
           ))}
         </div>
+
+        {directors.length === 0 && (
+          <div className="text-center text-gray-500">
+            선호하는 감독이 없습니다.
+          </div>
+        )}
         <hr className="my-8" />
 
         <h2 className="text-2xl font-bold mb-4">영화 감상 시간</h2>
